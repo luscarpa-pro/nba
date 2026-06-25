@@ -41,10 +41,16 @@ Copia `NBAStudio.exe` dove vuoi (Desktop, una cartella, ecc.) e fai **doppio cli
 
 ## 3. Dove finiscono i dati
 
+> **Il dataset reale NON è incluso nell'eseguibile.** All'avvio l'app è **vuota**
+> di clienti/lead (restano solo i Check-up demo). Importa il `dataset.json` reale da
+> **Admin → Export → Importa dataset**: resta solo in `%APPDATA%\NBAStudio` su quel PC,
+> mai nel repo né nell'exe.
+
 Tutto in `%APPDATA%\NBAStudio` (es. `C:\Users\<nome>\AppData\Roaming\NBAStudio`):
 - `tangible_lab.db` — utenti, casi salvati, review, commenti, casi Check-up
 - `.secret` — chiave delle sessioni (così il login sopravvive ai riavvii)
-- `dataset.json`, `nba_config.json`, `trigger_catalog_overrides.json` — copie modificabili
+- `dataset.json` — il dataset reale importato (con dati personali); `nba_config.json`,
+  `trigger_catalog_overrides.json` — copie modificabili
 
 **Backup / reset**: per azzerare tutto basta cancellare la cartella `NBAStudio`.
 Per fare un backup, copiala altrove.
