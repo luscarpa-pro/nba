@@ -1952,7 +1952,7 @@
     // Aggiornamento del badge "(N)" via refresh asincrono.
     const btn = el("button", {class:"comments-trigger", type:"button"},
       el("span", {class:"msi"}, "chat"),
-      el("span", {class:"comments-trigger-lbl"}, "Conversazione del team"),
+      el("span", {class:"comments-trigger-lbl"}, "Note"),
       el("span", {class:"comments-trigger-count", "data-comments-count":""}, "")
     );
     btn.addEventListener("click", () => openCommentsDrawer(it));
@@ -1977,13 +1977,13 @@
     document.querySelector(".comments-drawer-bg")?.remove();
 
     const bg = el("div", {class:"comments-drawer-bg"});
-    const drawer = el("aside", {class:"comments-drawer", role:"dialog", "aria-label":"Conversazione del team"});
+    const drawer = el("aside", {class:"comments-drawer", role:"dialog", "aria-label":"Note"});
 
     // header
     const head = el("div", {class:"cdrawer-head"},
       el("div", {class:"cdrawer-title"},
         el("span", {class:"msi"}, "chat"),
-        " Conversazione del team"
+        " Note"
       ),
       el("button", {class:"cdrawer-close", type:"button", title:"Chiudi"},
         el("span", {class:"msi"}, "close")
@@ -2149,8 +2149,7 @@
     const defaultName = existing?.name || `Caso ${STATE.selected.id}`;
     const name = prompt("Nome del caso (descrivi la casistica):", defaultName);
     if (!name) return;
-    const sharedDefault = existing ? existing.shared : false;
-    const shared = confirm("Vuoi condividere questo caso con il team?\n\nOK = sì, condividi · Annulla = privato" + (sharedDefault ? "\n\n(Attualmente: condiviso)" : ""));
+    const shared = false;  // single-user: i casi sono sempre privati
     try {
       if (existing) {
         const updated = await fetchJSON(`/lab/api/cases/${existing.id}`, {
@@ -2169,7 +2168,7 @@
         STATE.selected = { kind:"saved", type:created.type, id:created.id };
         STATE.folder = "saved"; updateFolderActive();
         STATE.items = buildItems(); updateFolderCounts(); renderListPane();
-        toast(`Caso "${name}" salvato${shared ? " e condiviso" : ""}`, "ok");
+        toast(`Caso "${name}" salvato`, "ok");
       }
     } catch (e) { toast("Errore: " + e.message, "err"); }
   }
@@ -2358,19 +2357,12 @@
             <span class="msi">account_circle</span>
             <div>
               <div class="umh-name">${STATE.me.username}</div>
-              <div class="umh-role">${STATE.me.role === "admin" ? "Amministratore" : "Tester"}</div>
             </div>
           </div>
-          <button class="user-menu-item" id="menu-change-pw">
-            <span class="msi">key</span> Cambia password
-          </button>
           <a class="user-menu-item" id="menu-original" href="/" title="UI originale del backend Vittoria (solo lettura)">
             <span class="msi">code</span> Tool originale Vittoria
             <span class="user-menu-arrow msi">open_in_new</span>
           </a>
-          <button class="user-menu-item danger" id="menu-logout">
-            <span class="msi">logout</span> Esci
-          </button>
         </div>`;
       headerActions.insertBefore(wrap, headerActions.children[0]);
 
@@ -2380,11 +2372,6 @@
         e.stopPropagation();
         if (menu.hasAttribute("hidden")) menu.removeAttribute("hidden");
         else closeMenu();
-      });
-      wrap.querySelector("#menu-change-pw").addEventListener("click", () => { closeMenu(); openChangePasswordModal(); });
-      wrap.querySelector("#menu-logout").addEventListener("click", async () => {
-        await fetch("/lab/api/logout", {method:"POST", credentials:"include"});
-        location.href = "/lab/login.html";
       });
       document.addEventListener("click", closeMenu);
       document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
@@ -2406,14 +2393,11 @@
         const adminLink = document.createElement("a");
         adminLink.className = "home-link";
         adminLink.href = "/lab/admin.html";
-        adminLink.title = "Pannello admin";
-        adminLink.innerHTML = '<span class="msi">admin_panel_settings</span><span class="home-link-lbl">Admin</span>';
+        adminLink.title = "Strumenti";
+        adminLink.innerHTML = '<span class="msi">build</span><span class="home-link-lbl">Strumenti</span>';
         headerActions.insertBefore(adminLink, headerActions.children[0]);
       }
       // (logout ora vive nel dropdown del chip utente)
-    }
-    if (STATE.me.must_change_password) {
-      setTimeout(() => openChangePasswordModal(true), 300);
     }
 
     bindAll();
