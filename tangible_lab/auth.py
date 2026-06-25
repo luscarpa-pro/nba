@@ -79,6 +79,21 @@ def delete_session(signed_sid: str) -> None:
 
 
 def user_from_request(request: Request) -> Optional[dict]:
+    # Modalità single-user locale: nessun login, ritorna l'utente admin locale.
+    if os.environ.get("TANGIBLE_LAB_SINGLE_USER"):
+        with get_conn() as conn:
+            row = conn.execute(
+                "SELECT id, username, role FROM users WHERE active = 1 AND role = 'admin' ORDER BY id LIMIT 1"
+            ).fetchone()
+        if not row:
+            return None
+        return {
+            "id": row["id"],
+            "username": row["username"],
+            "role": row["role"],
+            "must_change_password": False,
+        }
+
     signed = request.cookies.get(COOKIE_NAME)
     if not signed:
         return None

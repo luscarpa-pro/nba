@@ -36,6 +36,9 @@ def main() -> None:
     # 1) cartella dati per-utente (rispetta un eventuale override già impostato)
     os.environ.setdefault("TANGIBLE_LAB_DATA_DIR", _default_data_dir())
 
+    # Modalità locale: un solo utente, niente login (vedi auth.user_from_request)
+    os.environ.setdefault("TANGIBLE_LAB_SINGLE_USER", "1")
+
     # 2) host/porta da argomenti opzionali
     host, port = "127.0.0.1", 8000
     args = sys.argv[1:]
