@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>NBA Test – Lead</title>
+
+<script defer="" src="/static/nba_common.js"></script>
+<script defer="" src="/static/nba_test_lead.js"></script>
+<link href="/static/nba_styles.css" rel="stylesheet"/></head>
+<body>
+<div class="topnav"><a href="./home.html">← Back to Home</a></div>
+<h2>NBA Test – Lead</h2>
+<div class="hint">Compila i parametri a sinistra (scroll). A destra: JSON generato e output NBA.</div>
+<div class="layout">
+<div class="panel left">
+<h3>Input lead</h3>
+<div class="grid">
+<div>
+<div class="field"><label>lead_id</label><input id="lead_id" value="L-TEST-001"/></div>
+<div class="field"><label>product</label><input id="product" value="AUTO"/></div>
+<div class="field"><label>marketing_consent</label>
+<select id="marketing_consent"><option value="true">true</option><option value="false">false</option></select>
+</div>
+<div class="field"><label>created_hours_ago</label><input id="created_hours_ago" type="number" value="6"/></div>
+<div class="field"><label>last_contact_days</label><input id="last_contact_days" placeholder="null" type="number" value=""/></div>
+</div>
+<div>
+<div class="field"><label>quote_premium</label><input id="quote_premium" type="number" value="900"/></div>
+<div class="field"><label>coverage_start_days</label><input id="coverage_start_days" type="number" value="7"/></div>
+<div class="field"><label>email</label><input id="email" value="lead.test@email.it"/></div>
+<div class="field"><label>phone</label><input id="phone" value="3337778888"/></div>
+<div class="field"><label>preferred_channel</label>
+<select id="preferred_channel"><option>PHONE</option><option>EMAIL</option><option>SMS</option><option>WHATSAPP</option></select>
+</div>
+<div class="field"><label>whatsapp_enabled</label>
+<select id="whatsapp_enabled"><option value="true">true</option><option value="false">false</option></select>
+</div>
+</div>
+</div>
+</div>
+<div class="panel right">
+<h3>Esecuzione test</h3>
+<div class="btns">
+<button id="btnRun">Esegui NBA</button>
+<label class="hint"><input checked="" id="debug" type="checkbox"/> debug</label>
+</div>
+<div class="box preview">
+<h4>Output NBA</h4>
+<div class="hint" id="meta"></div>
+<div id="actions"></div>
+<pre id="respJson" style="display:none"></pre>
+<div class="box">
+<h4>JSON inviato</h4>
+<pre id="reqJson"></pre>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

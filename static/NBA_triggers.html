@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>NBA Trigger Catalog</title>
+  
+  <link rel="stylesheet" href="/static/nba_styles.css">
+<!-- Stesso pattern delle altre pagine: nba_common.js + js pagina, entrambi defer -->
+  <script src="/static/nba_common.js" defer></script>
+  <script src="/static/nba_triggers.js" defer></script>
+</head>
+
+<body>
+  <div class="topnav"><a href="/">← Back to Home</a></div>
+
+  <h2>NBA Trigger Catalog</h2>
+  <div class="hint">
+    Questa pagina permette di <b>abilitare/disabilitare</b> e personalizzare metadati dei trigger.
+    Gli override vengono salvati nel file <span class="mono">trigger_catalog_overrides.json</span> (accanto all'EXE / progetto).
+  </div>
+
+  <div class="layout" style="margin-top:12px">
+    <div class="panel left">
+      <h3>Catalogo trigger</h3>
+
+      <div class="row">
+        <button id="btnReload">Reload</button>
+        <button id="btnValidate">Validate</button>
+        <button id="btnSave">Save</button>
+        <button id="btnAddDoc">Add doc-only</button>
+      </div>
+
+      <div class="row">
+        <label><input type="radio" name="scope" value="client" checked> CLIENT</label>
+        <label><input type="radio" name="scope" value="lead"> LEAD</label>
+        <input id="search" type="text" placeholder="Search trigger code / display name" />
+        <span class="muted" id="meta"></span>
+      </div>
+
+      <div id="tableWrap"></div>
+      <div id="status" class="status"></div>
+      <div id="error" class="error"></div>
+    </div>
+
+    <div class="panel right">
+      <h3>Overrides JSON (advanced)</h3>
+      <div class="hint">Puoi modificare direttamente gli override. Usa <b>Validate</b> prima di <b>Save</b>.</div>
+      <textarea id="rawOverrides"></textarea>
+
+      <div class="doc" style="margin-top:12px">
+        <b>Nota:</b> i trigger <span class="mono">doc-only</span> vengono mostrati nel catalogo ma non scattano finché non esistono nel motore.
+      </div>
+    </div>
+  </div>
+</body>
+</html>

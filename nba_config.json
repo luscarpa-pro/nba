@@ -1,0 +1,246 @@
+{
+  "client_weights": {
+    "urgency": {
+      "value": 0.1,
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    },
+    "value": {
+      "value": 0.2,
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    },
+    "opportunity": {
+      "value": 0.31,
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    },
+    "recency": {
+      "value": 0.39,
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    }
+  },
+  "lead_weights": {
+    "urgency": {
+      "value": 0.16,
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    },
+    "value": {
+      "value": 0.32,
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    },
+    "timing": {
+      "value": 0.52,
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    }
+  },
+  "tiers": {
+    "CRITICAL": {
+      "value": 81,
+      "min": 0,
+      "max": 100,
+      "step": 1
+    },
+    "HIGH": {
+      "value": 65,
+      "min": 0,
+      "max": 100,
+      "step": 1
+    },
+    "MEDIUM": {
+      "value": 47,
+      "min": 0,
+      "max": 100,
+      "step": 1
+    }
+  },
+  "avg_premiums": {
+    "CASA": {
+      "value": 1700,
+      "min": 0,
+      "max": 5000,
+      "step": 50
+    },
+    "INFORTUNI": {
+      "value": 350,
+      "min": 0,
+      "max": 5000,
+      "step": 50
+    },
+    "MALATTIA": {
+      "value": 550,
+      "min": 0,
+      "max": 5000,
+      "step": 50
+    },
+    "VITA_PROTEZIONE": {
+      "value": 600,
+      "min": 0,
+      "max": 5000,
+      "step": 50
+    },
+    "PREVIDENZA_COMPLEMENTARE": {
+      "value": 1200,
+      "min": 0,
+      "max": 5000,
+      "step": 50
+    },
+    "RESPONSABILITA_PROFESSIONALE": {
+      "value": 800,
+      "min": 0,
+      "max": 5000,
+      "step": 50
+    },
+    "VITA_PRIVATA_RESPONSABILITA_CIVILE": {
+      "value": 150,
+      "min": 0,
+      "max": 5000,
+      "step": 10
+    },
+    "VITA_PRIVATA_ANIMALI_DOMESTICI": {
+      "value": 100,
+      "min": 0,
+      "max": 5000,
+      "step": 10
+    },
+    "VITA_PRIVATA_TUTELA_LEGALE": {
+      "value": 150,
+      "min": 0,
+      "max": 5000,
+      "step": 10
+    },
+    "VITA_PRIVATA_MICROMOBILITA": {
+      "value": 80,
+      "min": 0,
+      "max": 5000,
+      "step": 10
+    },
+    "VITA_PRIVATA_VIAGGI": {
+      "value": 90,
+      "min": 0,
+      "max": 5000,
+      "step": 10
+    }
+  },
+  "thresholds": {
+    "HIGH_CHURN_THRESHOLD": {
+      "value": 0.28,
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    },
+    "SINGLE_POLICY_CHURN_THRESHOLD": {
+      "value": 0.53,
+      "min": 0,
+      "max": 1,
+      "step": 0.01
+    },
+    "CHURN_OVERRIDE_RENEWAL_DAYS": {
+      "value": 285,
+      "min": 0,
+      "max": 365,
+      "step": 1
+    },
+    "NO_CONTACT_DAYS_THRESHOLD": {
+      "value": 90,
+      "min": 0,
+      "max": 365,
+      "step": 1
+    },
+    "LEAD_NEW_HOURS_THRESHOLD": {
+      "value": 134,
+      "min": 0,
+      "max": 168,
+      "step": 1
+    },
+    "LEAD_STALE_DAYS_THRESHOLD": {
+      "value": 10,
+      "min": 0,
+      "max": 30,
+      "step": 1
+    },
+    "LEAD_COVERAGE_START_SOON_DAYS": {
+      "value": 14,
+      "min": 0,
+      "max": 60,
+      "step": 1
+    },
+    "LEAD_HIGH_VALUE_PREMIUM_THRESHOLD": {
+      "value": 1900,
+      "min": 0,
+      "max": 5000,
+      "step": 50
+    },
+    "OPEN_CASE_URGENCY_BOOST": {
+      "value": 26,
+      "min": 0,
+      "max": 50,
+      "step": 1
+    },
+    "ACTIVE_CAMPAIGN_OPPORTUNITY_BOOST": {
+      "value": 41,
+      "min": 0,
+      "max": 50,
+      "step": 1
+    },
+    "VIVA_EXPIRING_OPPORTUNITY_BOOST": {
+      "value": 20,
+      "min": 0,
+      "max": 50,
+      "step": 1
+    },
+    "PENDING_QUOTE_OPPORTUNITY_BOOST": {
+      "value": 36,
+      "min": 0,
+      "max": 50,
+      "step": 1
+    },
+    "VALUE_TENURE_MAX_YEARS": {
+      "value": 25,
+      "min": 1,
+      "max": 50,
+      "step": 1
+    },
+    "VALUE_POLICYCOUNT_MAX": {
+      "value": 8,
+      "min": 1,
+      "max": 20,
+      "step": 1
+    },
+    "VALUE_AGENCY_PROFIT_MAX": {
+      "value": 7100,
+      "min": 0,
+      "max": 10000,
+      "step": 100
+    },
+    "VALUE_COMPANY_SP_MAX": {
+      "value": 1.7,
+      "min": 0,
+      "max": 2,
+      "step": 0.05
+    },
+    "VALUE_AUTO_NORM_MAX": {
+      "value": 3250,
+      "min": 0,
+      "max": 5000,
+      "step": 50
+    },
+    "VALUE_NONAUTO_PREM_MAX": {
+      "value": 5000,
+      "min": 0,
+      "max": 20000,
+      "step": 100
+    }
+  }
+}

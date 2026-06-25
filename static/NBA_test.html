@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>NBA Test – Cliente</title>
+
+<script defer="" src="/static/nba_common.js"></script>
+<script defer="" src="/static/nba_test_client.js"></script>
+<link href="/static/nba_styles.css" rel="stylesheet"/></head>
+<body>
+<div class="topnav"><a href="./home.html">← Back to Home</a></div>
+<h2>NBA Test – Cliente</h2>
+<div class="hint">Compila i parametri a sinistra (scroll). A destra: JSON generato e output NBA.</div>
+<div class="layout">
+<div class="panel left">
+  <h3>Input cliente</h3>
+  <div class="grid">
+  <div>
+  <div class="field"><label>client_id</label><input id="client_id" value="C-TEST-001"/></div>
+  <div class="field"><label>email</label><input id="email" value="cliente.test@email.it"/></div>
+  <div class="field"><label>phone</label><input id="phone" value="3331234567"/></div>
+  <div class="field"><label>preferred_channel</label>
+  <select id="preferred_channel"><option>PHONE</option><option>EMAIL</option><option>SMS</option><option>WHATSAPP</option></select>
+  </div>
+  <div class="field"><label>whatsapp_enabled</label>
+  <select id="whatsapp_enabled"><option value="true">true</option><option value="false">false</option></select>
+  </div>
+  <div class="field"><label>last_contact_days</label><input id="last_contact_days" type="number" value="120"/></div>
+  <div class="field"><label>birthday_days</label><input id="birthday_days" type="number" value="3"/></div>
+  <div class="field"><label>anniversary_days</label><input id="anniversary_days" type="number" value="10"/></div>
+  </div>
+  <div>
+  <div class="field"><label>unpaid_days (CSV)</label><input id="unpaid_days" value="32"/></div>
+  <div class="field">
+  <label>cross_sell_gaps</label>
+  <select id="cross_sell_gaps" multiple size="5"></select>
+  <div class="desc">Multi-select: Ctrl/⌘ + click per selezionare più valori.</div>
+</div>
+  <div class="field"><label>viva_points</label><input id="viva_points" type="number" value="1400"/></div>
+  <div class="field"><label>viva_points_expiring</label><input id="viva_points_expiring" type="number" value="250"/></div>
+  <div class="field"><label>viva_enrolled</label>
+  <select id="viva_enrolled"><option value="false">false</option><option value="true">true</option></select>
+  </div>
+  <div class="field"><label>checkup_done</label>
+  <select id="checkup_done"><option value="false">false</option><option value="true">true</option></select>
+  </div>
+  <div class="field"><label>customer_tenure_years</label><input id="customer_tenure_years" type="number" value="12"/></div>
+  <div class="field"><label>active_policies_count</label><input id="active_policies_count" type="number" value="3"/></div>
+  </div>
+  </div>
+  <div class="grid" style="margin-top:10px">
+  <div>
+  <div class="field"><label>agency_profitability</label><input id="agency_profitability" type="number" value="500"/></div>
+  <div class="field"><label>company_profitability_sp</label><input id="company_profitability_sp" step="0.01" type="number" value="0.65"/></div>
+  <div class="field"><label>auto_premium_normalized</label><input id="auto_premium_normalized" type="number" value="900"/></div>
+  <div class="field"><label>auto_guarantees_weight_vct</label><input id="auto_guarantees_weight_vct" step="0.1" type="number" value="1.1"/></div>
+  <div class="field"><label>non_auto_premium_total</label><input id="non_auto_premium_total" type="number" value="1500"/></div>
+  </div>
+  <div>
+  </div>
+  </div>
+
+  <div class="section">
+  <h3>2) Policies</h3>
+  <div class="btns">
+  <button id="btnAddPolicy">+ Aggiungi policy</button>
+  <span class="small">Metti expiry_date nel futuro</span>
+  </div>
+  <table id="policiesTable">
+  <thead><tr><th>policy_number</th><th>product</th><th>premium</th><th>expiry_date</th><th>churn_rate</th><th></th></tr></thead>
+  <tbody></tbody>
+  </table>
+  </div>
+  <div class="section">
+  <h3>3) Claims / Complaints (status != CLOSED → open)</h3>
+  <div class="btns">
+  <button id="btnAddClaim">+ Claim</button>
+  <button id="btnAddComplaint">+ Complaint</button>
+  <span class="small">Esempio status: OPEN / IN_PROGRESS / CLOSED</span>
+  </div>
+  <table id="casesTable">
+  <thead><tr><th>type</th><th>status</th><th>opened_date</th><th>reference_id</th><th></th></tr></thead>
+  <tbody></tbody>
+  </table>
+  </div>
+  <div class="section">
+  <h3>4) Campagne &amp; Pending Quotes</h3>
+  <div class="btns">
+  <button id="btnAddCampaign">+ Campagna</button>
+  <button id="btnAddPendingQuote">+ Pending Quote</button>
+  </div>
+  <table id="campaignsTable">
+  <thead><tr><th>campaign_id</th><th>name</th><th>product_scope</th><th>end_date</th><th></th></tr></thead>
+  <tbody></tbody>
+  </table>
+  <table id="quotesTable" style="margin-top:12px">
+  <thead><tr><th>quote_id</th><th>product</th><th>saved_at</th><th>coverage_start_date</th><th>status</th><th></th></tr></thead>
+  <tbody></tbody>
+  </table>
+  </div>
+</div>
+
+<div class="panel right">
+  <h3>Esecuzione test</h3>
+  <div class="btns">
+  <button id="btnRun">Esegui NBA</button>
+  <label class="hint"><input checked="" id="debug" type="checkbox"/> debug</label>
+  </div>
+  <div class="box preview">
+  <h4>Output NBA</h4>
+  <div class="hint" id="meta"></div>
+  <div id="actions"></div>
+  <pre id="respJson" style="display:none"></pre>
+  <div class="box">
+  <h4>JSON inviato</h4>
+  <pre id="reqJson"></pre>
+  </div>
+  </div>
+  </div>
+</div>
+</body>
+</html>

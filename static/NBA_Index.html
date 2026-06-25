@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Next Best Action – Demo</title>
+  <link href="/static/nba_styles.css" rel="stylesheet"/>
+  
+  <script src="/static/nba_common.js" defer></script>
+  <script src="/static/nba_index.js" defer></script>
+</head>
+<body class="indexPage">
+  <div class="topnav">
+    <a href="./home.html">← Back to Home</a>
+  </div>
+
+  <h2>Next Best Action – Demo</h2>
+
+  <div class="tabs">
+  <div class="tabBar">
+    <button class="tabBtn active" data-tab="bulk" type="button">Bulk</button>
+    <button class="tabBtn" data-tab="single" type="button">Singolo</button>
+  </div>
+
+  <div id="tab_bulk" class="tabPanel active">
+    <div class="card bulk">
+      <h3>Carica i primi N (bulk)</h3>
+      <div class="hint">Seleziona se caricare clienti o lead, poi il numero N. Risultato in tabella.</div>
+      <div class="rowFlex" style="margin-top:10px">
+        <label><b>Target</b></label>
+        <select id="bulkType">
+          <option value="clients">Clienti</option>
+          <option value="leads">Lead</option>
+        </select>
+        <label><b>N</b></label>
+        <input id="bulkN" type="number" value="10" min="1" max="200"/>
+        <button id="btnBulk">Carica</button>
+      </div>
+      <div id="bulkStatus" class="hint"></div>
+      <div id="bulkTable"></div>
+    </div>
+  </div>
+
+  <div id="tab_single" class="tabPanel">
+    <div class="card single">
+      <h3>Singolo cliente / lead</h3>
+      <div class="hint">Inserisci l'ID e seleziona se è un cliente o un lead.</div>
+      <div class="rowFlex" style="margin-top:10px">
+        <label><b>Tipo</b></label>
+        <select id="singleType">
+          <option value="client">Cliente</option>
+          <option value="lead">Lead</option>
+        </select>
+        <label><b>ID</b></label>
+        <input id="singleId" type="text" placeholder="C001 / L001"/>
+        <button id="btnSingle">Carica</button>
+      </div>
+      <div id="singleStatus" class="hint"></div>
+      <div id="singleOut"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tabs behavior (layout only; does not affect nba_index.js logic)
+(function(){
+  function setTab(name){
+    document.querySelectorAll('.tabBtn').forEach(b=>b.classList.toggle('active', b.dataset.tab===name));
+    document.querySelectorAll('.tabPanel').forEach(p=>p.classList.toggle('active', p.id==='tab_'+name));
+  }
+  document.addEventListener('click', (e)=>{
+    const b=e.target && e.target.closest && e.target.closest('.tabBtn');
+    if(!b) return;
+    setTab(b.dataset.tab);
+  });
+})();
+</script>
+</body>
+</html>

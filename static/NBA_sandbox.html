@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>NBA Sandbox (Config + Client + Lead)</title>
+  <link rel="stylesheet" href="/static/nba_styles.css">
+  <script src="/static/nba_common.js" defer></script>
+  <script src="/static/nba_sandbox.js" defer></script>
+</head>
+<body>
+  <div class="topnav"><a href="/">← Back to Home</a></div>
+
+  <h2>NBA Sandbox (Config + Client + Lead)</h2>
+  <div class="hint">Modifica <b>config</b>, costruisci <b>CLIENT</b> e <b>LEAD</b> e osserva in tempo reale la NBA (preview). Ogni modifica fa hot-reload con debounce.</div>
+
+  <div class="layout">
+    <!-- LEFT PANEL -->
+    <div class="panel left">
+
+      <div class="section" style="margin-top:0;padding-top:0;border-top:none">
+        <h3>1) CONFIG (sliders)</h3>
+        <div class="hint">Valori letti da <code>/config</code>. Le preview usano sempre la config corrente (non serve salvare). <b>Save</b> persiste sul server.</div>
+        <div id="cfgContainer"></div>
+        <div class="btns">
+          <button id="btnCfgSave">Save</button>
+          <button id="btnCfgReset">Reset (reload)</button>
+        </div>
+        <div id="cfgStatus" class="status"></div>
+        <div id="cfgError" class="error"></div>
+      </div>
+
+      <div class="section">
+        <h3>2) CLIENT setup</h3>
+        <div class="hint">Stessi campi del test tool CLIENT (incluse tabelle Policies / Claims / Complaints / Campaigns / Quotes).</div>
+
+        <div class="grid">
+          <div>
+            <div class="field"><label>client_id</label><input id="client_id" value="C-TEST-001"></div>
+            <div class="field"><label>email</label><input id="email" value="cliente.test@email.it"></div>
+            <div class="field"><label>phone</label><input id="phone" value="3331234567"></div>
+            <div class="field"><label>preferred_channel</label>
+              <select id="preferred_channel"><option>PHONE</option><option>EMAIL</option><option>SMS</option><option>WHATSAPP</option></select>
+            </div>
+            <div class="field"><label>whatsapp_enabled</label>
+              <select id="whatsapp_enabled"><option value="true">true</option><option value="false">false</option></select>
+            </div>
+            <div class="field"><label>last_contact_days</label><input id="last_contact_days" type="number" value="120"></div>
+            <div class="field"><label>birthday_days</label><input id="birthday_days" type="number" value="3"></div>
+            <div class="field"><label>anniversary_days</label><input id="anniversary_days" type="number" value="10"></div>
+          </div>
+
+          <div>
+            <div class="field"><label>unpaid_days (CSV)</label><input id="unpaid_days" value="32"></div>
+            <div class="field">
+  <label>cross_sell_gaps</label>
+  <select id="cross_sell_gaps" multiple size="5"></select>
+  <div class="desc">Multi-select: Ctrl/⌘ + click per selezionare più valori.</div>
+</div>
+            <div class="field"><label>viva_points</label><input id="viva_points" type="number" value="1400"></div>
+            <div class="field"><label>viva_points_expiring</label><input id="viva_points_expiring" type="number" value="250"></div>
+            <div class="field"><label>viva_enrolled</label>
+              <select id="viva_enrolled"><option value="false">false</option><option value="true">true</option></select>
+            </div>
+            <div class="field"><label>checkup_done</label>
+              <select id="checkup_done"><option value="false">false</option><option value="true">true</option></select>
+            </div>
+            <div class="field"><label>customer_tenure_years</label><input id="customer_tenure_years" type="number" value="12"></div>
+            <div class="field"><label>active_policies_count</label><input id="active_policies_count" type="number" value="3"></div>
+          </div>
+        </div>
+
+        <div class="grid" style="margin-top:10px">
+          <div>
+            <div class="field"><label>agency_profitability</label><input id="agency_profitability" type="number" value="500"></div>
+            <div class="field"><label>company_profitability_sp</label><input id="company_profitability_sp" type="number" value="0.65" step="0.01"></div>
+            <div class="field"><label>auto_premium_normalized</label><input id="auto_premium_normalized" type="number" value="900"></div>
+            <div class="field"><label>auto_guarantees_weight_vct</label><input id="auto_guarantees_weight_vct" type="number" value="1.1" step="0.1"></div>
+            <div class="field"><label>non_auto_premium_total</label><input id="non_auto_premium_total" type="number" value="1500"></div>
+          </div>
+          <div></div>
+        </div>
+
+        <div class="btns" style="margin-top:8px">
+          <button id="btnClientReset">Reset client sample</button>
+        </div>
+
+        <div class="section">
+          <h3>2.1) Policies</h3>
+          <div class="btns">
+            <button id="btnAddPolicy">+ Aggiungi policy</button>
+            <span class="small">Metti expiry_date nel futuro</span>
+          </div>
+          <table id="policiesTable">
+            <thead><tr><th>policy_number</th><th>product</th><th>premium</th><th>expiry_date</th><th>churn_rate</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h3>2.2) Claims / Complaints</h3>
+          <div class="btns">
+            <button id="btnAddClaim">+ Claim</button>
+            <button id="btnAddComplaint">+ Complaint</button>
+            <span class="small">Esempio status: OPEN / IN_PROGRESS / CLOSED</span>
+          </div>
+          <table id="casesTable">
+            <thead><tr><th>type</th><th>status</th><th>opened_date</th><th>reference_id</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <h3>2.3) Campagne & Pending Quotes</h3>
+          <div class="btns">
+            <button id="btnAddCampaign">+ Campagna</button>
+            <button id="btnAddPendingQuote">+ Pending Quote</button>
+          </div>
+          <table id="campaignsTable">
+            <thead><tr><th>campaign_id</th><th>name</th><th>product_scope</th><th>end_date</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+
+          <table id="quotesTable" style="margin-top:12px">
+            <thead><tr><th>quote_id</th><th>product</th><th>saved_at</th><th>coverage_start_date</th><th>status</th><th></th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>3) LEAD setup</h3>
+        <div class="hint">Stessi campi del test tool LEAD.</div>
+
+        <div class="grid">
+          <div>
+            <div class="field"><label>lead_id</label><input id="lead_id" value="L-TEST-001"></div>
+            <div class="field"><label>product</label><input id="lead_product" value="AUTO"></div>
+            <div class="field"><label>marketing_consent</label>
+              <select id="marketing_consent"><option value="true">true</option><option value="false">false</option></select>
+            </div>
+            <div class="field"><label>created_hours_ago</label><input id="created_hours_ago" type="number" value="6"></div>
+            <div class="field"><label>last_contact_days</label><input id="lead_last_contact_days" type="number" value="" placeholder="null"></div>
+          </div>
+
+          <div>
+            <div class="field"><label>quote_premium</label><input id="quote_premium" type="number" value="900"></div>
+            <div class="field"><label>coverage_start_days</label><input id="coverage_start_days" type="number" value="7"></div>
+            <div class="field"><label>email</label><input id="lead_email" value="lead.test@email.it"></div>
+            <div class="field"><label>phone</label><input id="lead_phone" value="3337778888"></div>
+            <div class="field"><label>preferred_channel</label>
+              <select id="lead_preferred_channel"><option>PHONE</option><option>EMAIL</option><option>SMS</option><option>WHATSAPP</option></select>
+            </div>
+            <div class="field"><label>whatsapp_enabled</label>
+              <select id="lead_whatsapp_enabled"><option value="true">true</option><option value="false">false</option></select>
+            </div>
+          </div>
+        </div>
+
+        <div class="btns" style="margin-top:8px">
+          <button id="btnLeadReset">Reset lead sample</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="panel right">
+      <h3>Preview (hot-reload)</h3>
+      <div class="hint">La preview richiama <code>/nba/client/preview</code> e <code>/nba/lead/preview</code> con <code>config</code> inline. Mostra JSON input e output NBA.</div>
+
+      <div class="box preview">
+        <h4>NBA cliente</h4>
+        <div id="clientMeta" class="hint"></div>
+        <div id="clientActions"></div>
+      </div>
+
+      <div class="box preview">
+        <h4>NBA lead</h4>
+        <div id="leadMeta" class="hint"></div>
+        <div id="leadActions"></div>
+      </div>
+
+      <div class="box">
+        <h4>Client JSON (generated)</h4>
+        <pre id="clientJson" class="json"></pre>
+      </div>
+
+      <div class="box" style="margin-top:16px">
+        <h4>Lead JSON (generated)</h4>
+        <pre id="leadJson" class="json"></pre>
+      </div>
+
+      <div class="box" style="margin-top:16px">
+        <h4>Diagnostics</h4>
+        <div class="hint">Config hash: <code id="cfgHash">-</code></div>
+        <div class="hint">Last refresh: <code id="lastRefresh">-</code></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

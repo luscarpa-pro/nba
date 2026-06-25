@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+<html lang="it">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>NBA CONFIG Editor</title>
+
+    <script defer="" src="/static/nba_common.js"></script>
+    <script defer="" src="/static/nba_config.js"></script>
+    <link href="/static/nba_styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="topnav"><a href="./home.html">← Back to Home</a></div>
+    <h2>NBA CONFIG Editor</h2>
+    <div class="hint">Modifica i parametri nella colonna sinistra. La simulazione (cliente + lead) è sempre visibile a
+        destra. <b>Save</b> salva la config sul server (hot reload, nessun riavvio).</div>
+    <div class="layout">
+        <div class="panel left">
+            <h3>Parametri (scroll)</h3>
+            <div id="container"></div>
+        </div>
+        <div class="panel right">
+            <h3>Simulazione live</h3>
+            <div class="hint">Ogni modifica slider ricalcola in tempo reale: <code>/nba/client/preview</code> e
+                <code>/nba/lead/preview</code>.</div>
+            <div class="btns">
+                <button id="btnSave">Save</button>
+                <button id="btnCancel">Cancel</button>
+                <button id="btnPreview">Ricalcola preview</button>
+            </div>
+            <div class="status" id="status"></div>
+            <div class="error" id="error"></div>
+            <div class="box preview">
+                <h4>Risultato NBA cliente</h4>
+                <div class="hint" id="previewClientMeta"></div>
+                <div id="previewClientActions"></div>
+            </div>
+            <div class="box preview">
+                <h4>Risultato NBA lead</h4>
+                <div class="hint" id="previewLeadMeta"></div>
+                <div id="previewLeadActions"></div>
+            </div>
+            <div class="box">
+                <h4>Cliente di esempio (JSON) usato per il test. Sample ad ALTA SENSITIVITA', deliberatamente creato per testare la configurazione</h4>
+                <pre class="json" id="sampleClientJson"></pre>
+            </div>
+            <div class="box" style="margin-top:16px">
+                <h4>Lead di esempio (JSON) usato per il test. Sample ad ALTA SENSITIVITA', deliberatamente creato per testare la configurazione</h4>
+                <pre class="json" id="sampleLeadJson"></pre>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

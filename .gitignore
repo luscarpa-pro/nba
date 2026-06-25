@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Tangible Lab — local state (NON committare: contiene segreti e dati utente)
+tangible_lab/tangible_lab.db
+tangible_lab/tangible_lab.db-journal
+tangible_lab/tangible_lab.db-wal
+tangible_lab/tangible_lab.db-shm
+tangible_lab/.secret
+
+# Build artifacts
+build/
+dist/
+*.spec
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Test / debug artifacts
+.playwright-mcp/
+nba_studio*.png
+nba_studio*.jpg
+mobile_*.png
+mobile_*.jpg
+align.jpg
+.data/
+
+# Sub-pyc
+*.pyo
+
+# Build artifacts e archivi (vecchie versioni .zip non vanno in repo Git)
+build/
+dist/
+*.zip
+*.spec
+# Eccezione: lo spec PyInstaller del Lab va versionato (serve alla CI di build Windows)
+!tangible_lab/nba_studio.spec
+NBA.code-workspace
+
+# Cache strumenti
+.firecrawl/
+
+# Dataset reale: contiene PII, non va MAI in git (si importa in locale)
+/dataset.json
+
+# Archivi vecchie versioni: contengono dataset con PII, non vanno in git
+OLD/
+
+# Documenti di lavoro/binari (guide, casi di test): possibili dati reali, fuori dal repo
+tangible_lab/_docs/

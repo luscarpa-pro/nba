@@ -1,0 +1,83 @@
+/* Tangible Lab — Guida "Come funziona" (riusa i token di studio.css) */
+
+.guida-layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:28px;max-width:1080px;margin:0 auto;padding:28px 22px 80px}
+
+/* ---- sommario sticky ---- */
+.guida-toc{position:sticky;top:84px;align-self:start;font-size:12.5px}
+.guida-toc .toc-title{font-weight:700;color:var(--muted);text-transform:uppercase;font-size:11px;letter-spacing:.06em;margin-bottom:10px}
+.guida-toc a{display:block;color:var(--ink2);text-decoration:none;padding:5px 10px;border-left:2px solid var(--border-soft);line-height:1.35}
+.guida-toc a:hover{color:var(--accent)}
+.guida-toc a.active{color:var(--accent);border-left-color:var(--accent);font-weight:600}
+.guida-toc a.lvl2{padding-left:22px;font-size:12px}
+
+/* ---- corpo ---- */
+.guida-body{min-width:0;max-width:100%;font-size:14px;line-height:1.65;color:var(--ink2)}
+.guida-body h2{font-size:21px;color:var(--ink);margin:44px 0 10px;scroll-margin-top:84px}
+.guida-body h2:first-child{margin-top:0}
+.guida-body h3{font-size:15.5px;color:var(--ink);margin:30px 0 8px;scroll-margin-top:84px}
+.guida-body p{margin:0 0 12px}
+.guida-body table{width:100%;border-collapse:collapse;margin:14px 0 20px;font-size:13px;background:var(--panel);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.guida-body th{text-align:left;background:var(--breeze);color:var(--ink);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;padding:9px 12px;border-bottom:1px solid var(--border)}
+.guida-body td{padding:9px 12px;border-bottom:1px solid var(--border-soft);vertical-align:top}
+.guida-body tr:last-child td{border-bottom:none}
+
+/* valori live */
+.live{font-weight:700;color:var(--accent);white-space:nowrap}
+.live-banner{display:flex;gap:10px;align-items:flex-start;background:#E6FCF8;border:1px solid var(--highlight);border-radius:10px;padding:12px 14px;margin:16px 0;font-size:13px}
+.live-banner .msi{color:#007D6F}
+.live-banner.warn{background:#FFF4DC;border-color:var(--warn)}
+.live-banner.warn .msi{color:#92580A}
+
+.guida-note{background:var(--breeze);border-left:3px solid var(--cta);border-radius:0 8px 8px 0;padding:10px 14px;margin:14px 0;font-size:13px}
+
+/* ---- widget card ---- */
+.widget{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;margin:18px 0 24px;box-shadow:0 1px 3px rgba(31,28,61,.05)}
+.widget .w-title{display:flex;align-items:center;gap:8px;font-weight:700;color:var(--ink);font-size:13.5px;margin-bottom:12px}
+.widget .w-title .msi{color:var(--accent);font-size:19px}
+.widget .w-hint{font-size:12px;color:var(--muted);margin-top:10px}
+
+/* widget pesi */
+.wrow{display:grid;grid-template-columns:170px minmax(0,1fr) 52px;gap:10px;align-items:center;margin:7px 0;font-size:13px}
+.wrow .wlbl{color:var(--ink)}
+.wrow .wbar{height:14px;background:var(--breeze);border-radius:7px;overflow:hidden}
+.wrow .wfill{height:100%;background:linear-gradient(90deg,var(--cta),var(--cta2));border-radius:7px;transition:width .4s}
+.wrow .wpct{text-align:right;font-weight:700;color:var(--ink)}
+
+/* widget slider tier */
+.tier-track{position:relative;height:14px;border-radius:7px;margin:26px 4px 6px;background:#ddd}
+.tier-mark{position:absolute;top:-20px;transform:translateX(-50%);font-size:10.5px;font-weight:700;color:var(--muted)}
+.tier-slider{width:100%;margin:10px 0 4px}
+.tier-out{display:flex;align-items:center;gap:12px;margin-top:10px;font-size:13px}
+.tier-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:999px;color:#fff;font-weight:700;font-size:13px}
+.tier-score{font-size:22px;font-weight:800;color:var(--ink);min-width:46px}
+
+/* widget esempio cliente */
+.demo-profile{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.demo-fact{background:var(--chip);border:1px solid var(--border-soft);border-radius:8px;padding:5px 10px;font-size:12px;display:inline-flex;gap:6px;align-items:center}
+.demo-fact .msi{font-size:15px;color:var(--ink2)}
+.demo-total{display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
+.demo-action{margin-top:10px;background:var(--breeze);border-radius:8px;padding:10px 12px;font-size:13px}
+.demo-action b{color:var(--ink)}
+.w-error{color:var(--muted);font-size:13px;font-style:italic}
+
+/* diagramma fallback canali */
+.chan-row{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:8px 0;font-size:12.5px}
+.chan-cat{min-width:170px;font-weight:700;color:var(--ink)}
+.chan-step{background:var(--panel);border:1px solid var(--border);border-radius:999px;padding:4px 12px;display:inline-flex;align-items:center;gap:5px}
+.chan-step .msi{font-size:15px;color:var(--ink2)}
+.chan-arr{color:var(--muted)}
+
+/* ---- responsive ---- */
+@media (max-width: 860px){
+  .guida-layout{grid-template-columns:1fr;padding:18px 14px 60px}
+  .guida-toc{position:static;display:flex;gap:4px;overflow-x:auto;padding-bottom:8px;border-bottom:1px solid var(--border-soft);-webkit-overflow-scrolling:touch}
+  .guida-toc .toc-title{display:none}
+  .guida-toc a{border-left:none;border:1px solid var(--border);border-radius:999px;padding:5px 12px;white-space:nowrap;font-size:12px}
+  .guida-toc a.lvl2{display:none}
+  .wrow{grid-template-columns:110px minmax(0,1fr) 46px;font-size:12px}
+  .chan-cat{min-width:100%}
+  /* le tabelle non possono comprimersi sotto il min-content: su mobile scrollano */
+  .guida-body{overflow-x:hidden}
+  .guida-body table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .guida-body th,.guida-body td{padding:8px 9px}
+}

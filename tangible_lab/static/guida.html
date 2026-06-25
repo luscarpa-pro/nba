@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1F1C3D" />
+  <title>NBA Studio — Guida al funzionamento</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link rel="stylesheet" href="/lab/studio.css" />
+  <link rel="stylesheet" href="/lab/guida.css" />
+</head>
+<body class="studio guida-page">
+  <header class="studio">
+    <div class="brand">
+      <img class="logo-vittoria" src="/lab/assets/vittoria.svg" alt="Vittoria Assicurazioni" />
+      <div class="brand-text">
+        <h1>Guida al funzionamento</h1>
+        <div class="sub">Come il sistema NBA prioritizza clienti e lead</div>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="home-link" href="/lab/" title="NBA Studio">
+        <span class="msi">arrow_back</span><span class="home-link-lbl"> NBA Studio</span>
+      </a>
+      <span class="user-chip" id="user-chip"><span class="msi">person</span> …</span>
+    </div>
+  </header>
+
+  <div class="guida-layout">
+    <nav class="guida-toc" id="toc">
+      <div class="toc-title">Sommario</div>
+      <a href="#intro">Introduzione</a>
+      <a href="#cliente">Parte 1 — Il cliente</a>
+      <a href="#cliente-segnali" class="lvl2">I segnali (trigger)</a>
+      <a href="#cliente-score" class="lvl2">Il punteggio</a>
+      <a href="#cliente-tier" class="lvl2">I livelli di priorità</a>
+      <a href="#cliente-override" class="lvl2">Le regole di eccezione</a>
+      <a href="#cliente-categoria" class="lvl2">Categoria strategica</a>
+      <a href="#cliente-azione" class="lvl2">Azione e canale</a>
+      <a href="#cliente-esempio" class="lvl2">Un esempio concreto</a>
+      <a href="#lead">Parte 2 — Il lead</a>
+      <a href="#uso">Parte 3 — Uso quotidiano</a>
+    </nav>
+
+    <main class="guida-body">
+      <h2 id="intro">Introduzione</h2>
+      <p>Il sistema NBA (Next Best Action) risponde ogni giorno a tre domande operative:
+      <strong>chi contattare prima?</strong> <strong>Con quale messaggio?</strong>
+      <strong>Attraverso quale canale?</strong></p>
+      <p>Il risultato è una lista ordinata che assegna a ciascun soggetto una
+      <strong>priorità</strong> (quanto è urgente), un'<strong>azione consigliata</strong>
+      (cosa fare) e un <strong>canale preferito</strong> (come contattarlo).
+      Il sistema gestisce due tipologie distinte, con logiche diverse:
+      i <strong>clienti esistenti</strong> (già in portafoglio) e i
+      <strong>lead</strong> (potenziali clienti che hanno manifestato interesse).</p>
+      <div class="live-banner" id="live-banner">
+        <span class="msi">sensors</span>
+        <div>I numeri <span class="live">evidenziati</span> in questa pagina sono letti
+        in tempo reale dalla configurazione attiva del sistema: se la configurazione
+        cambia, questa guida si aggiorna da sola.</div>
+      </div>
+      <div class="guida-note"><strong>Chi non entra in lista.</strong>
+      Un cliente senza telefono né email registrati non compare nella lista NBA
+      (non è contattabile). Un lead senza consenso marketing non viene elaborato
+      e non compare in nessuna lista.</div>
+
+      <h2 id="cliente">Parte 1 — Il cliente esistente</h2>
+
+      <h3 id="cliente-segnali">Passo 1 — Il sistema rileva i segnali (trigger)</h3>
+      <p>Il motore analizza i dati già presenti nel sistema e identifica i segnali
+      di attenzione attivi. Non tutti pesano allo stesso modo: quelli legati a
+      urgenza economica (insoluti, scadenze) hanno precedenza su quelli
+      relazionali (compleanni, anniversari).</p>
+      <table>
+        <thead><tr><th>#</th><th>Segnale</th><th>Quando si attiva</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Premio non pagato</td><td>C'è un insoluto, contano i giorni di ritardo accumulati</td></tr>
+          <tr><td>2</td><td>Polizza in scadenza</td><td>Scadenza nei prossimi 45 giorni, con 4 livelli di urgenza (7 / 14 / 30 / 45 giorni)</td></tr>
+          <tr><td>3</td><td>Rischio abbandono (churn)</td><td>La probabilità di abbandono stimata sul contratto supera la soglia attuale del <span class="live" data-cfg="thresholds.HIGH_CHURN_THRESHOLD" data-fmt="pct">—</span></td></tr>
+          <tr><td>4</td><td>Sinistro aperto</td><td>Pratica sinistro non ancora chiusa</td></tr>
+          <tr><td>5</td><td>Reclamo aperto</td><td>Reclamo formale non ancora chiuso</td></tr>
+          <tr><td>6</td><td>Gap di copertura</td><td>Prodotti assicurativi mancanti nel portafoglio</td></tr>
+          <tr><td>7</td><td>Campagna commerciale attiva</td><td>Campagna di marketing attiva sul cliente</td></tr>
+          <tr><td>8</td><td>Preventivo non concluso</td><td>Preventivo salvato non ancora convertito</td></tr>
+          <tr><td>9</td><td>Punti Viva in scadenza</td><td>Punti del programma fedeltà che stanno per scadere</td></tr>
+          <tr><td>10</td><td>Punti Viva non utilizzati</td><td>Saldo superiore a 1.000 punti non riscattati</td></tr>
+          <tr><td>11</td><td>Check-up non eseguito</td><td>Analisi dei bisogni assicurativi mai effettuata</td></tr>
+          <tr><td>12</td><td>Non iscritto al programma Viva</td><td>Cliente non ancora iscritto al programma fedeltà</td></tr>
+          <tr><td>13</td><td>Contatto assente</td><td>Nessuna interazione da più di <span class="live" data-cfg="thresholds.NO_CONTACT_DAYS_THRESHOLD">—</span> giorni</td></tr>
+          <tr><td>14</td><td>Compleanno imminente</td><td>Compleanno entro i prossimi 7 giorni</td></tr>
+          <tr><td>15</td><td>Anniversario cliente</td><td>Anniversario dell'attivazione del rapporto, entro 30 giorni</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="cliente-score">Passo 2 — Il calcolo del punteggio (score 0–100)</h3>
+      <p>Ogni cliente riceve un punteggio costruito su <strong>quattro dimensioni</strong>.
+      Quanto pesa ciascuna dimensione è una scelta di configurazione, non una
+      costante: i pesi qui sotto sono <strong>quelli attivi in questo momento</strong>.</p>
+      <div class="widget">
+        <div class="w-title"><span class="msi">tune</span> I pesi attuali delle dimensioni — cliente</div>
+        <div id="w-client-weights"><div class="w-error">Caricamento…</div></div>
+        <div class="w-hint">Percentuali normalizzate per leggibilità. I pesi si modificano
+        dalla pagina di configurazione; la lista si riordina di conseguenza.</div>
+      </div>
+      <table>
+        <thead><tr><th>Dimensione</th><th>Cosa misura</th></tr></thead>
+        <tbody>
+          <tr><td>Urgenza</td><td>Quanto è urgente agire: insoluto, scadenza imminente, rischio abbandono, pratiche aperte</td></tr>
+          <tr><td>Valore economico</td><td>Quanto vale il cliente: premi, anzianità, numero polizze, redditività</td></tr>
+          <tr><td>Opportunità commerciale</td><td>Quanto c'è da sviluppare: gap di copertura, campagne, preventivi aperti</td></tr>
+          <tr><td>Recency contatto</td><td>Da quanto tempo il cliente non viene contattato</td></tr>
+        </tbody>
+      </table>
+      <p>Al punteggio pesato si aggiungono due piccoli correttivi: un
+      <strong>bonus multi-trigger</strong> se più segnali sono attivi
+      contemporaneamente, e un <strong>modificatore relazionale</strong> legato a
+      compleanno o anniversario imminenti.</p>
+
+      <h3 id="cliente-tier">Passo 3 — La classificazione in livelli (tier)</h3>
+      <p>Il punteggio viene tradotto in un livello di priorità operativa.
+      Anche le soglie sono configurabili: quelle mostrate sono le attuali.
+      Prova a muovere lo slider:</p>
+      <div class="widget">
+        <div class="w-title"><span class="msi">speed</span> Dal punteggio al tier</div>
+        <div class="tier-track" id="tier-track"></div>
+        <input type="range" min="0" max="100" value="70" class="tier-slider" id="tier-slider" aria-label="Punteggio di priorità (0–100)" />
+        <div class="tier-out">
+          <span class="tier-score" id="tier-score">70</span>
+          <span class="tier-chip" id="tier-chip">—</span>
+          <span id="tier-desc" style="color:var(--muted)"></span>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Livello</th><th>Soglia attuale</th><th>Significato operativo</th></tr></thead>
+        <tbody>
+          <tr><td><strong style="color:#E80E3F">CRITICAL</strong></td><td>≥ <span class="live" data-cfg="tiers.CRITICAL">—</span></td><td>Azione immediata — contattare nella giornata</td></tr>
+          <tr><td><strong style="color:#F59E0B">HIGH</strong></td><td>≥ <span class="live" data-cfg="tiers.HIGH">—</span></td><td>Alta priorità — contattare entro 24–48 ore</td></tr>
+          <tr><td><strong style="color:#00B5A3">MEDIUM</strong></td><td>≥ <span class="live" data-cfg="tiers.MEDIUM">—</span></td><td>Priorità media — pianificare il contatto nella settimana</td></tr>
+          <tr><td><strong style="color:#6b7280">LOW</strong></td><td>sotto la soglia MEDIUM</td><td>Bassa urgenza — gestione ordinaria</td></tr>
+        </tbody>
+      </table>
+      <p>Il tier determina <strong>quando</strong> agire. La categoria strategica
+      (Passo 4) determina <strong>come</strong> agire.</p>
+
+      <h3 id="cliente-override"><span class="msi" style="vertical-align:-3px;color:#F59E0B">warning_amber</span> Quando il sistema scavalca il punteggio: le regole di eccezione</h3>
+      <p>In tre situazioni specifiche il sistema applica regole che modificano il
+      risultato indipendentemente dal punteggio calcolato. Sono queste regole a
+      spiegare i casi che a prima vista sembrano «fuori posto» nella lista.</p>
+      <table>
+        <thead><tr><th>Regola</th><th>Condizione</th><th>Effetto</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Sinistro o reclamo aperto</td>
+            <td>Il cliente ha una pratica sinistro o un reclamo non chiusi</td>
+            <td>L'azione primaria diventa la <strong>gestione della relazione</strong> (aggiornamento sulla pratica), prima di qualsiasi altra azione — perfino del sollecito di pagamento</td>
+          </tr>
+          <tr>
+            <td>Churn elevato + scadenza imminente</td>
+            <td>Rischio abbandono sopra soglia su una polizza <em>che è anche in scadenza</em></td>
+            <td>Lo score viene portato almeno alla soglia CRITICAL (<span class="live" data-cfg="tiers.CRITICAL">—</span>) e l'azione primaria diventa la <strong>prevenzione dell'abbandono</strong></td>
+          </tr>
+          <tr>
+            <td>Churn elevato (in generale)</td>
+            <td>Rischio abbandono sopra soglia su almeno una polizza</td>
+            <td>Cross-sell, iscrizione Viva e check-up vengono <strong>soppressi</strong>: il sistema si concentra solo sulla fidelizzazione</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="guida-note"><strong>Ordine delle azioni.</strong> A parità di
+      condizioni l'azione primaria segue questa precedenza: pratica aperta →
+      prevenzione abbandono (se scatta l'eccezione) → sollecito pagamento →
+      rinnovo → sviluppo commerciale → relazione.</div>
+
+      <h3 id="cliente-categoria">Passo 4 — La categoria strategica</h3>
+      <table>
+        <thead><tr><th>Categoria</th><th>Quando si attiva</th><th>Obiettivo</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Retention</strong></td><td>Insoluto, polizza in scadenza, rischio abbandono, sinistro o reclamo aperto</td><td>Trattenere il cliente ed evitare la perdita della polizza</td></tr>
+          <tr><td><strong>Growth</strong></td><td>Gap di copertura, campagna attiva, preventivo sospeso, programma Viva, check-up</td><td>Sviluppare il portafoglio e aumentare il valore del cliente</td></tr>
+          <tr><td><strong>Service</strong></td><td>Nessun segnale urgente o commerciale attivo</td><td>Mantenere la relazione e presidiare il contatto</td></tr>
+        </tbody>
+      </table>
+      <p>La categoria <strong>Retention ha sempre precedenza su Growth</strong>:
+      se un cliente ha sia un rinnovo imminente che un gap di copertura, il
+      sistema propone prima il rinnovo.</p>
+
+      <h3 id="cliente-azione">Passo 5 — L'azione raccomandata e il canale</h3>
+      <p>Il sistema genera automaticamente il testo dell'azione in italiano
+      («Rinnovo urgente AUTO — scadenza tra 5 giorni (€1.100/anno)») e seleziona
+      il canale di contatto. La <strong>preferenza di canale registrata in
+      anagrafica vince sempre</strong>; se quel canale non è disponibile, il
+      sistema scala secondo quest'ordine:</p>
+      <div class="widget">
+        <div class="w-title"><span class="msi">alt_route</span> Ordine di fallback del canale</div>
+        <div class="chan-row"><span class="chan-cat">Retention / Conversion</span>
+          <span class="chan-step"><span class="msi">call</span>Telefono</span><span class="chan-arr">→</span>
+          <span class="chan-step"><span class="msi">chat</span>WhatsApp</span><span class="chan-arr">→</span>
+          <span class="chan-step"><span class="msi">sms</span>SMS</span><span class="chan-arr">→</span>
+          <span class="chan-step"><span class="msi">mail</span>Email</span></div>
+        <div class="chan-row"><span class="chan-cat">Growth / Nurturing</span>
+          <span class="chan-step"><span class="msi">mail</span>Email</span><span class="chan-arr">→</span>
+          <span class="chan-step"><span class="msi">chat</span>WhatsApp</span><span class="chan-arr">→</span>
+          <span class="chan-step"><span class="msi">sms</span>SMS</span><span class="chan-arr">→</span>
+          <span class="chan-step"><span class="msi">call</span>Telefono</span></div>
+        <div class="chan-row"><span class="chan-cat">Service</span>
+          <span class="chan-step"><span class="msi">chat</span>WhatsApp</span><span class="chan-arr">→</span>
+          <span class="chan-step"><span class="msi">sms</span>SMS</span><span class="chan-arr">→</span>
+          <span class="chan-step"><span class="msi">call</span>Telefono</span><span class="chan-arr">→</span>
+          <span class="chan-step"><span class="msi">mail</span>Email</span></div>
+        <div class="w-hint">WhatsApp richiede che il numero sia presente e che il
+        canale sia abilitato per il cliente. Il canale preferito è modificabile in
+        anagrafica: la successiva elaborazione recepisce il cambiamento.</div>
+      </div>
+
+      <h3 id="cliente-esempio">Un esempio concreto, calcolato adesso</h3>
+      <p>Questo esempio non è disegnato a mano: è <strong>calcolato in questo
+      momento dal motore reale</strong> con la configurazione attiva, su un
+      cliente dimostrativo.</p>
+      <div class="widget">
+        <div class="w-title"><span class="msi">person_search</span> Cliente demo — il percorso del punteggio</div>
+        <div id="w-demo"><div class="w-error">Calcolo in corso…</div></div>
+      </div>
+
+      <h2 id="lead">Parte 2 — Il lead</h2>
+      <p>Con un cliente il sistema ragiona su un rapporto già in essere. Con un
+      lead <strong>il tempo è il fattore dominante</strong>: un potenziale cliente
+      che ha richiesto un preventivo si raffredda rapidamente. La logica è
+      costruita attorno all'urgenza temporale, non al valore del portafoglio.</p>
+      <h3>I segnali del lead</h3>
+      <table>
+        <thead><tr><th>Segnale</th><th>Quando si attiva</th></tr></thead>
+        <tbody>
+          <tr><td>Nuovo lead</td><td>Richiesta arrivata da meno di ~<span class="live" data-cfg="thresholds.LEAD_NEW_HOURS_THRESHOLD" data-fmt="days-from-hours">—</span> giorni. Più è recente, più alta è l'urgenza.</td></tr>
+          <tr><td>Lead fermo</td><td>Richiesta da più di <span class="live" data-cfg="thresholds.LEAD_STALE_DAYS_THRESHOLD">—</span> giorni <em>senza nessun contatto registrato</em>. Rischio perdita elevato.</td></tr>
+          <tr><td>Copertura imminente</td><td>Decorrenza richiesta entro <span class="live" data-cfg="thresholds.LEAD_COVERAGE_START_SOON_DAYS">—</span> giorni. Finestra temporale stretta.</td></tr>
+          <tr><td>Preventivo disponibile</td><td>È già stato generato un preventivo: l'azione è il follow-up.</td></tr>
+          <tr><td>Preventivo di alto valore</td><td>Il preventivo supera <span class="live" data-cfg="thresholds.LEAD_HIGH_VALUE_PREMIUM_THRESHOLD" data-fmt="eur">—</span>: riceve un peso aggiuntivo.</td></tr>
+        </tbody>
+      </table>
+      <h3>Il punteggio del lead — tre dimensioni</h3>
+      <p>A differenza del cliente (4 dimensioni), il lead viene valutato su
+      <strong>3 dimensioni</strong>: urgenza (freschezza della richiesta o
+      imminenza della decorrenza), valore (entità del preventivo) e timing
+      (da quanto non viene contattato).
+      <span id="lead-weights-phrase"></span></p>
+      <div class="widget">
+        <div class="w-title"><span class="msi">tune</span> I pesi attuali delle dimensioni — lead</div>
+        <div id="w-lead-weights"><div class="w-error">Caricamento…</div></div>
+        <div class="w-hint">Anche questi pesi sono configurabili e possono cambiare.</div>
+      </div>
+      <h3>Categorie e azioni del lead</h3>
+      <table>
+        <thead><tr><th>Categoria</th><th>Quando si attiva</th><th>Esempio di azione</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Conversion</strong></td><td>Lead nuovo, preventivo disponibile, copertura imminente</td><td>«Primo contatto — richiesta AUTO ricevuta 2 ore fa» · «Presentare preventivo AUTO €1.200/anno»</td></tr>
+          <tr><td><strong>Nurturing</strong></td><td>Lead fermo senza risposta</td><td>«Contattare urgentemente — richiesta HOME ricevuta 12 giorni fa senza risposta»</td></tr>
+        </tbody>
+      </table>
+      <p>Il canale predefinito per i lead è il <strong>telefono</strong>, salvo
+      diversa indicazione nella scheda lead.</p>
+
+      <h2 id="uso">Parte 3 — Come usare la lista ogni giorno</h2>
+      <p>La lista NBA è uno strumento operativo, non un obbligo: supporta le
+      decisioni quotidiane con i dati, non sostituisce il giudizio dell'operatore.</p>
+      <table>
+        <thead><tr><th>#</th><th>Abitudine</th><th>Perché</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Apri la lista a inizio giornata</td><td>È il punto di partenza: la lista riflette i dati più aggiornati</td></tr>
+          <tr><td>2</td><td>Parti dai CRITICAL</td><td>Sono i casi che richiedono azione immediata: insoluti, scadenze, churn alto</td></tr>
+          <tr><td>3</td><td>Leggi l'azione suggerita prima di chiamare</td><td>Contiene già il motivo del contatto e le informazioni chiave (prodotto, premio, scadenza)</td></tr>
+          <tr><td>4</td><td>Verifica il canale consigliato</td><td>Tiene già conto della preferenza del cliente; se hai informazioni più fresche, aggiorna l'anagrafica</td></tr>
+          <tr><td>5</td><td>Registra l'esito del contatto</td><td>Alimenta i dati della prossima elaborazione: un MEDIUM oggi può essere CRITICAL domani</td></tr>
+        </tbody>
+      </table>
+      <div class="guida-note"><strong>Un cliente sembra fuori posto?</strong>
+      Controlla se è soggetto a una regola di eccezione
+      (<a href="#cliente-override">sezione dedicata</a>): un CRITICAL
+      «inspiegabile» è quasi sempre un churn elevato con polizza in scadenza,
+      e un cliente senza proposte commerciali è quasi sempre un churn elevato
+      con le azioni di sviluppo soppresse.</div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="/lab/guida.js"></script>
+</body>
+</html>

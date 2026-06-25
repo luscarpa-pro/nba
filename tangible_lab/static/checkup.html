@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1F1C3D" />
+  <title>NBA Studio — Check-up Vittoria</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+  <link rel="stylesheet" href="/lab/studio.css" />
+</head>
+<body class="studio checkup-page">
+  <header class="studio">
+    <div class="brand">
+      <img class="logo-vittoria" src="/lab/assets/vittoria.svg" alt="Vittoria Assicurazioni" />
+      <div class="brand-text">
+        <h1>Check-up Vittoria</h1>
+        <div class="sub">Simulatore dell'algoritmo di assegnazione bisogni</div>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="home-link" href="/lab/guida.html" title="Guida — come funziona l'algoritmo NBA">
+        <span class="msi">menu_book</span><span class="home-link-lbl"> Guida</span>
+      </a>
+      <a class="home-link" href="/lab/" title="NBA Studio">
+        <span class="msi">arrow_back</span><span class="home-link-lbl"> NBA Studio</span>
+      </a>
+      <span class="user-chip" id="user-chip"><span class="msi">person</span> …</span>
+      <a class="home-link" id="admin-link" href="/lab/admin.html" title="Admin" style="display:none">
+        <span class="msi">admin_panel_settings</span>
+      </a>
+      <button class="home-link" id="logout-btn" title="Esci" style="border:1px solid rgba(255,255,255,.18);cursor:pointer">
+        <span class="msi">logout</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="checkup-layout">
+    <aside class="checkup-side">
+      <div class="checkup-side-head">
+        <h2><span class="msi">folder_shared</span> Casi salvati</h2>
+        <button class="btn block" id="cu-new"><span class="msi">add</span> Nuovo checkup</button>
+      </div>
+      <div class="side-tabs">
+        <button class="active" data-tab="mine">Miei</button>
+        <button data-tab="shared">Condivisi</button>
+      </div>
+      <input type="search" id="cu-search" placeholder="🔍 Filtra…" />
+      <div class="checkup-cases" id="cu-list"></div>
+    </aside>
+
+    <section class="checkup-main">
+      <div class="checkup-toolbar">
+        <div class="checkup-title-edit">
+          <input type="text" id="cu-name" placeholder="Nome dello scenario (es. Libero professionista 35 anni con figli)" />
+        </div>
+        <div class="checkup-actions">
+          <button class="btn ghost" id="cu-reset" title="Cancella tutte le risposte">
+            <span class="msi">restart_alt</span> Pulisci
+          </button>
+          <button class="btn primary-cta" id="cu-compute">
+            <span class="msi">calculate</span> Calcola
+          </button>
+          <button class="btn ghost" id="cu-save">
+            <span class="msi">save</span> Salva
+          </button>
+        </div>
+      </div>
+      <div class="checkup-grid">
+        <div class="checkup-form" id="cu-form">
+          <div class="muted" style="padding:30px;text-align:center">Caricamento questionario…</div>
+        </div>
+        <aside class="checkup-result" id="cu-result">
+          <div class="checkup-result-empty">
+            <span class="msi">healing</span>
+            <div class="t">Compila il questionario e premi <strong>Calcola</strong></div>
+            <div class="s">I bisogni assicurativi rilevati appariranno qui con il livello di priorità.</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="/lab/checkup.js"></script>
+</body>
+</html>

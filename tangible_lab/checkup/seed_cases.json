@@ -1,0 +1,271 @@
+[
+  {
+    "name": "Famiglia giovane con figli, mutuo e cane",
+    "answers": {
+      "in_quale_fascia_d_eta_si_colloca": "26_35",
+      "stato_civile": "sposata_sposato",
+      "con_chi_convivi": [
+        "figli",
+        "partner_o_coniuge"
+      ],
+      "possiede_animali": [
+        "cane"
+      ],
+      "qual_e_la_tua_qualifica": "impiegato",
+      "qual_e_la_tua_principale_fonte_di_reddito": "professione_attuale",
+      "vive_in_affitto": "no",
+      "ha_una_casa_di_proprieta": "si",
+      "hai_altri_immobili_di_proprieta": "no",
+      "ha_un_mutuo_in_corso": "si",
+      "in_che_tipo_di_abitazione_vivi": "appartamento",
+      "quali_mezzi_di_trasporto_possiede": [
+        "automobile",
+        "bicicletta"
+      ],
+      "attalmente_hai_dei_risparmi": "si",
+      "attalmente_hai_degli_investimenti": "no",
+      "viaggi": "si"
+    }
+  },
+  {
+    "name": "Libero professionista 35 anni con micromobilità",
+    "answers": {
+      "in_quale_fascia_d_eta_si_colloca": "26_35",
+      "stato_civile": "con_partner",
+      "con_chi_convivi": [
+        "partner_o_coniuge"
+      ],
+      "possiede_animali": [
+        "non_ho_animali"
+      ],
+      "qual_e_la_tua_qualifica": "libero_professionista_iscritto_all_albo",
+      "qual_e_la_tua_principale_fonte_di_reddito": "professione_attuale",
+      "vive_in_affitto": "si",
+      "ha_una_casa_di_proprieta": "no",
+      "hai_altri_immobili_di_proprieta": "no",
+      "ha_un_mutuo_in_corso": "no",
+      "in_che_tipo_di_abitazione_vivi": "appartamento",
+      "quali_mezzi_di_trasporto_possiede": [
+        "bicicletta",
+        "monopattino_o_altri_mezzi_elettrici_es_bicicletta_elettrica"
+      ],
+      "attalmente_hai_dei_risparmi": "si",
+      "attalmente_hai_degli_investimenti": "si",
+      "viaggi": "si"
+    }
+  },
+  {
+    "name": "Imprenditore 50 anni con immobili e moto",
+    "answers": {
+      "in_quale_fascia_d_eta_si_colloca": "46_55",
+      "stato_civile": "sposata_sposato",
+      "con_chi_convivi": [
+        "figli",
+        "partner_o_coniuge"
+      ],
+      "possiede_animali": [
+        "cane"
+      ],
+      "qual_e_la_tua_qualifica": "imprenditore",
+      "qual_e_la_tua_principale_fonte_di_reddito": "professione_attuale",
+      "vive_in_affitto": "no",
+      "ha_una_casa_di_proprieta": "si",
+      "hai_altri_immobili_di_proprieta": "si",
+      "ha_un_mutuo_in_corso": "no",
+      "in_che_tipo_di_abitazione_vivi": "villa_casa_isolata",
+      "quali_mezzi_di_trasporto_possiede": [
+        "automobile",
+        "ciclomotore_motociclo"
+      ],
+      "attalmente_hai_dei_risparmi": "si",
+      "attalmente_hai_degli_investimenti": "si",
+      "viaggi": "si"
+    }
+  },
+  {
+    "name": "Operaio 40 anni con figli in affitto",
+    "answers": {
+      "in_quale_fascia_d_eta_si_colloca": "36_45",
+      "stato_civile": "sposata_sposato",
+      "con_chi_convivi": [
+        "figli",
+        "partner_o_coniuge"
+      ],
+      "possiede_animali": [
+        "non_ho_animali"
+      ],
+      "qual_e_la_tua_qualifica": "operaio",
+      "qual_e_la_tua_principale_fonte_di_reddito": "professione_attuale",
+      "vive_in_affitto": "si",
+      "ha_una_casa_di_proprieta": "no",
+      "hai_altri_immobili_di_proprieta": "no",
+      "ha_un_mutuo_in_corso": "no",
+      "in_che_tipo_di_abitazione_vivi": "appartamento",
+      "quali_mezzi_di_trasporto_possiede": [
+        "automobile",
+        "ciclomotore_motociclo"
+      ],
+      "attalmente_hai_dei_risparmi": "no",
+      "attalmente_hai_degli_investimenti": "no",
+      "viaggi": "no"
+    }
+  },
+  {
+    "name": "Pensionato 70 anni con coniuge e gatto",
+    "answers": {
+      "in_quale_fascia_d_eta_si_colloca": "66_74",
+      "stato_civile": "sposata_sposato",
+      "con_chi_convivi": [
+        "partner_o_coniuge"
+      ],
+      "possiede_animali": [
+        "gatto"
+      ],
+      "qual_e_la_tua_qualifica": "pensionato",
+      "qual_e_la_tua_principale_fonte_di_reddito": "pensione_o_assegno_previdenziale",
+      "vive_in_affitto": "no",
+      "ha_una_casa_di_proprieta": "si",
+      "hai_altri_immobili_di_proprieta": "no",
+      "ha_un_mutuo_in_corso": "no",
+      "in_che_tipo_di_abitazione_vivi": "appartamento",
+      "quali_mezzi_di_trasporto_possiede": [
+        "automobile"
+      ],
+      "attalmente_hai_dei_risparmi": "si",
+      "attalmente_hai_degli_investimenti": "no",
+      "viaggi": "no"
+    }
+  },
+  {
+    "name": "Studente 22 anni single in bicicletta",
+    "answers": {
+      "in_quale_fascia_d_eta_si_colloca": "18_25",
+      "stato_civile": "celibe_nubile",
+      "con_chi_convivi": [
+        "genitori"
+      ],
+      "possiede_animali": [
+        "non_ho_animali"
+      ],
+      "qual_e_la_tua_qualifica": "non_occupato_disoccupato_casalinga_studente",
+      "qual_e_la_tua_principale_fonte_di_reddito": "supporto_familiare_o_coniugale",
+      "vive_in_affitto": "si",
+      "ha_una_casa_di_proprieta": "no",
+      "hai_altri_immobili_di_proprieta": "no",
+      "ha_un_mutuo_in_corso": "no",
+      "in_che_tipo_di_abitazione_vivi": "appartamento",
+      "quali_mezzi_di_trasporto_possiede": [
+        "bicicletta"
+      ],
+      "attalmente_hai_dei_risparmi": "no",
+      "attalmente_hai_degli_investimenti": "no",
+      "viaggi": "si"
+    }
+  },
+  {
+    "name": "Dirigente 45 anni single con investimenti",
+    "answers": {
+      "in_quale_fascia_d_eta_si_colloca": "46_55",
+      "stato_civile": "celibe_nubile",
+      "con_chi_convivi": [
+        "non_convivo_con_altre_persone"
+      ],
+      "possiede_animali": [
+        "non_ho_animali"
+      ],
+      "qual_e_la_tua_qualifica": "dirigente_soggetto_apicale",
+      "qual_e_la_tua_principale_fonte_di_reddito": "professione_attuale",
+      "vive_in_affitto": "no",
+      "ha_una_casa_di_proprieta": "si",
+      "hai_altri_immobili_di_proprieta": "no",
+      "ha_un_mutuo_in_corso": "si",
+      "in_che_tipo_di_abitazione_vivi": "appartamento",
+      "quali_mezzi_di_trasporto_possiede": [
+        "automobile"
+      ],
+      "attalmente_hai_dei_risparmi": "si",
+      "attalmente_hai_degli_investimenti": "si",
+      "viaggi": "si"
+    }
+  },
+  {
+    "name": "Coppia senior 60 anni con casa e altri immobili",
+    "answers": {
+      "in_quale_fascia_d_eta_si_colloca": "56_60",
+      "stato_civile": "sposata_sposato",
+      "con_chi_convivi": [
+        "partner_o_coniuge"
+      ],
+      "possiede_animali": [
+        "cane"
+      ],
+      "qual_e_la_tua_qualifica": "funzionario_quadro",
+      "qual_e_la_tua_principale_fonte_di_reddito": "professione_attuale",
+      "vive_in_affitto": "no",
+      "ha_una_casa_di_proprieta": "si",
+      "hai_altri_immobili_di_proprieta": "si",
+      "ha_un_mutuo_in_corso": "no",
+      "in_che_tipo_di_abitazione_vivi": "villa_casa_isolata",
+      "quali_mezzi_di_trasporto_possiede": [
+        "automobile",
+        "bicicletta"
+      ],
+      "attalmente_hai_dei_risparmi": "si",
+      "attalmente_hai_degli_investimenti": "si",
+      "viaggi": "si"
+    }
+  },
+  {
+    "name": "Lavoratore autonomo 30 anni con cane e ciclomotore",
+    "answers": {
+      "in_quale_fascia_d_eta_si_colloca": "26_35",
+      "stato_civile": "con_partner",
+      "con_chi_convivi": [
+        "partner_o_coniuge"
+      ],
+      "possiede_animali": [
+        "cane"
+      ],
+      "qual_e_la_tua_qualifica": "lavoratore_autonomo",
+      "qual_e_la_tua_principale_fonte_di_reddito": "professione_attuale",
+      "vive_in_affitto": "no",
+      "ha_una_casa_di_proprieta": "si",
+      "hai_altri_immobili_di_proprieta": "no",
+      "ha_un_mutuo_in_corso": "si",
+      "in_che_tipo_di_abitazione_vivi": "appartamento",
+      "quali_mezzi_di_trasporto_possiede": [
+        "automobile",
+        "ciclomotore_motociclo"
+      ],
+      "attalmente_hai_dei_risparmi": "si",
+      "attalmente_hai_degli_investimenti": "no",
+      "viaggi": "no"
+    }
+  },
+  {
+    "name": "Vedovo 75 anni con gatti in casa di proprietà",
+    "answers": {
+      "in_quale_fascia_d_eta_si_colloca": "oltre_74",
+      "stato_civile": "vedovo_vedova",
+      "con_chi_convivi": [
+        "non_convivo_con_altre_persone"
+      ],
+      "possiede_animali": [
+        "gatto"
+      ],
+      "qual_e_la_tua_qualifica": "pensionato",
+      "qual_e_la_tua_principale_fonte_di_reddito": "pensione_o_assegno_previdenziale",
+      "vive_in_affitto": "no",
+      "ha_una_casa_di_proprieta": "si",
+      "hai_altri_immobili_di_proprieta": "no",
+      "ha_un_mutuo_in_corso": "no",
+      "in_che_tipo_di_abitazione_vivi": "appartamento",
+      "quali_mezzi_di_trasporto_possiede": [
+        "non_possiedo_mezzi_di_trasporto"
+      ],
+      "attalmente_hai_dei_risparmi": "si",
+      "attalmente_hai_degli_investimenti": "no",
+      "viaggi": "no"
+    }
+  }
+]

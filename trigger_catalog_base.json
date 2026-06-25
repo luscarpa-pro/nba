@@ -1,0 +1,288 @@
+{
+  "catalog_version": "1.0.0",
+  "client": {
+    "PAYMENT_OVERDUE": {
+      "default_enabled": true,
+      "display_name": "PAYMENT_OVERDUE",
+      "severity": "HIGH",
+      "display_order": 10,
+      "payload_schema": {
+        "max_days_overdue": "int",
+        "policies": "object[]  # [{policy_number, product, expiry_date, days_overdue}]"
+      },
+      "threshold_refs": []
+    },
+    "RENEWAL_7D": {
+      "default_enabled": true,
+      "display_name": "RENEWAL_7D",
+      "severity": "HIGH",
+      "display_order": 20,
+      "payload_schema": {
+        "policies": "Policy[]"
+      },
+      "threshold_refs": []
+    },
+    "RENEWAL_14D": {
+      "default_enabled": true,
+      "display_name": "RENEWAL_14D",
+      "severity": "MEDIUM",
+      "display_order": 21,
+      "payload_schema": {
+        "policies": "Policy[]"
+      },
+      "threshold_refs": []
+    },
+    "RENEWAL_30D": {
+      "default_enabled": true,
+      "display_name": "RENEWAL_30D",
+      "severity": "MEDIUM",
+      "display_order": 22,
+      "payload_schema": {
+        "policies": "Policy[]"
+      },
+      "threshold_refs": []
+    },
+    "RENEWAL_45D": {
+      "default_enabled": true,
+      "display_name": "RENEWAL_45D",
+      "severity": "LOW",
+      "display_order": 23,
+      "payload_schema": {
+        "policies": "Policy[]"
+      },
+      "threshold_refs": []
+    },
+    "MULTI_RENEWAL": {
+      "default_enabled": true,
+      "display_name": "MULTI_RENEWAL",
+      "severity": "LOW",
+      "display_order": 24,
+      "payload_schema": {
+        "policies": "Policy[]"
+      },
+      "threshold_refs": []
+    },
+    "HIGH_CHURN_RISK": {
+      "default_enabled": true,
+      "display_name": "HIGH_CHURN_RISK",
+      "severity": "CRITICAL",
+      "display_order": 30,
+      "payload_schema": {
+        "policy_number": "string",
+        "product": "string",
+        "churn_rate": "float"
+      },
+      "threshold_refs": [
+        "HIGH_CHURN_THRESHOLD"
+      ]
+    },
+    "SINGLE_POLICY_RISK": {
+      "default_enabled": true,
+      "display_name": "SINGLE_POLICY_RISK",
+      "severity": "HIGH",
+      "display_order": 31,
+      "payload_schema": {
+        "policy_number": "string",
+        "product": "string",
+        "churn_rate": "float"
+      },
+      "threshold_refs": [
+        "SINGLE_POLICY_CHURN_THRESHOLD"
+      ]
+    },
+    "CONTACT_OVERDUE": {
+      "default_enabled": true,
+      "display_name": "CONTACT_OVERDUE",
+      "severity": "LOW",
+      "display_order": 40,
+      "payload_schema": {
+        "days_since_contact": "int"
+      },
+      "threshold_refs": [
+        "NO_CONTACT_DAYS_THRESHOLD"
+      ]
+    },
+    "BIRTHDAY": {
+      "default_enabled": true,
+      "display_name": "BIRTHDAY",
+      "severity": "LOW",
+      "display_order": 41,
+      "payload_schema": {
+        "days_remaining": "int"
+      },
+      "threshold_refs": []
+    },
+    "CUSTOMER_ANNIVERSARY": {
+      "default_enabled": true,
+      "display_name": "CUSTOMER_ANNIVERSARY",
+      "severity": "LOW",
+      "display_order": 42,
+      "payload_schema": {
+        "days_remaining": "int"
+      },
+      "threshold_refs": []
+    },
+    "VIVA_NOT_ENROLLED": {
+      "default_enabled": true,
+      "display_name": "VIVA_NOT_ENROLLED",
+      "severity": "LOW",
+      "display_order": 50,
+      "payload_schema": {
+        "policy_count": "int"
+      },
+      "threshold_refs": []
+    },
+    "VIVA_POINTS_HIGH": {
+      "default_enabled": true,
+      "display_name": "VIVA_POINTS_HIGH",
+      "severity": "LOW",
+      "display_order": 51,
+      "payload_schema": {
+        "balance": "float"
+      },
+      "threshold_refs": []
+    },
+    "VIVA_POINTS_EXPIRING": {
+      "default_enabled": true,
+      "display_name": "VIVA_POINTS_EXPIRING",
+      "severity": "LOW",
+      "display_order": 52,
+      "payload_schema": {
+        "expiring_points": "int"
+      },
+      "threshold_refs": []
+    },
+    "CHECKUP_NOT_DONE": {
+      "default_enabled": true,
+      "display_name": "CHECKUP_NOT_DONE",
+      "severity": "LOW",
+      "display_order": 60,
+      "payload_schema": {
+        "policy_count": "int"
+      },
+      "threshold_refs": []
+    },
+    "COVERAGE_GAPS": {
+      "default_enabled": true,
+      "display_name": "COVERAGE_GAPS",
+      "severity": "LOW",
+      "display_order": 70,
+      "payload_schema": {
+        "gaps": "string[]"
+      },
+      "threshold_refs": []
+    },
+    "ACTIVE_CAMPAIGN": {
+      "default_enabled": true,
+      "display_name": "ACTIVE_CAMPAIGN",
+      "severity": "LOW",
+      "display_order": 71,
+      "payload_schema": {
+        "campaigns": "object[]"
+      },
+      "threshold_refs": []
+    },
+    "PENDING_QUOTE": {
+      "default_enabled": true,
+      "display_name": "PENDING_QUOTE",
+      "severity": "LOW",
+      "display_order": 72,
+      "payload_schema": {
+        "count_pending": "int",
+        "nearest_coverage_start_days": "int|null",
+        "oldest_saved_days": "int|null"
+      },
+      "threshold_refs": []
+    },
+    "OPEN_CLAIM": {
+      "default_enabled": true,
+      "display_name": "OPEN_CLAIM",
+      "severity": "LOW",
+      "display_order": 73,
+      "payload_schema": {
+        "count_open": "int"
+      },
+      "threshold_refs": []
+    },
+    "OPEN_COMPLAINT": {
+      "default_enabled": true,
+      "display_name": "OPEN_COMPLAINT",
+      "severity": "LOW",
+      "display_order": 74,
+      "payload_schema": {
+        "count_open": "int"
+      },
+      "threshold_refs": []
+    },
+    "SERVICE_BASELINE": {
+      "default_enabled": true,
+      "display_name": "SERVICE_BASELINE",
+      "severity": "LOW",
+      "display_order": 999,
+      "payload_schema": {
+        "reason": "string"
+      },
+      "threshold_refs": []
+    }
+  },
+  "lead": {
+    "COVERAGE_START_SOON": {
+      "default_enabled": true,
+      "display_name": "COVERAGE_START_SOON",
+      "severity": "HIGH",
+      "display_order": 10,
+      "payload_schema": {
+        "days_remaining": "int"
+      },
+      "threshold_refs": [
+        "LEAD_COVERAGE_START_SOON_DAYS"
+      ]
+    },
+    "HIGH_VALUE_QUOTE": {
+      "default_enabled": true,
+      "display_name": "HIGH_VALUE_QUOTE",
+      "severity": "HIGH",
+      "display_order": 20,
+      "payload_schema": {
+        "premium": "float"
+      },
+      "threshold_refs": [
+        "LEAD_HIGH_VALUE_PREMIUM_THRESHOLD"
+      ]
+    },
+    "QUOTE_READY": {
+      "default_enabled": true,
+      "display_name": "QUOTE_READY",
+      "severity": "MEDIUM",
+      "display_order": 21,
+      "payload_schema": {
+        "premium": "float"
+      },
+      "threshold_refs": []
+    },
+    "NEW_LEAD": {
+      "default_enabled": true,
+      "display_name": "NEW_LEAD",
+      "severity": "HIGH",
+      "display_order": 30,
+      "payload_schema": {
+        "hours_since_creation": "int"
+      },
+      "threshold_refs": [
+        "LEAD_NEW_HOURS_THRESHOLD"
+      ]
+    },
+    "STALE_LEAD": {
+      "default_enabled": true,
+      "display_name": "STALE_LEAD",
+      "severity": "MEDIUM",
+      "display_order": 40,
+      "payload_schema": {
+        "days_since_creation": "int"
+      },
+      "threshold_refs": [
+        "LEAD_STALE_DAYS_THRESHOLD"
+      ]
+    }
+  }
+}

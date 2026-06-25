@@ -1,0 +1,689 @@
+{
+  "needs": [
+    {
+      "id": "casa",
+      "label": "Casa"
+    },
+    {
+      "id": "infortuni",
+      "label": "Infortuni"
+    },
+    {
+      "id": "malattia",
+      "label": "Salute / Malattia"
+    },
+    {
+      "id": "previdenza",
+      "label": "Previdenza Complementare"
+    },
+    {
+      "id": "animali",
+      "label": "Animali domestici"
+    },
+    {
+      "id": "micromobilita",
+      "label": "Micromobilità"
+    },
+    {
+      "id": "rc_privata",
+      "label": "RC Privata"
+    },
+    {
+      "id": "tutela_legale",
+      "label": "Tutela Legale"
+    },
+    {
+      "id": "vita_protezione",
+      "label": "Vita Protezione"
+    },
+    {
+      "id": "rc_professionale",
+      "label": "RC Professionale"
+    },
+    {
+      "id": "viaggi",
+      "label": "Viaggi"
+    }
+  ],
+  "questions": [
+    {
+      "id": "in_quale_fascia_d_eta_si_colloca",
+      "text": "In quale fascia d'età si colloca?",
+      "type": "single",
+      "answers": [
+        {
+          "id": "18_25",
+          "text": "18-25",
+          "key": "18-25",
+          "needs": {
+            "infortuni": "medio",
+            "malattia": "medio",
+            "previdenza": "alto",
+            "rc_privata": "medio",
+            "tutela_legale": "basso",
+            "vita_protezione": "basso"
+          }
+        },
+        {
+          "id": "26_35",
+          "text": "26-35",
+          "key": "26-35",
+          "needs": {
+            "infortuni": "alto",
+            "malattia": "medio",
+            "previdenza": "alto",
+            "rc_privata": "alto",
+            "tutela_legale": "basso",
+            "vita_protezione": "basso"
+          }
+        },
+        {
+          "id": "36_45",
+          "text": "36-45",
+          "key": "36-45",
+          "needs": {
+            "infortuni": "alto",
+            "malattia": "medio",
+            "previdenza": "alto",
+            "rc_privata": "alto",
+            "tutela_legale": "basso",
+            "vita_protezione": "medio"
+          }
+        },
+        {
+          "id": "46_55",
+          "text": "46-55",
+          "key": "46-55",
+          "needs": {
+            "infortuni": "alto",
+            "malattia": "alto",
+            "previdenza": "alto",
+            "rc_privata": "alto",
+            "tutela_legale": "medio",
+            "vita_protezione": "alto"
+          }
+        },
+        {
+          "id": "56_60",
+          "text": "56-60",
+          "key": "56-60",
+          "needs": {
+            "infortuni": "medio",
+            "malattia": "alto",
+            "previdenza": "medio",
+            "rc_privata": "alto",
+            "tutela_legale": "medio",
+            "vita_protezione": "alto"
+          }
+        },
+        {
+          "id": "61_65",
+          "text": "61-65",
+          "key": "61-65",
+          "needs": {
+            "infortuni": "medio",
+            "malattia": "alto",
+            "previdenza": "medio",
+            "rc_privata": "alto",
+            "tutela_legale": "medio",
+            "vita_protezione": "alto"
+          }
+        },
+        {
+          "id": "66_74",
+          "text": "66-74",
+          "key": "66-74",
+          "needs": {
+            "infortuni": "medio",
+            "malattia": "alto",
+            "previdenza": "basso",
+            "rc_privata": "alto",
+            "tutela_legale": "basso"
+          }
+        },
+        {
+          "id": "oltre_74",
+          "text": "Oltre 74",
+          "key": "Oltre 74",
+          "needs": {
+            "previdenza": "basso",
+            "rc_privata": "alto",
+            "tutela_legale": "basso"
+          }
+        }
+      ]
+    },
+    {
+      "id": "stato_civile",
+      "text": "Stato civile",
+      "type": "single",
+      "answers": [
+        {
+          "id": "celibe_nubile",
+          "text": "Celibe/Nubile",
+          "key": "Celibe/Nubile"
+        },
+        {
+          "id": "con_partner",
+          "text": "con partner",
+          "key": "con partner"
+        },
+        {
+          "id": "sposata_sposato",
+          "text": "Sposata/sposato",
+          "key": "Sposata/sposato"
+        },
+        {
+          "id": "separata_separato",
+          "text": "separata/separato",
+          "key": "separata/separato"
+        },
+        {
+          "id": "divorziata_divorziato",
+          "text": "divorziata/divorziato",
+          "key": "divorziata/divorziato"
+        },
+        {
+          "id": "vedovo_vedova",
+          "text": "Vedovo/vedova",
+          "key": "Vedovo/vedova"
+        }
+      ]
+    },
+    {
+      "id": "con_chi_convivi",
+      "text": "Con chi convivi",
+      "type": "multi",
+      "answers": [
+        {
+          "id": "figli",
+          "text": "figli",
+          "key": "figli (quanti figli hai- quanti sono a tuo carico)",
+          "follow_up": "quanti figli hai",
+          "needs": {
+            "infortuni": "alto",
+            "malattia": "alto",
+            "rc_privata": "alto",
+            "tutela_legale": "medio",
+            "vita_protezione": "alto"
+          }
+        },
+        {
+          "id": "partner_o_coniuge",
+          "text": "Partner o Coniuge",
+          "key": "Partner o Coniuge",
+          "needs": {
+            "infortuni": "medio",
+            "malattia": "medio",
+            "rc_privata": "alto",
+            "tutela_legale": "medio",
+            "vita_protezione": "medio"
+          }
+        },
+        {
+          "id": "genitori",
+          "text": "Genitori",
+          "key": "Genitori",
+          "needs": {
+            "infortuni": "medio",
+            "malattia": "medio",
+            "rc_privata": "medio",
+            "tutela_legale": "medio",
+            "vita_protezione": "basso"
+          }
+        },
+        {
+          "id": "altri_familiari",
+          "text": "Altri familiari",
+          "key": "Altri familiari",
+          "needs": {
+            "infortuni": "medio",
+            "malattia": "medio",
+            "rc_privata": "medio",
+            "tutela_legale": "medio",
+            "vita_protezione": "basso"
+          }
+        },
+        {
+          "id": "altri_conviventi_non_familiari_es_coinquilino",
+          "text": "altri conviventi non familiari (es. coinquilino)",
+          "key": "altri conviventi non familiari (es. coinquilino)",
+          "needs": {
+            "rc_privata": "medio",
+            "tutela_legale": "basso"
+          }
+        },
+        {
+          "id": "non_convivo_con_altre_persone",
+          "text": "Non convivo con altre persone",
+          "key": "Non convivo con altre persone",
+          "needs": {
+            "infortuni": "medio",
+            "malattia": "alto",
+            "rc_privata": "alto",
+            "tutela_legale": "basso",
+            "vita_protezione": "basso"
+          }
+        }
+      ]
+    },
+    {
+      "id": "possiede_animali",
+      "text": "Possiede animali?",
+      "type": "multi",
+      "answers": [
+        {
+          "id": "cane",
+          "text": "cane",
+          "key": "cane",
+          "needs": {
+            "animali": "alto"
+          }
+        },
+        {
+          "id": "gatto",
+          "text": "gatto",
+          "key": "gatto",
+          "needs": {
+            "animali": "alto"
+          }
+        },
+        {
+          "id": "cavallo",
+          "text": "cavallo",
+          "key": "cavallo"
+        },
+        {
+          "id": "animali_da_cortile",
+          "text": "animali da cortile",
+          "key": "animali da cortile"
+        },
+        {
+          "id": "altro",
+          "text": "altro",
+          "key": "altro"
+        },
+        {
+          "id": "non_ho_animali",
+          "text": "non ho animali",
+          "key": "non ho animali"
+        }
+      ]
+    },
+    {
+      "id": "qual_e_la_tua_qualifica",
+      "text": "Qual è la tua qualifica",
+      "type": "single",
+      "answers": [
+        {
+          "id": "libero_professionista_iscritto_all_albo",
+          "text": "libero professionista iscritto all'albo",
+          "key": "libero professionista iscritto all'albo",
+          "needs": {
+            "infortuni": "alto",
+            "malattia": "alto",
+            "rc_professionale": "alto"
+          }
+        },
+        {
+          "id": "imprenditore",
+          "text": "Imprenditore",
+          "key": "Imprenditore",
+          "needs": {
+            "infortuni": "alto",
+            "malattia": "alto",
+            "rc_professionale": "alto"
+          }
+        },
+        {
+          "id": "dirigente_soggetto_apicale",
+          "text": "Dirigente /Soggetto Apicale",
+          "key": "Dirigente /Soggetto Apicale",
+          "needs": {
+            "infortuni": "basso",
+            "malattia": "basso"
+          }
+        },
+        {
+          "id": "funzionario_quadro",
+          "text": "Funzionario/quadro",
+          "key": "Funzionario/quadro",
+          "needs": {
+            "infortuni": "basso",
+            "malattia": "basso"
+          }
+        },
+        {
+          "id": "impiegato",
+          "text": "Impiegato",
+          "key": "Impiegato",
+          "needs": {
+            "infortuni": "basso",
+            "malattia": "basso"
+          }
+        },
+        {
+          "id": "operaio",
+          "text": "Operaio",
+          "key": "Operaio",
+          "needs": {
+            "infortuni": "alto",
+            "malattia": "alto"
+          }
+        },
+        {
+          "id": "pensionato",
+          "text": "Pensionato",
+          "key": "Pensionato",
+          "needs": {
+            "infortuni": "basso",
+            "malattia": "basso"
+          }
+        },
+        {
+          "id": "lavoratore_autonomo",
+          "text": "Lavoratore autonomo",
+          "key": "Lavoratore autonomo",
+          "needs": {
+            "infortuni": "alto",
+            "malattia": "alto",
+            "rc_professionale": "alto"
+          }
+        },
+        {
+          "id": "non_occupato_disoccupato_casalinga_studente",
+          "text": "Non occupato (Disoccupato, Casalinga, Studente)",
+          "key": "Non occupato (Disoccupato, Casalinga, Studente)",
+          "needs": {
+            "infortuni": "basso",
+            "malattia": "basso"
+          }
+        },
+        {
+          "id": "libero_professionista_non_iscritto_all_albo",
+          "text": "Libero professionista non iscritto all'albo",
+          "key": "Libero professionista non iscritto all'albo",
+          "needs": {
+            "infortuni": "alto",
+            "malattia": "alto",
+            "rc_professionale": "alto"
+          }
+        }
+      ]
+    },
+    {
+      "id": "qual_e_la_tua_principale_fonte_di_reddito",
+      "text": "qual è la tua principale fonte di reddito?",
+      "type": "single",
+      "answers": [
+        {
+          "id": "professione_attuale",
+          "text": "Professione attuale",
+          "key": "Professione attuale"
+        },
+        {
+          "id": "supporto_familiare_o_coniugale",
+          "text": "Supporto familiare o coniugale",
+          "key": "Supporto familiare o coniugale"
+        },
+        {
+          "id": "reddito_da_patrimonio",
+          "text": "Reddito da patrimonio",
+          "key": "Reddito da patrimonio"
+        },
+        {
+          "id": "reddito_da_investimenti",
+          "text": "Reddito da investimenti",
+          "key": "Reddito da investimenti"
+        },
+        {
+          "id": "entrate_occasionale",
+          "text": "Entrate occasionale",
+          "key": "Entrate occasionale"
+        },
+        {
+          "id": "altre_fonti_di_reddito",
+          "text": "Altre fonti di reddito",
+          "key": "Altre fonti di reddito"
+        },
+        {
+          "id": "pensione_o_assegno_previdenziale",
+          "text": "Pensione o assegno previdenziale",
+          "key": "Pensione o assegno previdenziale"
+        },
+        {
+          "id": "sussidi_statali_o_aiuti_pubblici",
+          "text": "Sussidi statali o aiuti pubblici",
+          "key": "Sussidi statali o aiuti pubblici"
+        },
+        {
+          "id": "rendita_vitalizia_o_polizza_assicurativa",
+          "text": "Rendita vitalizia o polizza assicurativa",
+          "key": "Rendita vitalizia o polizza assicurativa"
+        }
+      ]
+    },
+    {
+      "id": "vive_in_affitto",
+      "text": "Vive in affitto?",
+      "type": "boolean",
+      "answers": [
+        {
+          "id": "si",
+          "text": "si",
+          "key": "si (Vive in affitto?)",
+          "needs": {
+            "casa": "medio",
+            "rc_privata": "alto",
+            "tutela_legale": "medio"
+          }
+        },
+        {
+          "id": "no",
+          "text": "no",
+          "key": "no (Vive in affitto?)"
+        }
+      ]
+    },
+    {
+      "id": "ha_una_casa_di_proprieta",
+      "text": "Ha una casa di proprietà?",
+      "type": "boolean",
+      "answers": [
+        {
+          "id": "si",
+          "text": "si",
+          "key": "si (Ha una casa di proprietà?)",
+          "needs": {
+            "casa": "alto",
+            "rc_privata": "alto",
+            "tutela_legale": "medio"
+          }
+        },
+        {
+          "id": "no",
+          "text": "no",
+          "key": "no (Ha una casa di proprietà?)",
+          "needs": {
+            "casa": "basso"
+          }
+        }
+      ]
+    },
+    {
+      "id": "hai_altri_immobili_di_proprieta",
+      "text": "Hai altri immobili di proprietà?",
+      "type": "boolean",
+      "answers": [
+        {
+          "id": "si",
+          "text": "si",
+          "key": "si (Hai altri immobili di proprietà?)",
+          "follow_up": "quanti nei hai"
+        },
+        {
+          "id": "no",
+          "text": "no",
+          "key": "no (Hai altri immobili di proprietà?)"
+        }
+      ]
+    },
+    {
+      "id": "ha_un_mutuo_in_corso",
+      "text": "Ha un mutuo in corso?",
+      "type": "boolean",
+      "answers": [
+        {
+          "id": "si",
+          "text": "si",
+          "key": "si (Ha un mutuo in corso?)",
+          "needs": {
+            "casa": "medio",
+            "vita_protezione": "alto"
+          }
+        },
+        {
+          "id": "no",
+          "text": "no",
+          "key": "no (Ha un mutuo in corso?)"
+        }
+      ]
+    },
+    {
+      "id": "in_che_tipo_di_abitazione_vivi",
+      "text": "In che tipo di abitazione vivi?",
+      "type": "single",
+      "answers": [
+        {
+          "id": "appartamento",
+          "text": "Appartamento",
+          "key": "Appartamento",
+          "needs": {
+            "rc_privata": "alto"
+          }
+        },
+        {
+          "id": "villa_casa_isolata",
+          "text": "villa, casa isolata",
+          "key": "villa, casa isolata",
+          "needs": {
+            "rc_privata": "medio"
+          }
+        }
+      ]
+    },
+    {
+      "id": "quali_mezzi_di_trasporto_possiede",
+      "text": "Quali mezzi di trasporto possiede?",
+      "type": "multi",
+      "answers": [
+        {
+          "id": "automobile",
+          "text": "Automobile",
+          "key": "Automobile",
+          "needs": {
+            "infortuni": "medio"
+          }
+        },
+        {
+          "id": "bicicletta",
+          "text": "bicicletta",
+          "key": "bicicletta",
+          "needs": {
+            "micromobilita": "medio"
+          }
+        },
+        {
+          "id": "ciclomotore_motociclo",
+          "text": "Ciclomotore/Motociclo",
+          "key": "Ciclomotore/Motociclo",
+          "needs": {
+            "infortuni": "alto"
+          }
+        },
+        {
+          "id": "imbarcazione",
+          "text": "Imbarcazione",
+          "key": "Imbarcazione"
+        },
+        {
+          "id": "monopattino_o_altri_mezzi_elettrici_es_bicicletta_elettrica",
+          "text": "Monopattino o altri mezzi elettrici (es. bicicletta elettrica)",
+          "key": "Monopattino o altri mezzi elettrici (es. bicicletta elettrica)",
+          "needs": {
+            "micromobilita": "medio"
+          }
+        },
+        {
+          "id": "autocarri_e_macchine_agricole",
+          "text": "Autocarri e Macchine agricole",
+          "key": "Autocarri e Macchine agricole"
+        },
+        {
+          "id": "autocaravan",
+          "text": "Autocaravan",
+          "key": "Autocaravan"
+        },
+        {
+          "id": "non_possiedo_mezzi_di_trasporto",
+          "text": "Non possiedo mezzi di trasporto",
+          "key": "Non possiedo mezzi di trasporto"
+        }
+      ]
+    },
+    {
+      "id": "attalmente_hai_dei_risparmi",
+      "text": "Attalmente hai dei risparmi",
+      "type": "boolean",
+      "answers": [
+        {
+          "id": "si",
+          "text": "si",
+          "key": "si (Attalmente hai dei risparmi)"
+        },
+        {
+          "id": "no",
+          "text": "no",
+          "key": "no (Attalmente hai dei risparmi)"
+        }
+      ]
+    },
+    {
+      "id": "attalmente_hai_degli_investimenti",
+      "text": "Attalmente hai degli investimenti",
+      "type": "boolean",
+      "answers": [
+        {
+          "id": "si",
+          "text": "si",
+          "key": "si (Attalmente hai degli investimenti)"
+        },
+        {
+          "id": "no",
+          "text": "no",
+          "key": "no (Attalmente hai degli investimenti)"
+        }
+      ]
+    },
+    {
+      "id": "viaggi",
+      "text": "Viaggi (fai viaggi frequenti / lunghi)?",
+      "type": "boolean",
+      "answers": [
+        {
+          "id": "si",
+          "text": "si",
+          "key": "si (viaggi)",
+          "needs": {
+            "viaggi": "basso"
+          }
+        },
+        {
+          "id": "no",
+          "text": "no",
+          "key": "no (viaggi)"
+        }
+      ]
+    }
+  ]
+}

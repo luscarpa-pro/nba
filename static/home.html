@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>NBA Demo – Home</title>
+  <style>
+    body{margin:32px;font-family:Arial,sans-serif;max-width:980px;}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:18px;}
+    .card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:12px;padding:16px;}
+    a.btn{display:inline-block;text-decoration:none;color:white;background:#2563eb;padding:10px 12px;border-radius:10px;font-weight:700}
+    a.btn:hover{background:#1d4ed8}
+    .muted{color:#6b7280;font-size:13px}
+    code{background:#f3f4f6;border:1px solid #e5e7eb;padding:2px 6px;border-radius:6px}
+   .btnRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+ .btnItem{display:flex} </style>
+</head>
+<body>
+  <h1>NBA Demo – Home</h1>
+  <p class="muted">Tool di test dell'algoritmo di Next Best Action. La configurazione dei parametri dell'algoritmo si trova in nba_config.json. Il dataset usato dal tool di test è in dataset.json. <br> 
+    Il catalogo dei trigger di action è in trigger_catalog_base.json, gli overrides ai trigger sono in trigger_catalog_override.json <br>
+    La UI e la API sono a <code>http://127.0.0.1:8000</code>.</p>
+  <div class="grid">
+    <div class="card">
+      <h2>Algoritmo NBA applicato al dataset</h2>
+      <p class="muted">Single client/lead lookup + tabella di applicazione bulk a n record.</p>
+      <a class="btn" href="/static/NBA_Index.html">Apri il tool di test</a>
+    </div>
+    <div class="card">
+      <h2>Sandbox di configurazione e test di applicazione</h2>
+      <p class="muted">One-page playground: configura i parametri e i dati di un cliente e lead di test e applica il NBA in preview.</p>
+      <a class="btn" href="/static/NBA_sandbox.html">Open Sandbox</a>
+    </div>
+    <div class="card">
+      <h2>Test Tool</h2>
+      <p class="muted">Crea un cliente o lead di test e applica il NBA per vedere l'effetto che fa.</p>
+      <div class="btnRow">
+        <div class="btnItem"><a class="btn" href="/static/NBA_test.html">Open CLIENT Test tool</a></div>
+        <div class="btnItem"><a class="btn" href="/static/NBA_test_Lead.html">Open LEAD Test tool</a></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>NBA Config Editor</h2>
+      <p class="muted">Editor dei parametri di configurazione dell'algoritmo.</p>
+      <a class="btn" href="/static/NBA_config.html">Open Config Editor</a>
+    </div>
+    <div class="card">
+      <h2>Open/edit trigger catalog</h2>
+      <p class="muted">Visualizza e modifica il catalogo dei trigger (abilita/disabilita) - Usare con cautela.</p>
+      <a class="btn" href="/static/NBA_triggers.html">Open Trigger Catalog</a>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:20px">
+    <h2>Come funziona l’algoritmo NBA</h2>
+    <p class="muted" style="font-size:13px; line-height:1.4">
+      L’algoritmo di <b>Next Best Action (NBA)</b> analizza i dati del cliente/lead e determina automaticamente
+      l’azione più opportuna da eseguire, con priorità e canale consigliato.
+    </p>
+
+    <ul class="muted" style="font-size:13px; line-height:1.4">
+      <li><b>1) Validazione input</b>: verifica dei vincoli minimi (cliente contattabile; per lead, consenso marketing).</li>
+      <li><b>2) Trigger detection</b>: identifica eventi rilevanti (es. insoluti, rinnovi imminenti, churn risk, contatto overdue, campagne, quote pending).</li>
+      <li><b>3) Scoring</b>: calcola la priorità combinando <i>urgenza</i>, <i>valore</i>, <i>opportunità</i>, <i>recency</i> e bonus (multi-trigger, relazione).</li>
+      <li><b>4) Tiering</b>: mappa lo score in LOW / MEDIUM / HIGH / CRITICAL (con possibili override).</li>
+      <li><b>5) Selezione azioni</b>: determina la <b>PRIMARY</b> (categoria dominante) e le azioni <b>SECONDARY</b> secondo precedence.</li>
+      <li><b>6) Channel resolution</b>: sceglie il canale migliore (PHONE/EMAIL/SMS/WHATSAPP) in base a preferenze e disponibilità.</li>
+      <li><b>7) Output</b>: restituisce un task con azioni ordinate (PRIMARY-first) e metadati (score, tier, trigger, strategia).</li>
+    </ul>
+
+    <p class="muted" style="font-size:12px; margin-top:10px">
+      I parametri (pesi, soglie e regole) sono configurabili tramite la pagina <b>Config Editor</b>.
+    </p>
+  </div>
+
+</body>
+</html>
