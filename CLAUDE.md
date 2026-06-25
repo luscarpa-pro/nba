@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-NBA Studio: a testing/review environment ("Tangible Lab") built by Tangible around a proprietary **NBA (Next Best Action) engine** owned by the client **Vittoria Assicurazioni**. The engine scores insurance clients/leads and recommends actions. The Lab adds multi-user auth, saved test cases, reviews/comments, an admin panel, and a "Check-up" needs-assessment simulator.
+NBA Studio: a testing/review environment ("Tangible Lab") built by Tangible around a proprietary **NBA (Next Best Action) engine** owned by the client **Vittoria Assicurazioni**. The engine scores insurance clients/leads and recommends actions. The Lab adds saved test cases, reviews/comments, an admin panel, and a "Check-up" needs-assessment simulator. In modalità normale include anche autenticazione multi-utente, ma la distribuzione attuale è **single-user offline** (flag `TANGIBLE_LAB_SINGLE_USER`).
 
 ## Hard constraint: the backend is supplied by the client's IT
 
@@ -53,9 +53,15 @@ The client engine itself (`nba_engine.py`) is pure functions: dataclasses `Clien
 
 ## Deploy
 
-Render via `render.yaml` blueprint (Docker, Frankfurt region for GDPR, persistent 1 GB disk on `/data`, auto-deploy on push to `main`). Gunicorn with 2 uvicorn workers — see `Dockerfile` CMD. Full procedure in `tangible_lab/DEPLOY.md`. Production URL: `nba-studio.tangible.design`. The repo must stay **private** (proprietary Vittoria engine).
+Distribuzione **offline su Windows**: eseguibile `NBAStudio.exe` generato con PyInstaller (spec in `tangible_lab/nba_studio.spec`, script di build in `tangible_lab/build_windows.bat`). Ogni tester riceve una copia dell'`.exe`; doppio click apre il browser su `http://127.0.0.1:8000/lab/`. I dati (DB, dataset, config) risiedono in `%APPDATA%\NBAStudio` sul PC locale — nessun dato sensibile in cloud né in git.
 
-Key env vars: `TANGIBLE_LAB_DATA_DIR`, `TANGIBLE_LAB_SECRET`, `TANGIBLE_LAB_SECURE_COOKIE`, `PORT`.
+Modalità **single-user locale**: il flag `TANGIBLE_LAB_SINGLE_USER=1` (impostato automaticamente da `desktop_main.py`) disabilita il login e considera l'utente sempre autenticato come admin. Non ci sono ruoli/condivisione: ogni installazione è isolata. Per condividere i risultati si usa l'**export Excel** dal pannello Admin.
+
+Il dataset reale (clienti/lead Vittoria) viene importato localmente tramite il pannello Admin → "Importa dataset"; non deve mai essere committato in git.
+
+Procedura completa in `tangible_lab/DISTRIBUZIONE_WINDOWS.md`. Il repo deve restare **privato** (motore Vittoria proprietario).
+
+Key env vars: `TANGIBLE_LAB_DATA_DIR`, `TANGIBLE_LAB_SECRET`, `TANGIBLE_LAB_SINGLE_USER`.
 
 ## Conventions
 

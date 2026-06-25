@@ -1002,80 +1002,6 @@
     return String(val);
   }
 
-  // ---- Cambia password modal ----
-  function openChangePasswordModal(forced = false) {
-    // Rimuovo eventuale modal precedente
-    document.querySelector(".pw-modal-bg")?.remove();
-    const bg = el("div", {class:"pw-modal-bg"});
-    const modal = el("div", {class:"pw-modal"});
-
-    const title = forced
-      ? "Imposta una nuova password"
-      : "Cambia password";
-    const subtitle = forced
-      ? "Al primo accesso devi sostituire la password iniziale che ti è stata data."
-      : "Inserisci la password attuale e quella nuova (minimo 6 caratteri).";
-
-    modal.appendChild(el("h3", {style:{margin:"0 0 4px",fontSize:"15px",color:"var(--ink)"}},
-      el("span", {class:"msi", style:{verticalAlign:"-3px",marginRight:"4px",color:"var(--primary)"}}, "key"),
-      " ", title));
-    modal.appendChild(el("p", {class:"muted", style:{margin:"0 0 12px",fontSize:"12px",lineHeight:"1.4"}}, subtitle));
-
-    const errBox = el("div", {class:"pw-err"});
-    const inputCurr = el("input", {type:"password", autocomplete:"current-password", placeholder:"Password attuale"});
-    const inputNew  = el("input", {type:"password", autocomplete:"new-password", placeholder:"Nuova password (min. 6 caratteri)"});
-    const inputConf = el("input", {type:"password", autocomplete:"new-password", placeholder:"Conferma nuova password"});
-
-    modal.appendChild(el("label", {class:"pw-label"}, "Password attuale", inputCurr));
-    modal.appendChild(el("label", {class:"pw-label"}, "Nuova password", inputNew));
-    modal.appendChild(el("label", {class:"pw-label"}, "Conferma nuova password", inputConf));
-    modal.appendChild(errBox);
-
-    const closeBtn = el("button", {class:"btn ghost", type:"button"},
-      el("span", {class:"msi"}, "close"), " ", forced ? "Esci" : "Annulla");
-    const submitBtn = el("button", {class:"btn primary-cta", type:"button"},
-      el("span", {class:"msi"}, "save"), " Aggiorna password");
-    modal.appendChild(el("div", {class:"pw-actions"}, closeBtn, submitBtn));
-
-    const close = () => bg.remove();
-    closeBtn.addEventListener("click", async () => {
-      if (forced) {
-        // L'utente non vuole cambiare ora: fa logout per non restare bloccato
-        if (!confirm("Senza cambiare password verrai disconnesso. Procedo?")) return;
-        try { await fetch("/lab/api/logout", {method:"POST", credentials:"include"}); } catch {}
-        location.href = "/lab/login.html";
-        return;
-      }
-      close();
-    });
-    bg.addEventListener("click", e => { if (e.target === bg && !forced) close(); });
-
-    submitBtn.addEventListener("click", async () => {
-      errBox.textContent = "";
-      const curr = inputCurr.value;
-      const newPw = inputNew.value;
-      const conf = inputConf.value;
-      if (!curr || !newPw || !conf) { errBox.textContent = "Compila tutti i campi."; return; }
-      if (newPw.length < 6) { errBox.textContent = "La nuova password deve avere almeno 6 caratteri."; return; }
-      if (newPw !== conf) { errBox.textContent = "Le due nuove password non corrispondono."; return; }
-      if (newPw === curr) { errBox.textContent = "La nuova password deve essere diversa dalla precedente."; return; }
-      submitBtn.disabled = true;
-      try {
-        await fetchJSON("/lab/api/me/password", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({current: curr, new: newPw})});
-        STATE.me.must_change_password = false;
-        close();
-        toast("Password aggiornata", "ok");
-      } catch (e) {
-        errBox.textContent = e.message.replace(/^\d+:\s*/, "");
-        submitBtn.disabled = false;
-      }
-    });
-
-    bg.appendChild(modal);
-    document.body.appendChild(bg);
-    setTimeout(() => inputCurr.focus(), 50);
-  }
-
   function statTile(label, value, icon) {
     return el("div", {class:"stat-tile"},
       icon ? el("span", {class:"msi stat-ico"}, icon) : null,
@@ -2397,7 +2323,6 @@
         adminLink.innerHTML = '<span class="msi">build</span><span class="home-link-lbl">Strumenti</span>';
         headerActions.insertBefore(adminLink, headerActions.children[0]);
       }
-      // (logout ora vive nel dropdown del chip utente)
     }
 
     bindAll();
