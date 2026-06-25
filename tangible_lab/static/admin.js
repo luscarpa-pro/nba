@@ -31,24 +31,16 @@
     try { STATE.me = await fetchJSON("/lab/api/me"); }
     catch { return; }
     if (STATE.me.role !== "admin") { location.href = "/lab/"; return; }
-    $("#me-name").textContent = STATE.me.username + " · admin";
-    $("#logout-btn").addEventListener("click", async () => {
-      await fetch("/lab/api/logout", {method:"POST", credentials:"include"});
-      location.href = "/lab/login.html";
-    });
+    $("#me-name").textContent = STATE.me.username;
     $$('.admin-tabs button').forEach(b => b.addEventListener("click", () => switchTab(b.dataset.tab)));
     $("#modal-bg").addEventListener("click", e => { if (e.target.id === "modal-bg") closeModal(); });
-    switchTab("dashboard");
+    switchTab("export");
   }
 
   function switchTab(t) {
     $$('.admin-tabs button').forEach(b => b.classList.toggle("active", b.dataset.tab === t));
-    ["dashboard","users","cases","reviews","export"].forEach(x => $("#tab-"+x).classList.toggle("hide", x !== t));
-    if (t === "dashboard") renderDashboard();
-    if (t === "users") renderUsers();
-    if (t === "cases") renderCases();
-    if (t === "reviews") renderReviews();
-    if (t === "export") renderExport();
+    $("#tab-export").classList.remove("hide");
+    renderExport();
   }
 
   function renderExport() {
@@ -85,6 +77,55 @@
 
     card.appendChild(body);
     box.appendChild(card);
+
+    // --- Importa dataset ---
+    const dsCard = el("div", {class:"section-block"});
+    dsCard.appendChild(el("div", {class:"section-head"},
+      el("span", {class:"msi section-ico"}, "database"),
+      el("h3", {}, "Importa dataset")
+    ));
+    const dsFile = el("input", {type:"file", accept:".json"});
+    const dsBtn = el("button", {class:"btn", onclick: async () => {
+      const f = dsFile.files && dsFile.files[0];
+      if (!f) { toast("Seleziona un file dataset.json", "err"); return; }
+      if (!confirm("L'import SOSTITUISCE il dataset corrente. Procedere?")) return;
+      let obj;
+      try { obj = JSON.parse(await f.text()); }
+      catch { toast("File JSON non valido", "err"); return; }
+      try {
+        const r = await fetchJSON("/lab/admin/dataset/import", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(obj),
+        });
+        toast(`Importati ${r.clients} clienti e ${r.leads} lead`, "ok");
+      } catch (e) { toast(e.message, "err"); }
+    }}, "Importa");
+    dsCard.appendChild(el("div", {class:"section-body", style:{display:"flex", gap:"12px", alignItems:"center", flexWrap:"wrap"}},
+      el("span", {class:"muted"}, "Carica il dataset.json reale (resta solo su questo PC)."),
+      dsFile, dsBtn));
+    box.appendChild(dsCard);
+
+    // --- Reseed scenari Check-up ---
+    const tools = el("div", {class:"section-block"});
+    tools.appendChild(el("div", {class:"section-head"},
+      el("span", {class:"msi section-ico"}, "health_and_safety"),
+      el("h3", {}, "Scenari Check-up")
+    ));
+    const seedBtn = el("button", {class:"btn", onclick: async () => {
+      seedBtn.disabled = true;
+      try {
+        const r = await fetchJSON("/lab/admin/checkup/reseed", {method:"POST"});
+        toast(`Scenari Check-up: ${r.created} creati, ${r.skipped} già presenti`, "ok");
+      } catch (e) { toast(e.message, "err"); }
+      finally { seedBtn.disabled = false; }
+    }}, el("span", {class:"msi"}, "health_and_safety"), " Carica scenari demo Check-up");
+    tools.appendChild(el("div", {class:"section-body"},
+      el("div", {class:"muted", style:{fontSize:"12px",marginBottom:"10px"}},
+        "Popola il Check-up con 10 scenari demo. Idempotente: salta quelli già presenti."),
+      seedBtn
+    ));
+    box.appendChild(tools);
   }
 
   // ============ DASHBOARD ============
