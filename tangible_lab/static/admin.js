@@ -127,6 +127,20 @@
       seedBtn
     ));
     box.appendChild(tools);
+
+    // --- Link utili (ex header) ---
+    const links = el("div", {class:"section-block"});
+    links.appendChild(el("div", {class:"section-head"},
+      el("span", {class:"msi section-ico"}, "more_horiz"),
+      el("h3", {}, "Altro")));
+    links.appendChild(el("div", {class:"section-body", style:{display:"flex", gap:"14px", flexWrap:"wrap"}},
+      el("a", {class:"btn ghost", href:"/", title:"UI originale del backend Vittoria (sola lettura)",
+        style:{textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"6px"}},
+        el("span", {class:"msi"}, "code"), " Tool originale Vittoria"),
+      el("a", {class:"btn ghost", href:"/lab/?tutorial=1", title:"Rivedi il tutorial iniziale",
+        style:{textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"6px"}},
+        el("span", {class:"msi"}, "school"), " Rivedi tutorial")));
+    box.appendChild(links);
   }
 
   function closeModal() { $("#modal-bg").classList.remove("open"); }
