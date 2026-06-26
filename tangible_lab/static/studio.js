@@ -33,6 +33,7 @@
       { k:"unpaid_days", label:"Giorni di insoluto (lista, virgole)", type:"numArray" },
       { k:"cross_sell_gaps", label:"Gap di copertura (legacy/fallback)", type:"enumArray",
         help:"Per i record reali è derivato da insurance_needs; usato solo se quel campo è assente",
+        hideIf: d => Array.isArray(d && d.insurance_needs) && d.insurance_needs.length > 0,
         opts:["CASA","INFORTUNI","MALATTIA","VITA_PROTEZIONE","PREVIDENZA_COMPLEMENTARE","RESPONSABILITA_PROFESSIONALE","VITA_PRIVATA_RESPONSABILITA_CIVILE","VITA_PRIVATA_ANIMALI_DOMESTICI","VITA_PRIVATA_TUTELA_LEGALE","VITA_PRIVATA_MICROMOBILITA","VITA_PRIVATA_VIAGGI"] }
     ]},
     { title: "Polizze", icon:"shield", arrayKey:"policies", itemTitle:"Polizza", itemFields:[
@@ -281,7 +282,7 @@
         bodyEl.appendChild(renderArraySection(sec, data));
       } else if (sec.fields) {
         const grid = el("div", {class:"fld-grid"});
-        sec.fields.forEach(f => grid.appendChild(renderField(f, data)));
+        sec.fields.forEach(f => { if (f.hideIf && f.hideIf(data)) return; grid.appendChild(renderField(f, data)); });
         if (sec.collapsed) {
           const acc = el("details", {class:"acc"}, el("summary", {}, "Mostra/nascondi sezione avanzata"), el("div", {class:"body"}, grid));
           bodyEl.appendChild(acc);
@@ -993,6 +994,7 @@
   function renderFieldsView(fields, data) {
     const grid = el("dl", {class:"view-grid"});
     fields.forEach(f => {
+      if (f.hideIf && f.hideIf(data)) return;
       const val = data[f.k];
       const empty = (val == null || val === "" || (Array.isArray(val) && val.length === 0));
       grid.appendChild(el("div", {class:"view-row"},
