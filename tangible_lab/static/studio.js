@@ -2115,88 +2115,6 @@
     } catch (e) { toast("Errore: " + e.message, "err"); }
   }
 
-  // ============================== Excel I/O ==============================
-  const CLIENT_FLAT_KEYS = ["client_id","email","phone","preferred_channel","whatsapp_enabled","last_contact_days","birthday_days","anniversary_days","customer_tenure_years","active_policies_count","checkup_done","viva_enrolled","viva_points","viva_points_expiring","unpaid_days","cross_sell_gaps","agency_profitability","company_profitability_sp","auto_premium_normalized","auto_guarantees_weight_vct","non_auto_premium_total"];
-  const LEAD_FLAT_KEYS   = ["lead_id","product","marketing_consent","created_hours_ago","last_contact_days","quote_premium","coverage_start_days","email","phone","preferred_channel","whatsapp_enabled"];
-
-  function downloadTemplate() {
-    if (typeof XLSX === "undefined") { toast("Libreria Excel non caricata", "err"); return; }
-    const cliRows = [CLIENT_FLAT_KEYS, CLIENT_FLAT_KEYS.map(k => exampleVal(k, "client"))];
-    const leadRows = [LEAD_FLAT_KEYS, LEAD_FLAT_KEYS.map(k => exampleVal(k, "lead"))];
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(cliRows), "Clienti");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(leadRows), "Lead");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
-      ["Istruzioni"],
-      ["Compila le righe sotto la riga di intestazione. Gli array (unpaid_days, cross_sell_gaps) vanno separati da pipe |, es: CASA|INFORTUNI|VITA_PROTEZIONE"],
-      ["Per polizze, sinistri, campagne e preventivi: aggiungili dopo l'import direttamente nel form di modifica."],
-      ["preferred_channel: PHONE|EMAIL|SMS|WHATSAPP (vuoto = null)."],
-      ["whatsapp_enabled / checkup_done / viva_enrolled / marketing_consent: TRUE / FALSE / vuoto (null)."],
-      ["I campi numerici vuoti vengono interpretati come null."]
-    ]), "Istruzioni");
-    XLSX.writeFile(wb, `nba_studio_template.xlsx`);
-    toast("Template scaricato", "ok");
-  }
-  function exampleVal(k, type) {
-    if (k === "client_id") return "C999";
-    if (k === "lead_id") return "L999";
-    if (k === "product") return "AUTO";
-    if (k === "marketing_consent") return true;
-    if (k === "created_hours_ago") return 24;
-    if (k === "email") return "esempio@email.it";
-    if (k === "phone") return "3331234567";
-    if (k === "preferred_channel") return "EMAIL";
-    if (k.endsWith("_days")) return null;
-    if (k.endsWith("_count") || k === "viva_points") return null;
-    if (k === "unpaid_days") return "";
-    if (k === "cross_sell_gaps") return "CASA|INFORTUNI";
-    return null;
-  }
-  function importExcel(file) {
-    if (typeof XLSX === "undefined") { toast("Libreria Excel non caricata", "err"); return; }
-    const fr = new FileReader();
-    fr.onload = e => {
-      try {
-        const wb = XLSX.read(e.target.result, {type:"array"});
-        let nClients = 0, nLeads = 0;
-        const tryParseSheet = (name, type, flatKeys) => {
-          const ws = wb.Sheets[name] || wb.Sheets[name.toLowerCase()] || wb.Sheets[name.toUpperCase()];
-          if (!ws) return;
-          const rows = XLSX.utils.sheet_to_json(ws, {defval:null});
-          rows.forEach(r => {
-            const rec = emptyRecord(type);
-            flatKeys.forEach(k => {
-              if (r[k] === undefined) return;
-              const v = r[k];
-              if (k === "unpaid_days" || k === "cross_sell_gaps") {
-                if (v == null || v === "") rec[k] = [];
-                else rec[k] = String(v).split("|").map(s => s.trim()).filter(Boolean).map(s => k === "unpaid_days" ? +s : s).filter(x => k === "unpaid_days" ? !isNaN(x) : true);
-              } else if (k === "whatsapp_enabled" || k === "checkup_done" || k === "viva_enrolled" || k === "marketing_consent") {
-                rec[k] = (v === null || v === "") ? null : (v === true || String(v).toUpperCase() === "TRUE" || v === 1);
-              } else if (v === "") {
-                rec[k] = null;
-              } else {
-                rec[k] = v;
-              }
-            });
-            const id = type === "client" ? rec.client_id : rec.lead_id;
-            if (!id) return;
-            const now = new Date().toISOString();
-            STATE.saved.push({ id: uid(), name: `Import ${type === "client" ? "Cliente" : "Lead"} ${id}`, type, record: rec, notes:"", createdAt:now, updatedAt:now });
-            if (type === "client") nClients++; else nLeads++;
-          });
-        };
-        tryParseSheet("Clienti", "client", CLIENT_FLAT_KEYS);
-        tryParseSheet("Lead",    "lead",   LEAD_FLAT_KEYS);
-        saveSavedToLS();
-        STATE.folder = "saved"; updateFolderActive();
-        STATE.items = buildItems(); updateFolderCounts(); renderListPane();
-        toast(`Importati: ${nClients} cli + ${nLeads} lead`, "ok");
-      } catch (err) { toast("Import fallito: " + err.message, "err"); }
-    };
-    fr.readAsArrayBuffer(file);
-  }
-
   // ============================== events + init ==============================
   function updateFolderActive() {
     $$('.ml-folders li').forEach(li => li.classList.toggle("active", li.dataset.folder === STATE.folder));
@@ -2231,9 +2149,6 @@
       if (t !== "client" && t !== "lead") { toast("Tipo non valido", "err"); return; }
       openNewDraft(t);
     });
-    $("#ana-template").addEventListener("click", downloadTemplate);
-    $("#ana-import").addEventListener("click", () => $("#xlsx-file").click());
-    $("#xlsx-file").addEventListener("change", e => { const f = e.target.files[0]; if (f) importExcel(f); e.target.value = ""; });
     // server URL chip (optional in header)
     const serverChip = $("#server-url"); if (serverChip) serverChip.textContent = location.origin;
     // sidebar collapse toggle (persisted; initial class is applied by the
@@ -2255,8 +2170,6 @@
     // Chiudere drawer quando si seleziona una folder sul mobile
     $$('.ml-folders li[data-folder]').forEach(li => li.addEventListener("click", closeMobileSidebar));
     $("#ana-new")?.addEventListener("click", closeMobileSidebar);
-    $("#ana-import")?.addEventListener("click", closeMobileSidebar);
-    $("#ana-template")?.addEventListener("click", closeMobileSidebar);
   }
 
   async function init() {
