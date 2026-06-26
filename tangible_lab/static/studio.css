@@ -1232,3 +1232,9 @@ input.toggle, select.tristate{appearance:none}
 .wts-body{padding:14px 22px;overflow:auto;flex:1}
 .wts-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 22px;border-top:1px solid var(--border-soft)}
 .wts-foot-right{display:flex;gap:8px}
+
+/* ============ Card comprimibile (es. Perché questa priorità) ============ */
+.section-block.collapsible .section-head-toggle{cursor:pointer}
+.section-block.collapsible .collapse-caret{margin-left:auto;transition:transform .15s;color:var(--muted)}
+.section-block.collapsible.collapsed .section-body{display:none}
+.section-block.collapsible.collapsed .collapse-caret{transform:rotate(-90deg)}

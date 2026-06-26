@@ -1051,14 +1051,16 @@
       )
     ));
 
-    // Card 2: Perché questa priorità
-    wrap.appendChild(el("div", {class:"section-block"},
-      el("div", {class:"section-head"},
-        el("span", {class:"msi section-ico"}, "psychology"),
-        el("h3", {}, "Perché questa priorità?")
-      ),
-      el("div", {class:"section-body"}, renderExplanation(out))
-    ));
+    // Card 2: Perché questa priorità (comprimibile, chiusa di default)
+    const whyCard = el("div", {class:"section-block collapsible collapsed"});
+    const whyHead = el("div", {class:"section-head section-head-toggle"},
+      el("span", {class:"msi section-ico"}, "psychology"),
+      el("h3", {}, "Perché questa priorità?"),
+      el("span", {class:"msi collapse-caret"}, "expand_more"));
+    whyHead.addEventListener("click", () => whyCard.classList.toggle("collapsed"));
+    whyCard.appendChild(whyHead);
+    whyCard.appendChild(el("div", {class:"section-body"}, renderExplanation(out)));
+    wrap.appendChild(whyCard);
 
     // Card 3: Azione principale (PRIMARY)
     if (primary.length) {
