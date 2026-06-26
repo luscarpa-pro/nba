@@ -614,7 +614,6 @@
     STATE.lastBreakdown = null;
     STATE.profileEdit = false;
     STATE.profileBackup = null;
-    initCmpFromConfig();
     renderListPane();
     renderDetail(it);
     document.documentElement.classList.add("has-selection");
@@ -624,11 +623,10 @@
   function initCmpFromConfig() {
     const cfg = STATE.config || {};
     const getV = x => (x && typeof x === "object" && "value" in x) ? x.value : x;
-    const wkey = STATE.selected?.type === "lead" ? "lead_weights" : "client_weights";
-    const w = cfg[wkey] || {};
+    const w = cfg["client_weights"] || {};
     STATE.cmpWeights = {};
-    weightFactorsFor(STATE.selected?.type).forEach(f => {
-      STATE.cmpWeights[f.k] = getV(w[f.k]) ?? (1 / weightFactorsFor(STATE.selected?.type).length);
+    weightFactorsFor("client").forEach(f => {
+      STATE.cmpWeights[f.k] = getV(w[f.k]) ?? (1 / weightFactorsFor("client").length);
     });
     const t = cfg.tiers || {};
     STATE.cmpTiers = {
@@ -875,9 +873,7 @@
       el("button", {class:"dtab", "data-tab":"nba", onclick:()=>switchDetailTab("nba")},
         el("span", {class:"msi"}, "auto_awesome"), " NBA"),
       el("button", {class:"dtab", "data-tab":"profile", onclick:()=>switchDetailTab("profile")},
-        el("span", {class:"msi"}, "badge"), " Profilo"),
-      el("button", {class:"dtab", "data-tab":"compare", onclick:()=>switchDetailTab("compare")},
-        el("span", {class:"msi"}, "tune"), " Confronta pesature")
+        el("span", {class:"msi"}, "badge"), " Profilo")
     );
     head.appendChild(tabsBar);
     pane.appendChild(head);
@@ -898,11 +894,6 @@
     nbaPane.appendChild(resultBox);
     body.appendChild(nbaPane);
 
-    // ---- Compare tab pane ----
-    const comparePane = el("div", {class:"tab-pane", "data-tab":"compare"});
-    comparePane.appendChild(buildComparePane());
-    body.appendChild(comparePane);
-
     // ---- Profile tab pane ----
     const profilePane = el("div", {class:"tab-pane", "data-tab":"profile"});
     profilePane.appendChild(buildProfileIntro());
@@ -917,7 +908,7 @@
 
     // initial tab: new records open on Profilo, others restore from LS or default NBA
     const tabFromLS = localStorage.getItem(LS_TAB);
-    const valid = ["nba","profile","compare"];
+    const valid = ["nba","profile"];
     STATE.detailTab = isNew ? "profile" : (valid.includes(tabFromLS) ? tabFromLS : "nba");
     syncDetailTab();
   }
@@ -1777,7 +1768,7 @@
       try { return JSON.parse(STATE.cmpJson); } catch { return null; }
     }
     const cfg = deepClone(STATE.config || {});
-    const type = STATE.selected?.type || "client";
+    const type = "client";
     const wkey = type === "lead" ? "lead_weights" : "client_weights";
     cfg[wkey] = cfg[wkey] || {};
     weightFactorsFor(type).forEach(f => {
