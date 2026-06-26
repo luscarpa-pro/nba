@@ -235,6 +235,16 @@ def list_comments_for_target(target_key: str) -> List[Dict[str, Any]]:
     return [dict(r) for r in rows]
 
 
+def list_all_comments_export() -> List[Dict[str, Any]]:
+    with get_conn() as conn:
+        rows = conn.execute(
+            """SELECT c.id, c.target_key, u.username, c.body, c.created_at, c.updated_at
+               FROM comments c JOIN users u ON u.id = c.user_id
+               ORDER BY c.created_at ASC"""
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
 def create_comment(user_id: int, target_key: str, body: str) -> Dict[str, Any]:
     with get_conn() as conn:
         cur = conn.execute(

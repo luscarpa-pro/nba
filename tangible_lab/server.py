@@ -597,6 +597,19 @@ def admin_export_state(request: Request):
     for i, w in enumerate([7, 16, 24, 9, 9, 12, 13, 22, 22], start=1):
         ws3.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
 
+    # --- Sheet 4: Note (commenti) ---
+    ws4 = wb.create_sheet("Note")
+    ws4.append(["id", "utente", "target_key", "kind", "tipo", "record_id",
+                "nota", "creato", "aggiornato"])
+    style_header(ws4, 9)
+    for r in models.list_all_comments_export():
+        nba = _nba_for_target(r["target_key"]) or ("", "", "", "", "", "", "")
+        kind, rec_type, rec_id, *_ = nba
+        ws4.append([r["id"], r["username"], r["target_key"], kind, rec_type, rec_id,
+                    r["body"], r["created_at"], r["updated_at"]])
+    for i, w in enumerate([7, 16, 24, 9, 9, 12, 70, 22, 22], start=1):
+        ws4.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
+
     buf = _io.BytesIO()
     wb.save(buf)
     buf.seek(0)

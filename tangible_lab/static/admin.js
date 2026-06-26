@@ -53,11 +53,12 @@
     const body = el("div", {class:"section-body", style:{display:"flex",flexDirection:"column",gap:"14px"}});
 
     body.appendChild(el("p", {class:"muted", style:{margin:"0",fontSize:"13px",lineHeight:"1.5"}},
-      "Genera un file Excel multi-foglio con lo stato corrente dei test. Il file contiene 3 fogli:"));
+      "Genera un file Excel multi-foglio con lo stato corrente dei test. Il file contiene 4 fogli:"));
     body.appendChild(el("ul", {style:{margin:"0",paddingLeft:"22px",fontSize:"13px",color:"var(--ink2)",lineHeight:"1.6"}},
       el("li", {}, el("strong", {}, "Riepilogo"), " — KPI aggregati (utenti, giudizi per tipo, casi, commenti) + tabella attività per utente"),
-      el("li", {}, el("strong", {}, "Stato per anagrafica"), " — una riga per ogni anagrafica analizzata, con NBA (tier/score/strategia/azione principale), giudizi ricevuti, commenti, data ultimo giudizio"),
-      el("li", {}, el("strong", {}, "Giudizi"), " — lista cronologica di tutti i giudizi espressi: utente, target, giudizio, date")
+      el("li", {}, el("strong", {}, "Stato per anagrafica"), " — una riga per ogni anagrafica analizzata, con NBA (tier/score/strategia/azione principale), giudizi ricevuti, n. note, data ultimo giudizio"),
+      el("li", {}, el("strong", {}, "Giudizi"), " — lista cronologica di tutti i giudizi espressi: utente, target, giudizio, date"),
+      el("li", {}, el("strong", {}, "Note"), " — testo di tutte le note/commenti: utente, target, nota, date")
     ));
 
     body.appendChild(el("div", {style:{display:"flex",gap:"10px",marginTop:"6px",flexWrap:"wrap"}},
