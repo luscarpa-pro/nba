@@ -958,8 +958,8 @@
       resultBox.appendChild(renderResultCard(STATE.lastResult));
     } else {
       resultBox.appendChild(el("div", {class:"ml-not-run"},
-        el("span", {class:"msi"}, "play_arrow"),
-        " Premi “Esegui NBA” per calcolare la priorità per questa anagrafica."));
+        el("span", {class:"msi"}, "hourglass_empty"),
+        " Calcolo della priorità in corso…"));
     }
     nbaPane.appendChild(resultBox);
     body.appendChild(nbaPane);
