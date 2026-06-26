@@ -196,6 +196,7 @@
   const LS_TAB = "nba.lab.detail.tab";
   const LS_REVIEWS = "nba.lab.reviews";       // (residuale: solo per migrazione)
   const LS_HIDE_REVIEWED = "nba.lab.hideReviewed";
+  const LS_TUTORIAL = "nba.lab.tutorial.seen";
 
   // ============================== utils ==============================
   const $ = s => document.querySelector(s);
@@ -2172,6 +2173,45 @@
     $("#ana-new")?.addEventListener("click", closeMobileSidebar);
   }
 
+  // ============================== Tutorial di utilizzo iniziale ==============================
+  const TUTORIAL_STEPS = [
+    ["Benvenuto in NBA Studio", "Ambiente Tangible per testare e validare le raccomandazioni del motore NBA di Vittoria."],
+    ["Importa i dati", "L'app parte vuota: vai su Strumenti → Importa dataset e carica il file dataset.json."],
+    ["Esplora le anagrafiche", "Nella lista a sinistra trovi clienti e lead con tier e punteggio; filtra per tier o tipo dalla sidebar."],
+    ["Leggi la raccomandazione", "Selezionando un'anagrafica, nel pannello a destra vedi il Perché (i trigger), le Azioni consigliate e il breakdown del punteggio."],
+    ["Valuta ed esporta", "Dai un giudizio (ok / ko / incerto), aggiungi una Nota, poi da Strumenti → Scarica Excel esporti tutto per condividere le considerazioni."],
+  ];
+
+  function buildTutorialOverlay() {
+    if (document.getElementById("tut-overlay")) return;
+    const list = el("ol", {class:"tut-steps"},
+      ...TUTORIAL_STEPS.map(([t, d]) =>
+        el("li", {}, el("strong", {}, t), el("span", {}, " — " + d))));
+    const okBtn = el("button", {class:"btn primary-cta", type:"button"}, "Ho capito");
+    okBtn.addEventListener("click", () => hideTutorial(true));
+    const panel = el("div", {class:"tut-panel", role:"dialog", "aria-label":"Come iniziare"},
+      el("div", {class:"tut-head"}, el("span", {class:"msi"}, "school"), el("h2", {}, "Come iniziare")),
+      list,
+      el("div", {class:"tut-actions"}, okBtn));
+    const overlay = el("div", {id:"tut-overlay", class:"tut-overlay"}, panel);
+    overlay.addEventListener("click", e => { if (e.target === overlay) hideTutorial(true); });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && overlay.classList.contains("open")) hideTutorial(true);
+    });
+    document.body.appendChild(overlay);
+  }
+
+  function showTutorial() {
+    buildTutorialOverlay();
+    document.getElementById("tut-overlay").classList.add("open");
+  }
+
+  function hideTutorial(markSeen) {
+    const o = document.getElementById("tut-overlay");
+    if (o) o.classList.remove("open");
+    if (markSeen) localStorage.setItem(LS_TUTORIAL, "1");
+  }
+
   async function init() {
     // Check auth (redirect a login.html se non autenticato)
     try {
@@ -2228,6 +2268,14 @@
       guidaLink.title = "Guida — come funziona l'algoritmo NBA";
       guidaLink.innerHTML = '<span class="msi">menu_book</span><span class="home-link-lbl">Guida</span>';
       headerActions.insertBefore(guidaLink, headerActions.children[0]);
+      // Pulsante "?" — riapre il tutorial di utilizzo iniziale
+      const helpBtn = document.createElement("button");
+      helpBtn.className = "home-link";
+      helpBtn.type = "button";
+      helpBtn.title = "Come iniziare — tutorial";
+      helpBtn.innerHTML = '<span class="msi">help</span><span class="home-link-lbl">Tutorial</span>';
+      helpBtn.addEventListener("click", () => showTutorial());
+      headerActions.insertBefore(helpBtn, headerActions.children[0]);
       if (STATE.me.role === "admin") {
         const adminLink = document.createElement("a");
         adminLink.className = "home-link";
@@ -2239,6 +2287,8 @@
     }
 
     bindAll();
+    buildTutorialOverlay();
+    if (!localStorage.getItem(LS_TUTORIAL)) showTutorial();
     await loadSavedFromAPI();
     loadSnapshotsFromLS();
     await loadReviewsFromAPI();

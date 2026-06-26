@@ -1185,3 +1185,14 @@ input.toggle, select.tristate{appearance:none}
   .review-btn .msi{font-size:14px}
   .summary-stats{grid-template-columns:1fr}
 }
+
+/* ============ Tutorial di benvenuto ============ */
+.tut-overlay{display:none;position:fixed;inset:0;background:rgba(15,17,32,.5);backdrop-filter:blur(2px);z-index:1100;align-items:center;justify-content:center;padding:16px}
+.tut-overlay.open{display:flex}
+.tut-panel{background:#fff;border-radius:14px;padding:22px 24px;max-width:520px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 16px 50px rgba(15,17,32,.25);display:flex;flex-direction:column;gap:14px}
+.tut-head{display:flex;align-items:center;gap:10px}
+.tut-head h2{margin:0;font-size:18px;color:var(--ink)}
+.tut-head .msi{color:var(--primary);font-size:24px}
+.tut-steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px;font-size:14px;line-height:1.5;color:var(--ink2)}
+.tut-steps strong{color:var(--ink)}
+.tut-actions{display:flex;justify-content:flex-end;margin-top:4px}
