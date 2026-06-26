@@ -748,6 +748,9 @@
       panel.appendChild(el("div", {class:"wiz-head"}, el("h2", {}, "Nuova anagrafica di test")));
       const pick = (t) => {
         WIZ.type = t; WIZ.record = emptyRecord(t); WIZ.step = 0;
+        // Email di default: il motore sopprime l'NBA se manca sia email che telefono
+        // (contactability). Così lo scenario è "eleggibile"; l'utente può cambiarla.
+        WIZ.record.email = "test@esempio.it";
         if (t === "client") WIZ.record.client_id = "C" + String(Date.now()).slice(-6);
         else WIZ.record.lead_id = "L" + String(Date.now()).slice(-6);
         renderWizard();
@@ -776,9 +779,9 @@
       if (step.optional) bodyEl.appendChild(el("div", {class:"muted", style:{fontSize:"12px",marginTop:"8px"}}, "Step facoltativo — puoi saltarlo."));
     } else {
       bodyEl.appendChild(el("div", {id:"wiz-preview", class:"muted"}, "Calcolo anteprima…"));
-      wizardPreview();
     }
     panel.appendChild(bodyEl);
+    if (isSummary) wizardPreview();  // dopo l'append: #wiz-preview ora è nel DOM
     const foot = el("div", {class:"wiz-foot"});
     foot.appendChild(el("button", {class:"btn ghost", type:"button", onclick:closeWizard}, "Annulla"));
     const right = el("div", {class:"wiz-foot-right"});
