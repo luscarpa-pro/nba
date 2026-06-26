@@ -44,6 +44,39 @@
 
   function renderExport() {
     const box = $("#tab-export"); box.innerHTML = "";
+    const onboarding = new URLSearchParams(location.search).get("onboarding") === "1";
+
+    // --- Importa dataset (blocco principale, in cima) ---
+    const dsCard = el("div", {class:"section-block" + (onboarding ? " onboarding-focus" : "")});
+    dsCard.appendChild(el("div", {class:"section-head"},
+      el("span", {class:"msi section-ico"}, "database"),
+      el("h3", {}, "Importa dataset")
+    ));
+    const dsFile = el("input", {type:"file", accept:".json"});
+    const dsBtn = el("button", {class:"btn primary-cta", style:{display:"inline-flex",alignItems:"center",gap:"6px",padding:"10px 18px"}, onclick: async () => {
+      const f = dsFile.files && dsFile.files[0];
+      if (!f) { toast("Seleziona un file dataset.json", "err"); return; }
+      if (!confirm("L'import SOSTITUISCE il dataset corrente. Procedere?")) return;
+      let obj;
+      try { obj = JSON.parse(await f.text()); }
+      catch { toast("File JSON non valido", "err"); return; }
+      try {
+        const r = await fetchJSON("/lab/admin/dataset/import", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(obj),
+        });
+        toast(`Importati ${r.clients} clienti e ${r.leads} lead`, "ok");
+        if (onboarding) setTimeout(() => { location.href = "/lab/"; }, 1000);
+      } catch (e) { toast(e.message, "err"); }
+    }}, el("span", {class:"msi"}, "upload"), " Importa dataset");
+    dsCard.appendChild(el("div", {class:"section-body", style:{display:"flex", flexDirection:"column", gap:"12px"}},
+      el("p", {class:"muted", style:{margin:"0",fontSize:"13px",lineHeight:"1.55"}},
+        "Carica il file dataset.json reale (clienti e lead Vittoria). I dati restano solo su questo computer e non vengono mai caricati online. L'import sostituisce il dataset corrente."),
+      el("div", {style:{display:"flex", gap:"12px", alignItems:"center", flexWrap:"wrap"}}, dsFile, dsBtn)));
+    box.appendChild(dsCard);
+
+    // --- Esporta stato dei test ---
     const card = el("div", {class:"section-block"});
     card.appendChild(el("div", {class:"section-head"},
       el("span", {class:"msi section-ico"}, "file_download"),
@@ -80,34 +113,6 @@
 
     card.appendChild(body);
     box.appendChild(card);
-
-    // --- Importa dataset ---
-    const dsCard = el("div", {class:"section-block"});
-    dsCard.appendChild(el("div", {class:"section-head"},
-      el("span", {class:"msi section-ico"}, "database"),
-      el("h3", {}, "Importa dataset")
-    ));
-    const dsFile = el("input", {type:"file", accept:".json"});
-    const dsBtn = el("button", {class:"btn", onclick: async () => {
-      const f = dsFile.files && dsFile.files[0];
-      if (!f) { toast("Seleziona un file dataset.json", "err"); return; }
-      if (!confirm("L'import SOSTITUISCE il dataset corrente. Procedere?")) return;
-      let obj;
-      try { obj = JSON.parse(await f.text()); }
-      catch { toast("File JSON non valido", "err"); return; }
-      try {
-        const r = await fetchJSON("/lab/admin/dataset/import", {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify(obj),
-        });
-        toast(`Importati ${r.clients} clienti e ${r.leads} lead`, "ok");
-      } catch (e) { toast(e.message, "err"); }
-    }}, "Importa");
-    dsCard.appendChild(el("div", {class:"section-body", style:{display:"flex", gap:"12px", alignItems:"center", flexWrap:"wrap"}},
-      el("span", {class:"muted"}, "Carica il dataset.json reale (resta solo su questo PC)."),
-      dsFile, dsBtn));
-    box.appendChild(dsCard);
 
     // --- Reseed scenari Check-up ---
     const tools = el("div", {class:"section-block"});

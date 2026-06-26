@@ -2581,43 +2581,150 @@
     $("#ana-new")?.addEventListener("click", closeMobileSidebar);
   }
 
-  // ============================== Tutorial di utilizzo iniziale ==============================
-  const TUTORIAL_STEPS = [
-    ["Benvenuto in NBA Studio", "Ambiente Tangible per testare e validare le raccomandazioni del motore NBA di Vittoria."],
-    ["Importa i dati", "L'app parte vuota: vai su Strumenti → Importa dataset e carica il file dataset.json."],
-    ["Esplora le anagrafiche", "Nella lista a sinistra trovi clienti e lead con tier e punteggio; filtra per tier o tipo dalla sidebar."],
-    ["Leggi la raccomandazione", "Selezionando un'anagrafica, nel pannello a destra vedi il Perché (i trigger), le Azioni consigliate e il breakdown del punteggio."],
-    ["Valuta ed esporta", "Dai un giudizio (ok / ko / incerto), aggiungi una Nota, poi da Strumenti → Scarica Excel esporti tutto per condividere le considerazioni."],
+  // ============================== Tour guidato di onboarding ==============================
+  // Tappe del tour completo (con dataset). Ogni step: {target, fallback?, icon, title, body}.
+  const TOUR_STEPS = [
+    { target:null, icon:"auto_awesome", title:"Benvenuto in NBA Studio",
+      body:"Il motore NBA (Next Best Action) di Vittoria assegna a ogni cliente e lead una priorità e suggerisce l'azione migliore e il canale con cui contattarlo. Qui in Tangible Lab mettiamo alla prova quelle raccomandazioni: le leggiamo, le giudichiamo e le esportiamo." },
+    { target:"aside.ml-sidebar", icon:"inbox", title:"Le cartelle",
+      body:"Sfoglia tutte le anagrafiche oppure filtra per priorità (da CRITICAL a LOW) o per tipo (clienti o lead)." },
+    { target:".ml-search-row", fallback:".ml-list-head", icon:"search", title:"Ricerca e filtri",
+      body:"Cerca per ID, trigger o nome del caso. Con “Filtri” restringi la lista per giudizio dell'operatore (Corretto/Sbagliato/Da verificare/non giudicati)." },
+    { target:".ml-side-actions", icon:"auto_fix_high", title:"Messaggi rivisti e nuovi casi",
+      body:"Attiva “Messaggi rivisti” per vedere i testi delle azioni nella versione riscritta dal cliente, al posto di quelli grezzi del motore. Da “Nuova anagrafica” crei casi di test." },
+    { target:"section.ml-list-pane", fallback:".ml-list", icon:"list", title:"La lista",
+      body:"Ogni riga è un'anagrafica con la sua priorità, il punteggio e — se l'hai già valutata — il badge del giudizio. Selezionala per aprirne il dettaglio." },
+    { target:".detail-tabs", fallback:"#ml-detail", icon:"badge", title:"Il dettaglio: NBA e Profilo",
+      body:"Nella tab NBA trovi il “Perché” (i trigger che hanno attivato la raccomandazione), le azioni consigliate con il canale, e la composizione del punteggio. In Profilo i dati dell'anagrafica." },
+    { target:".review-bar", fallback:"#ml-detail", icon:"rate_review", title:"Il tuo giudizio",
+      body:"Per ogni anagrafica esprimi un giudizio — Corretto, Sbagliato o Da verificare — e aggiungi una Nota. È il cuore della validazione." },
+    { target:"header.studio .actions", icon:"more_horiz", title:"Dati, Check-up e Guida",
+      body:"In alto: “Dati” per importare il dataset ed esportare lo stato dei test in Excel; “Check-up” il simulatore dei bisogni; “Guida” come funziona l'algoritmo." },
   ];
 
-  function buildTutorialOverlay() {
-    if (document.getElementById("tut-overlay")) return;
-    const list = el("ol", {class:"tut-steps"},
-      ...TUTORIAL_STEPS.map(([t, d]) =>
-        el("li", {}, el("strong", {}, t), el("span", {}, " — " + d))));
-    const okBtn = el("button", {class:"btn primary-cta", type:"button"}, "Ho capito");
-    okBtn.addEventListener("click", () => hideTutorial(true));
-    const panel = el("div", {class:"tut-panel", role:"dialog", "aria-label":"Come iniziare"},
-      el("div", {class:"tut-head"}, el("span", {class:"msi"}, "school"), el("h2", {}, "Come iniziare")),
-      list,
-      el("div", {class:"tut-actions"}, okBtn));
-    const overlay = el("div", {id:"tut-overlay", class:"tut-overlay"}, panel);
-    overlay.addEventListener("click", e => { if (e.target === overlay) hideTutorial(true); });
-    document.addEventListener("keydown", e => {
-      if (e.key === "Escape" && overlay.classList.contains("open")) hideTutorial(true);
-    });
-    document.body.appendChild(overlay);
+  let TOUR = null;
+  function tourReposition() { if (TOUR) tourGoTo(TOUR.i); }
+  function tourKey(e) {
+    if (!TOUR) return;
+    if (e.key === "Escape") endTour(true);
+    else if (e.key === "ArrowRight") tourNext();
+    else if (e.key === "ArrowLeft") tourGoTo(TOUR.i - 1);
   }
-
-  function showTutorial() {
-    buildTutorialOverlay();
-    document.getElementById("tut-overlay").classList.add("open");
-  }
-
-  function hideTutorial(markSeen) {
-    const o = document.getElementById("tut-overlay");
-    if (o) o.classList.remove("open");
+  function endTour(markSeen) {
+    document.querySelectorAll(".tour-spot,.tour-callout,.tour-backdrop").forEach(n => n.remove());
+    window.removeEventListener("resize", tourReposition);
+    document.removeEventListener("keydown", tourKey);
+    TOUR = null;
     if (markSeen) localStorage.setItem(LS_TUTORIAL, "1");
+  }
+  function startTour(steps) {
+    if (!steps || !steps.length) return;
+    endTour(false);
+    TOUR = { steps, i: 0 };
+    document.body.appendChild(el("div", {class:"tour-backdrop"}));
+    window.addEventListener("resize", tourReposition);
+    document.addEventListener("keydown", tourKey);
+    tourGoTo(0);
+  }
+  function tourNext() {
+    if (!TOUR) return;
+    if (TOUR.i >= TOUR.steps.length - 1) endTour(true);
+    else tourGoTo(TOUR.i + 1);
+  }
+  function buildTourCallout(step, i) {
+    const total = TOUR.steps.length;
+    const skip = el("button", {class:"tour-skip", type:"button", title:"Chiudi il tour"}, "Salta");
+    skip.addEventListener("click", () => endTour(true));
+    const kids = [
+      el("div", {class:"tour-head"},
+        el("span", {class:"msi"}, step.icon || "school"),
+        el("h2", {class:"tour-title"}, step.title),
+        skip),
+      el("p", {class:"tour-body"}, step.body),
+    ];
+    if (step.cta) {
+      const a = el("a", {class:"btn primary-cta tour-cta", href: step.cta.href},
+        el("span", {class:"msi"}, "upload"), step.cta.label);
+      kids.push(a);
+    }
+    const dots = el("div", {class:"tour-dots"},
+      ...TOUR.steps.map((_, k) => el("span", {class:"tour-dot" + (k === i ? " active" : "")})));
+    const back = el("button", {class:"btn ghost", type:"button"}, "Indietro");
+    back.disabled = (i === 0);
+    back.addEventListener("click", () => tourGoTo(i - 1));
+    const next = el("button", {class:"btn primary-cta", type:"button"}, i === total - 1 ? "Fine" : "Avanti");
+    next.addEventListener("click", () => tourNext());
+    const btns = el("div", {class:"tour-btns"}, total > 1 ? back : null, next);
+    kids.push(el("div", {class:"tour-foot"}, dots, btns));
+    return el("div", {class:"tour-callout", role:"dialog", "aria-label": step.title}, ...kids);
+  }
+  function positionCallout(callout, rect) {
+    if (!rect) { callout.classList.add("centered"); return; }
+    callout.classList.remove("centered");
+    const cw = callout.offsetWidth || 330, ch = callout.offsetHeight || 170;
+    const gap = 12, vw = window.innerWidth, vh = window.innerHeight;
+    let top, left;
+    if (rect.height > vh * 0.5) {
+      // target alto (sidebar/lista/dettaglio): callout accanto, centrato in verticale
+      left = rect.left + rect.width + gap;
+      if (left + cw > vw - gap) left = rect.left - cw - gap;
+      left = Math.max(gap, Math.min(vw - cw - gap, left));
+      top = Math.max(gap, Math.min(vh - ch - gap, rect.top + rect.height / 2 - ch / 2));
+    } else {
+      top = rect.top + rect.height + gap;
+      if (top + ch > vh - gap) top = rect.top - ch - gap;
+      top = Math.max(gap, top);
+      left = Math.max(gap, Math.min(vw - cw - gap, rect.left + rect.width / 2 - cw / 2));
+    }
+    callout.style.left = left + "px";
+    callout.style.top = top + "px";
+  }
+  function tourGoTo(i) {
+    if (!TOUR) return;
+    i = Math.max(0, Math.min(TOUR.steps.length - 1, i));
+    TOUR.i = i;
+    const step = TOUR.steps[i];
+    document.querySelectorAll(".tour-spot,.tour-callout").forEach(n => n.remove());
+    const backdrop = document.querySelector(".tour-backdrop");
+    const tgt = step.target ? (document.querySelector(step.target) || (step.fallback && document.querySelector(step.fallback))) : null;
+    let rect = null;
+    if (tgt) {
+      const r = tgt.getBoundingClientRect();
+      const pad = 6;
+      rect = { left: r.left - pad, top: r.top - pad, width: r.width + pad * 2, height: r.height + pad * 2 };
+      const spot = el("div", {class:"tour-spot"});
+      spot.style.left = rect.left + "px"; spot.style.top = rect.top + "px";
+      spot.style.width = rect.width + "px"; spot.style.height = rect.height + "px";
+      document.body.appendChild(spot);
+      if (backdrop) backdrop.classList.remove("dim");
+    } else if (backdrop) {
+      backdrop.classList.add("dim");
+    }
+    const callout = buildTourCallout(step, i);
+    document.body.appendChild(callout);
+    positionCallout(callout, rect);
+  }
+
+  // Decide se/come avviare il tour, dopo che i dati sono stati caricati.
+  function maybeStartTour() {
+    const forced = new URLSearchParams(location.search).get("tutorial") === "1";
+    if (forced) history.replaceState(null, "", location.pathname);
+    if (!forced && localStorage.getItem(LS_TUTORIAL)) return;
+    const hasData = STATE.items.some(it => it.kind === "predef");
+    if (!hasData) {
+      startTour([{
+        target: null, icon: "database", title: "Carica i dati per iniziare",
+        body: "NBA Studio parte vuoto. Importa il file dataset.json (clienti e lead Vittoria): i dati restano solo su questo computer. Al termine torni qui e parte il tour completo.",
+        cta: { label: "Vai a importare i dati", href: "/lab/admin.html?onboarding=1" }
+      }]);
+      return;
+    }
+    // Apri un'anagrafica d'esempio (se nessuna già aperta) per mostrare dettaglio e giudizio.
+    if (!STATE.selected) {
+      const first = STATE.items.find(it => it.kind === "predef");
+      if (first) loadAnagrafica(first);
+    }
+    startTour(TOUR_STEPS);
   }
 
   async function init() {
@@ -2649,15 +2756,9 @@
       wbtn.addEventListener("click", () => openWeightsPanel());
       headerActions.insertBefore(wbtn, headerActions.children[0]);
     }
-    // Riapertura tutorial da link esterno (?tutorial=1), poi pulisce l'URL
-    if (new URLSearchParams(location.search).get("tutorial") === "1") {
-      showTutorial();
-      history.replaceState(null, "", location.pathname);
-    }
+    // Il tour guidato parte dopo il caricamento dei dati (vedi maybeStartTour()).
 
     bindAll();
-    buildTutorialOverlay();
-    if (!localStorage.getItem(LS_TUTORIAL)) showTutorial();
     await loadSavedFromAPI();
     loadSnapshotsFromLS();
     await loadReviewsFromAPI();
@@ -2698,6 +2799,8 @@
           if (it) loadAnagrafica(it);
         }
       }
+      // Avvio del tour guidato (primo accesso o ?tutorial=1), ora che i dati ci sono.
+      maybeStartTour();
     } catch (e) {
       toast("Errore avvio: " + e.message, "err");
     }

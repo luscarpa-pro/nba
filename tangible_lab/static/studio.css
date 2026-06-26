@@ -1241,6 +1241,28 @@ input.toggle, select.tristate{appearance:none}
 .tut-steps strong{color:var(--ink)}
 .tut-actions{display:flex;justify-content:flex-end;margin-top:4px}
 
+/* ============ Tour guidato (onboarding) ============ */
+.tour-backdrop{position:fixed;inset:0;z-index:1099}
+.tour-backdrop.dim{background:rgba(15,17,32,.55)}
+.tour-spot{position:fixed;z-index:1100;border-radius:10px;box-shadow:0 0 0 9999px rgba(15,17,32,.55);pointer-events:none;transition:left .2s ease,top .2s ease,width .2s ease,height .2s ease}
+.tour-callout{position:fixed;z-index:1101;background:#fff;border-radius:12px;box-shadow:0 14px 44px rgba(15,17,32,.30);padding:16px 18px;width:330px;max-width:calc(100vw - 24px);display:flex;flex-direction:column;gap:10px}
+.tour-callout.centered{left:50%;top:50%;transform:translate(-50%,-50%)}
+.tour-head{display:flex;align-items:center;gap:8px}
+.tour-head .msi{font-size:20px;color:var(--primary)}
+.tour-title{font-size:15px;font-weight:800;color:var(--ink);margin:0;flex:1}
+.tour-skip{background:transparent;border:none;color:var(--muted);font:inherit;font-size:12px;cursor:pointer;flex:0 0 auto}
+.tour-skip:hover{color:var(--primary)}
+.tour-body{font-size:13px;line-height:1.55;color:var(--ink2,#475569);margin:0}
+.tour-body strong{color:var(--ink)}
+.tour-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
+.tour-dots{display:flex;gap:5px}
+.tour-dot{width:7px;height:7px;border-radius:999px;background:var(--border)}
+.tour-dot.active{background:var(--primary)}
+.tour-btns{display:flex;gap:8px}
+.tour-btns .btn{font-size:12px;padding:7px 13px}
+.tour-cta{align-self:flex-start;text-decoration:none;display:inline-flex;align-items:center;gap:6px;padding:9px 16px}
+.onboarding-focus{box-shadow:0 0 0 3px var(--highlight)!important;border-color:var(--highlight)!important}
+
 /* ============ Scoperture derivate nella tab Profilo ============ */
 .profile-gaps-note{display:flex;gap:10px;align-items:flex-start;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 14px;margin-bottom:14px}
 .profile-gaps-note .msi{color:#ea580c;flex:0 0 auto}
