@@ -40,6 +40,7 @@ Bootstrap login on a fresh DB: `admin` / `admin` (deleting `tangible_lab/tangibl
 - `server.py` imports `nba_engine` internals directly (`detect_client_triggers`, `client_urgency_score`, `client_value_score`, etc.) to build the client breakdown.
 - `lab_breakdown_lead` **re-implements the lead scoring tables inline** (urgency/value/timing thresholds copied from the engine) — if IT changes lead scoring, this drifts silently.
 - `studio.js` contains `CLIENT_SCHEMA`/`LEAD_SCHEMA` form definitions mirroring the engine's expected JSON record shape — also maintained by hand.
+- `tangible_lab/messages_revised.json` (overlay "Messaggi rivisti") keys its `match` templates to the engine's exact `recommended_action` output strings (the f-strings in `nba_engine.py`: `_cosa_*`, `_growth_rationale_blocks`, `lead_actions`). If IT changes a message text, the match silently fails and the Lab falls back to the engine text. Re-check the templates after an engine update.
 
 Other pieces (all in `tangible_lab/`):
 
