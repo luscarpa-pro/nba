@@ -75,15 +75,29 @@ Nota tecnica: per `RELATIONSHIP`/`CHURN_PREVENTION` i testi del motore usano il 
 ### 2. Logica di rimappatura (speculare JS + Python)
 
 Funzione `revise(category, engineText)` → `revisedText | engineText`:
-1. Filtra le voci con `category` uguale (più eventuali voci `category: null` come fallback).
-2. Per ciascuna voce, **compila** `match` in regex: escape dei caratteri speciali nelle parti
+1. **Split per segmenti (solo `CROSS_SELL`, `VIVA`, `CHECKUP`)**: per queste categorie il motore
+   concatena le "leve" al messaggio base con il separatore ` — ` (spazio, em-dash U+2014, spazio)
+   — vedi `nba_engine.py` (`base + " — " + " — ".join(blocks)`). Si **spezza** `engineText` su
+   ` — `, si rimappa **ogni segmento** indipendentemente (passo 2–5) e si **ricongiunge** con
+   ` — `. I messaggi base di queste categorie usano il trattino corto ` - ` (non em-dash), quindi
+   lo split è sicuro. Per **tutte le altre categorie** (incl. `RELATIONSHIP`, che usa ` — ` dentro
+   un messaggio unico) si rimappa l'intera stringa senza split.
+2. Filtra le voci con `category` uguale (più eventuali voci `category: null` come fallback).
+3. Per ciascuna voce, **compila** `match` in regex: escape dei caratteri speciali nelle parti
    letterali, sostituzione di ogni `{TOKEN}` col suo frammento regex (in ordine di apparizione),
-   ancoraggio `^…$`.
-3. Se la regex combacia con `engineText`, cattura i gruppi in ordine e li associa ai token di
-   `match` nell'ordine in cui compaiono.
-4. Rende `revised` sostituendo ogni `{TOKEN}` col valore catturato corrispondente. Se in
-   `revised` un token compare più volte o in ordine diverso, si usa la mappa token→valore.
-5. Primo match vince. Nessun match → ritorna `engineText` invariato.
+   ancoraggio `^…$` (l'ancoraggio è ciò che distingue varianti con prefisso comune, es.
+   QUOTE_FOLLOW_UP "alto valore" vs standard, o PAYMENT ≥45 vs <45).
+4. Se la regex combacia, cattura i gruppi in ordine e li associa ai token di `match` nell'ordine
+   in cui compaiono (mappa token→valore).
+5. Rende `revised` sostituendo ogni `{TOKEN}` col valore della mappa (un token può comparire più
+   volte / in ordine diverso nel `revised`).
+6. Primo match vince. Nessun match (sull'intera stringa o sul singolo segmento) → quel testo
+   resta invariato.
+
+**Reconciliazione nomi categoria**: l'`action_category` del motore è la chiave autorevole. Alcune
+etichette dell'Excel differiscono: Excel `NEW_CONTACT` → motore **`FIRST_CONTACT`**; le righe
+"leva" dell'Excel (`CROSS_SELL - Leva`) si mappano comunque sotto `category: "CROSS_SELL"` perché
+i blocchi vengono concatenati ad azioni CROSS_SELL/VIVA/CHECKUP.
 
 Implementazioni:
 - **Python**: `tangible_lab/messages.py` — `load_map()` (legge il JSON, cache),
@@ -141,9 +155,9 @@ rivisto" dell'Excel.
 
 - Nessuna modifica al motore o ai testi alla fonte.
 - Nessun editor UI della mappatura (il JSON si aggiorna a mano / da script).
-- Nessuna gestione delle "leve concatenabili" come blocchi separati nell'UI oltre a quanto il
-  motore già concatena in `recommended_action` (se il motore le emette già unite, si rimappa il
-  testo unito con un pattern dedicato; se non compaiono, si ignorano).
+- Le "leve concatenabili" (campagna / punti Viva / preventivo) non sono blocchi separati nell'UI:
+  sono gestite dallo split per segmenti (vedi §2) — ogni leva concatenata dal motore viene
+  rimappata nel proprio testo rivisto e ricongiunta. Nessun controllo UI dedicato alle leve.
 - Nessun supporto al primo foglio "Messaggi NBA" (39 righe, versione precedente).
 
 ## Testing
