@@ -202,6 +202,7 @@
   const LS_JUDGE_FILTER = "nba.lab.judgeFilter";
   const LS_TUTORIAL = "nba.lab.tutorial.seen";
   const LS_REVISED_MSG = "nba.lab.revisedMessages";
+  const LS_COLS = "nba.lab.cols";
 
   // ============================== utils ==============================
   const $ = s => document.querySelector(s);
@@ -2479,6 +2480,55 @@
     });
   }
 
+  // Ridimensionamento colonne via drag (sidebar|lista e lista|dettaglio).
+  function initColumnResizers() {
+    const layout = document.querySelector(".ml-layout");
+    if (!layout) return;
+    // applica le larghezze salvate
+    try {
+      const saved = JSON.parse(localStorage.getItem(LS_COLS) || "null");
+      if (saved && saved.sidebar) layout.style.setProperty("--col-sidebar", saved.sidebar + "px");
+      if (saved && saved.list) layout.style.setProperty("--col-list", saved.list + "px");
+    } catch (e) {}
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    function persist() {
+      const cs = getComputedStyle(layout);
+      const sb = parseInt(cs.getPropertyValue("--col-sidebar"), 10) || null;
+      const ls = parseInt(cs.getPropertyValue("--col-list"), 10) || null;
+      localStorage.setItem(LS_COLS, JSON.stringify({ sidebar: sb, list: ls }));
+    }
+    function attach(host, cls, onDrag) {
+      if (!host) return;
+      const h = el("div", { class: "col-resizer " + cls, title: "Trascina per ridimensionare" });
+      h.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        h.setPointerCapture(e.pointerId);
+        h.classList.add("dragging");
+        layout.classList.add("resizing");
+        const move = (ev) => onDrag(ev);
+        const up = () => {
+          h.classList.remove("dragging");
+          layout.classList.remove("resizing");
+          h.removeEventListener("pointermove", move);
+          h.removeEventListener("pointerup", up);
+          persist();
+        };
+        h.addEventListener("pointermove", move);
+        h.addEventListener("pointerup", up);
+      });
+      host.appendChild(h);
+    }
+    attach(document.querySelector("aside.ml-sidebar"), "col-resizer-sidebar", (ev) => {
+      const w = clamp(ev.clientX - layout.getBoundingClientRect().left, 160, 420);
+      layout.style.setProperty("--col-sidebar", w + "px");
+    });
+    attach(document.querySelector("section.ml-list-pane"), "col-resizer-list", (ev) => {
+      const left = document.querySelector("section.ml-list-pane").getBoundingClientRect().left;
+      const w = clamp(ev.clientX - left, 260, 680);
+      layout.style.setProperty("--col-list", w + "px");
+    });
+  }
+
   function bindAll() {
     // folders
     $$('.ml-folders li').forEach(li => {
@@ -2493,6 +2543,7 @@
     $("#ana-search").addEventListener("input", debounce(e => { STATE.query = e.target.value.trim(); renderListPane(); }, 120));
     // filtri giudizio operatore (popover)
     initJudgeFilterUI();
+    initColumnResizers();
     // sidebar actions
     $("#ana-new").addEventListener("click", () => openWizard());
     // server URL chip (optional in header)
