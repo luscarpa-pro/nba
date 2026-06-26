@@ -52,6 +52,8 @@
 
   {"category": null, "match": "Leva commerciale: {CAMPAGNA}", "revised": "È attiva la campagna {CAMPAGNA}. Usala come leva nella conversazione.", "note": "Leva: campagna attiva (segmento concatenato)"},
   {"category": null, "match": "Punti Viva in scadenza: {N} punti", "revised": "Il cliente ha {N} punti Viva in scadenza. Menzionali durante il contatto.", "note": "Leva: punti Viva in scadenza (segmento concatenato)"},
-  {"category": null, "match": "Preventivo/bozza in sospeso — decorrenza tra {NEAR} giorni, salvato {OLD} giorni fa", "revised": "C'è un preventivo salvato. Decorrenza tra {NEAR} giorni, salvato {OLD} giorni fa. Riprendi la conversazione.", "note": "Leva: preventivo in sospeso (entrambe le parti)"},
-  {"category": null, "match": "Preventivo/bozza in sospeso", "revised": "C'è un preventivo salvato. Riprendi la conversazione.", "note": "Leva: preventivo in sospeso (senza dettagli)"}
+  {"category": null, "match": "Preventivo/bozza in sospeso", "revised": "C'è un preventivo salvato. Riprendi la conversazione.", "note": "Leva: preventivo in sospeso (testa, dopo lo split su em-dash)"},
+  {"category": null, "match": "decorrenza tra {NEAR} giorni, salvato {OLD} giorni fa", "revised": "Decorrenza tra {NEAR} giorni, salvato {OLD} giorni fa.", "note": "Leva: preventivo, coda con entrambe le parti (post-split)"},
+  {"category": null, "match": "salvato {OLD} giorni fa", "revised": "Salvato {OLD} giorni fa.", "note": "Leva: preventivo, coda solo salvataggio (post-split)"},
+  {"category": null, "match": "decorrenza tra {NEAR} giorni", "revised": "Decorrenza tra {NEAR} giorni.", "note": "Leva: preventivo, coda solo decorrenza (post-split)"}
 ]
