@@ -1,0 +1,57 @@
+[
+  {"category": "PAYMENT", "match": "Gestire insoluto polizza - scaduto da {N} giorni. Rischio cancellazione.", "revised": "Polizza con pagamento scaduto da {N} giorni. Rischio cancellazione: contatta il cliente con urgenza.", "note": "Insoluto >= 45 giorni"},
+  {"category": "PAYMENT", "match": "Gestire insoluto polizza - scaduto da {N} giorni.", "revised": "Polizza con pagamento scaduto da {N} giorni. Contatta il cliente per regolarizzare.", "note": "Insoluto < 45 giorni"},
+
+  {"category": "RENEWAL", "match": "Rinnovo urgente {PRODOTTO} - scade oggi (€{PREMIO}/anno)", "revised": "Polizza {PRODOTTO} scade oggi (€{PREMIO}/anno). Rinnova subito.", "note": "Scadenza oggi"},
+  {"category": "RENEWAL", "match": "Rinnovo urgente {PRODOTTO} - scadenza tra {N} giorni (€{PREMIO}/anno)", "revised": "Polizza {PRODOTTO} scade tra {N} giorni (€{PREMIO}/anno). Contatta il cliente per il rinnovo.", "note": "Scadenza entro 7 giorni"},
+  {"category": "RENEWAL", "match": "Rinnovo {PRODOTTO} in scadenza tra {N} giorni (€{PREMIO}/anno) - verificare intenzioni", "revised": "Polizza {PRODOTTO} in scadenza tra {N} giorni (€{PREMIO}/anno). Verifica le intenzioni del cliente.", "note": "Scadenza entro 30 giorni"},
+  {"category": "RENEWAL", "match": "Rinnovo {PRODOTTO} in scadenza tra {N} giorni (€{PREMIO}/anno)", "revised": "Polizza {PRODOTTO} in scadenza tra {N} giorni (€{PREMIO}/anno). Pianifica il rinnovo.", "note": "Scadenza entro 14 giorni"},
+  {"category": "RENEWAL", "match": "Primo contatto per rinnovo {PRODOTTO} in scadenza tra {N} giorni (€{PREMIO}/anno)", "revised": "Polizza {PRODOTTO} in scadenza tra {N} giorni (€{PREMIO}/anno). Primo contatto consigliato.", "note": "Scadenza entro 45 giorni"},
+
+  {"category": "CHURN_PREVENTION", "match": "Rischio abbandono - polizza {PRODOTTO} rischio {N}%", "revised": "Cliente a rischio abbandono ({N}%) sulla polizza {PRODOTTO}. Intervieni per fidelizzare.", "note": "Alto churn, piu' polizze"},
+  {"category": "CHURN_PREVENTION", "match": "Attenzione - unica polizza {PRODOTTO} con rischio abbandono {N}%", "revised": "Attenzione: è l'unica polizza del cliente ({PRODOTTO}). Rischio abbandono al {N}%. Priorità alta.", "note": "Alto churn, polizza unica"},
+  {"category": "CHURN_PREVENTION", "match": "Rischio abbandono cliente", "revised": "Segnale di abbandono rilevato. Contatta il cliente per capire la situazione.", "note": "Churn generico (fallback)"},
+
+  {"category": "CROSS_SELL", "match": "Proporre polizza Casa - gap di copertura rilevato", "revised": "Il cliente non ha una copertura Casa. Proponila.", "note": "Gap Casa"},
+  {"category": "CROSS_SELL", "match": "Proporre polizza Infortuni - gap di copertura rilevato", "revised": "Il cliente non ha una copertura Infortuni. Proponila.", "note": "Gap Infortuni"},
+  {"category": "CROSS_SELL", "match": "Proporre polizza Malattia - gap di copertura rilevato", "revised": "Il cliente non ha una copertura Malattia. Proponila.", "note": "Gap Malattia"},
+  {"category": "CROSS_SELL", "match": "Proporre polizza Vita Protezione - gap di copertura rilevato", "revised": "Il cliente non ha una copertura Vita Protezione. Proponila.", "note": "Gap Vita Protezione"},
+  {"category": "CROSS_SELL", "match": "Proporre soluzione di Previdenza Complementare - gap di copertura rilevato", "revised": "Il cliente non ha una soluzione di Previdenza Complementare. Proponila.", "note": "Gap Previdenza Complementare"},
+  {"category": "CROSS_SELL", "match": "Proporre polizza Responsabilità Professionale - gap di copertura rilevato", "revised": "Il cliente non ha una copertura Responsabilità Professionale. Proponila.", "note": "Gap Responsabilita' Professionale"},
+  {"category": "CROSS_SELL", "match": "Proporre polizza Responsabilità Civile Vita Privata - gap di copertura rilevato", "revised": "Il cliente non ha una copertura RC Vita Privata. Proponila.", "note": "Gap Resp. Civile Vita Privata"},
+  {"category": "CROSS_SELL", "match": "Proporre polizza Animali Domestici - gap di copertura rilevato", "revised": "Il cliente non ha una copertura per animali domestici. Proponila.", "note": "Gap Animali Domestici"},
+  {"category": "CROSS_SELL", "match": "Proporre polizza Tutela Legale - gap di copertura rilevato", "revised": "Il cliente non ha una copertura Tutela Legale. Proponila.", "note": "Gap Tutela Legale"},
+  {"category": "CROSS_SELL", "match": "Proporre polizza Micromobilità - gap di copertura rilevato", "revised": "Il cliente non ha una copertura Micromobilità. Proponila.", "note": "Gap Micromobilita'"},
+  {"category": "CROSS_SELL", "match": "Proporre polizza Viaggi - gap di copertura rilevato", "revised": "Il cliente non ha una copertura Viaggi. Proponila.", "note": "Gap Viaggi"},
+  {"category": "CROSS_SELL", "match": "Upgrade polizza Auto - opportunità di upsell rilevata", "revised": "C'è un'opportunità di upgrade sulla polizza Auto. Proponila.", "note": "Upsell Auto (legacy)"},
+  {"category": "CROSS_SELL", "match": "Proposta commerciale - opportunità di copertura", "revised": "Opportunità di copertura rilevata. Valuta cosa proporre al cliente.", "note": "Gap generico (fallback)"},
+
+  {"category": "VIVA", "match": "Punti Viva in scadenza: {N} punti - contattare il cliente", "revised": "Il cliente ha {N} punti Viva in scadenza. Contattalo prima che li perda.", "note": "Punti in scadenza"},
+  {"category": "VIVA", "match": "Informare su {N} punti VIVA non utilizzati", "revised": "Il cliente ha {N} punti Viva non ancora usati. Informalo dei vantaggi disponibili.", "note": "Saldo alto non riscattato"},
+  {"category": "VIVA", "match": "Proporre iscrizione programma VIVA", "revised": "Il cliente non è ancora iscritto al programma Viva. Presentaglielo.", "note": "Non iscritto al programma"},
+
+  {"category": "CHECKUP", "match": "Proporre analisi dei bisogni assicurativi", "revised": "Il cliente non ha ancora fatto il checkup assicurativo. Proponi un'analisi dei bisogni.", "note": "Checkup mai effettuato"},
+
+  {"category": "RELATIONSHIP", "match": "Azione ordinaria: nessuna situazione che richiede attenzione specifica. Valutare contatto di cortesia/manutenzione.", "revised": "Nessuna situazione urgente. Considera un contatto di cortesia per mantenere la relazione.", "note": "Nessun segnale attivo"},
+  {"category": "RELATIONSHIP", "match": "Sinistro e reclamo aperti in gestione — verificare stato e contattare il cliente.", "revised": "Il cliente ha un sinistro e un reclamo aperti. Verifica lo stato e contattalo.", "note": "Sinistro e reclamo aperti"},
+  {"category": "RELATIONSHIP", "match": "Sinistro aperto in gestione — verificare stato e contattare il cliente.", "revised": "Il cliente ha un sinistro aperto. Verifica lo stato della pratica e contattalo.", "note": "Solo sinistro aperto"},
+  {"category": "RELATIONSHIP", "match": "Reclamo aperto in gestione — verificare stato e contattare il cliente.", "revised": "Il cliente ha un reclamo aperto. Verifica lo stato della pratica e contattalo.", "note": "Solo reclamo aperto"},
+  {"category": "RELATIONSHIP", "match": "Riprendere contatto - nessuna interazione da {N} giorni", "revised": "Nessun contatto da {N} giorni. È un buon momento per riprendere la relazione.", "note": "Nessun contatto da >90 giorni"},
+  {"category": "RELATIONSHIP", "match": "Inviare auguri di compleanno", "revised": "Oggi è il compleanno del cliente. Invia i tuoi auguri.", "note": "Compleanno oggi"},
+  {"category": "RELATIONSHIP", "match": "Compleanno tra {N} giorni - buona occasione per un contatto", "revised": "Il compleanno del cliente è tra {N} giorni. Ottima occasione per un contatto.", "note": "Compleanno imminente"},
+  {"category": "RELATIONSHIP", "match": "Celebrare anniversario cliente", "revised": "Oggi è l'anniversario del cliente con l'agenzia. Un messaggio di ringraziamento fa la differenza.", "note": "Anniversario cliente"},
+  {"category": "RELATIONSHIP", "match": "Mantenere relazione cliente", "revised": "Nessuna azione specifica richiesta. Mantieni la relazione con un contatto periodico.", "note": "Default (fallback)"},
+
+  {"category": "LEAD_CONVERSION", "match": "Finalizzare {PRODOTTO} - copertura richiesta tra {N} giorni", "revised": "Il lead vuole la copertura {PRODOTTO} entro {N} giorni. Finalizza subito il contratto.", "note": "Copertura imminente"},
+  {"category": "QUOTE_FOLLOW_UP", "match": "Presentare preventivo {PRODOTTO} €{PREMIO}/anno - alto valore", "revised": "Preventivo {PRODOTTO} disponibile: €{PREMIO}/anno. Lead ad alto valore — contatta con priorità.", "note": "Preventivo alto valore"},
+  {"category": "QUOTE_FOLLOW_UP", "match": "Presentare preventivo {PRODOTTO} €{PREMIO}/anno", "revised": "Preventivo {PRODOTTO} disponibile: €{PREMIO}/anno. Contatta il lead per presentarlo.", "note": "Preventivo standard"},
+  {"category": "FIRST_CONTACT", "match": "Primo contatto - richiesta {PRODOTTO} ricevuta oggi", "revised": "Richiesta {PRODOTTO} ricevuta oggi. Contatta il lead al più presto.", "note": "Lead ricevuto oggi"},
+  {"category": "FIRST_CONTACT", "match": "Primo contatto - richiesta {PRODOTTO} ricevuta ieri", "revised": "Richiesta {PRODOTTO} ricevuta ieri. Contatta il lead oggi.", "note": "Lead ricevuto ieri"},
+  {"category": "FIRST_CONTACT", "match": "Primo contatto - richiesta {PRODOTTO} ricevuta {N} ore fa", "revised": "Richiesta {PRODOTTO} ricevuta {N} ore fa. Contatta il lead subito.", "note": "Lead recente (ore)"},
+  {"category": "RE_ENGAGEMENT", "match": "Contattare urgentemente - richiesta {PRODOTTO} ricevuta {N} giorni fa senza risposta", "revised": "Richiesta {PRODOTTO} rimasta senza risposta da {N} giorni. Contatta il lead con urgenza.", "note": "Lead fermo >10 giorni"},
+
+  {"category": null, "match": "Leva commerciale: {CAMPAGNA}", "revised": "È attiva la campagna {CAMPAGNA}. Usala come leva nella conversazione.", "note": "Leva: campagna attiva (segmento concatenato)"},
+  {"category": null, "match": "Punti Viva in scadenza: {N} punti", "revised": "Il cliente ha {N} punti Viva in scadenza. Menzionali durante il contatto.", "note": "Leva: punti Viva in scadenza (segmento concatenato)"},
+  {"category": null, "match": "Preventivo/bozza in sospeso — decorrenza tra {NEAR} giorni, salvato {OLD} giorni fa", "revised": "C'è un preventivo salvato. Decorrenza tra {NEAR} giorni, salvato {OLD} giorni fa. Riprendi la conversazione.", "note": "Leva: preventivo in sospeso (entrambe le parti)"},
+  {"category": null, "match": "Preventivo/bozza in sospeso", "revised": "C'è un preventivo salvato. Riprendi la conversazione.", "note": "Leva: preventivo in sospeso (senza dettagli)"}
+]
