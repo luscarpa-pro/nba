@@ -50,11 +50,16 @@ Ogni step: `{ target: <selector|null>, title, body, cta?: {label, href} }`.
 7. `.review-bar` — giudizio operatore (Corretto/Sbagliato/Da verificare) + Note.
 8. `header.studio .actions` — Dati / Check-up / Guida / Pesature.
 
-### 3. Flusso senza dataset
+### 3. Flusso senza dataset (gate obbligatorio nel popup)
 
-Una sola schermata (no target): titolo "Carica i dati per iniziare" + spiegazione + CTA
-**"Vai a importare i dati"** → `/lab/admin.html?onboarding=1`. Bottone secondario "Salta"
-(marca `seen`). Non marca `seen` se si va a importare (così al rientro parte il tour completo).
+Una sola schermata centrale (no target) **bloccante e non skippabile**: titolo "Carica i dati
+per iniziare" + spiegazione + **file input + bottone "Importa dataset" direttamente nel popup**.
+- Nessun "Salta", nessuna chiusura con `Esc` o click sul backdrop (`step.blocking`).
+- L'import chiama `/lab/admin/dataset/import` e, al successo, fa `location.reload()`: al ricarico
+  i dati sono presenti → parte il **tour completo** (non si marca `seen` finché non si completa
+  il tour vero e proprio).
+- Il gate compare **sempre** quando mancano i dati (anche se il tour risulta "già visto"):
+  senza dataset l'app è inutilizzabile, quindi è una condizione vincolante.
 
 ### 4. Integrazione init (`studio.js`)
 

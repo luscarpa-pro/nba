@@ -2606,9 +2606,10 @@
   function tourReposition() { if (TOUR) tourGoTo(TOUR.i); }
   function tourKey(e) {
     if (!TOUR) return;
-    if (e.key === "Escape") endTour(true);
-    else if (e.key === "ArrowRight") tourNext();
-    else if (e.key === "ArrowLeft") tourGoTo(TOUR.i - 1);
+    const blocking = !!TOUR.steps[TOUR.i].blocking;
+    if (e.key === "Escape") { if (!blocking) endTour(true); }
+    else if (e.key === "ArrowRight") { if (!blocking) tourNext(); }
+    else if (e.key === "ArrowLeft") { if (!blocking) tourGoTo(TOUR.i - 1); }
   }
   function endTour(markSeen) {
     document.querySelectorAll(".tour-spot,.tour-callout,.tour-backdrop").forEach(n => n.remove());
@@ -2633,30 +2634,59 @@
   }
   function buildTourCallout(step, i) {
     const total = TOUR.steps.length;
-    const skip = el("button", {class:"tour-skip", type:"button", title:"Chiudi il tour"}, "Salta");
-    skip.addEventListener("click", () => endTour(true));
-    const kids = [
-      el("div", {class:"tour-head"},
-        el("span", {class:"msi"}, step.icon || "school"),
-        el("h2", {class:"tour-title"}, step.title),
-        skip),
-      el("p", {class:"tour-body"}, step.body),
-    ];
+    const head = el("div", {class:"tour-head"},
+      el("span", {class:"msi"}, step.icon || "school"),
+      el("h2", {class:"tour-title"}, step.title));
+    // Step bloccante (es. caricamento dati): nessun "Salta", nessun Esc/footer.
+    if (!step.blocking) {
+      const skip = el("button", {class:"tour-skip", type:"button", title:"Chiudi il tour"}, "Salta");
+      skip.addEventListener("click", () => endTour(true));
+      head.appendChild(skip);
+    }
+    const kids = [head, el("p", {class:"tour-body"}, step.body)];
+    if (typeof step.render === "function") kids.push(step.render());
     if (step.cta) {
       const a = el("a", {class:"btn primary-cta tour-cta", href: step.cta.href},
         el("span", {class:"msi"}, "upload"), step.cta.label);
       kids.push(a);
     }
-    const dots = el("div", {class:"tour-dots"},
-      ...TOUR.steps.map((_, k) => el("span", {class:"tour-dot" + (k === i ? " active" : "")})));
-    const back = el("button", {class:"btn ghost", type:"button"}, "Indietro");
-    back.disabled = (i === 0);
-    back.addEventListener("click", () => tourGoTo(i - 1));
-    const next = el("button", {class:"btn primary-cta", type:"button"}, i === total - 1 ? "Fine" : "Avanti");
-    next.addEventListener("click", () => tourNext());
-    const btns = el("div", {class:"tour-btns"}, total > 1 ? back : null, next);
-    kids.push(el("div", {class:"tour-foot"}, dots, btns));
+    if (!step.blocking) {
+      const dots = el("div", {class:"tour-dots"},
+        ...TOUR.steps.map((_, k) => el("span", {class:"tour-dot" + (k === i ? " active" : "")})));
+      const back = el("button", {class:"btn ghost", type:"button"}, "Indietro");
+      back.disabled = (i === 0);
+      back.addEventListener("click", () => tourGoTo(i - 1));
+      const next = el("button", {class:"btn primary-cta", type:"button"}, i === total - 1 ? "Fine" : "Avanti");
+      next.addEventListener("click", () => tourNext());
+      const btns = el("div", {class:"tour-btns"}, total > 1 ? back : null, next);
+      kids.push(el("div", {class:"tour-foot"}, dots, btns));
+    }
     return el("div", {class:"tour-callout", role:"dialog", "aria-label": step.title}, ...kids);
+  }
+  // Import del dataset direttamente nel popup di avvio (onboarding obbligatorio).
+  function buildOnboardingImport() {
+    const file = el("input", {type:"file", accept:".json"});
+    const btn = el("button", {class:"btn primary-cta tour-cta", type:"button"},
+      el("span", {class:"msi"}, "upload"), " Importa dataset");
+    const status = el("div", {class:"muted", style:{fontSize:"12px",minHeight:"16px"}}, "");
+    btn.addEventListener("click", async () => {
+      const f = file.files && file.files[0];
+      if (!f) { status.textContent = "Seleziona prima un file dataset.json."; return; }
+      let obj;
+      try { obj = JSON.parse(await f.text()); }
+      catch { status.textContent = "File JSON non valido."; return; }
+      btn.disabled = true; status.textContent = "Importazione in corso…";
+      try {
+        const r = await fetchJSON("/lab/admin/dataset/import", {
+          method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(obj)
+        });
+        status.textContent = `Importati ${r.clients} clienti e ${r.leads} lead. Avvio del tour…`;
+        setTimeout(() => location.reload(), 900);
+      } catch (e) { btn.disabled = false; status.textContent = "Errore: " + e.message; }
+    });
+    return el("div", {style:{display:"flex",flexDirection:"column",gap:"10px"}},
+      el("div", {style:{display:"flex",gap:"10px",alignItems:"center",flexWrap:"wrap"}}, file, btn),
+      status);
   }
   function positionCallout(callout, rect) {
     if (!rect) { callout.classList.add("centered"); return; }
@@ -2709,16 +2739,18 @@
   function maybeStartTour() {
     const forced = new URLSearchParams(location.search).get("tutorial") === "1";
     if (forced) history.replaceState(null, "", location.pathname);
-    if (!forced && localStorage.getItem(LS_TUTORIAL)) return;
     const hasData = STATE.items.some(it => it.kind === "predef");
+    // Senza dati: gate OBBLIGATORIO e non skippabile, sempre (anche se "già visto"):
+    // l'app è inutilizzabile senza dataset. Import direttamente nel popup.
     if (!hasData) {
       startTour([{
-        target: null, icon: "database", title: "Carica i dati per iniziare",
-        body: "NBA Studio parte vuoto. Importa il file dataset.json (clienti e lead Vittoria): i dati restano solo su questo computer. Al termine torni qui e parte il tour completo.",
-        cta: { label: "Vai a importare i dati", href: "/lab/admin.html?onboarding=1" }
+        target: null, icon: "database", title: "Carica i dati per iniziare", blocking: true,
+        body: "NBA Studio parte vuoto: per usarlo devi importare il file dataset.json (clienti e lead Vittoria). I dati restano solo su questo computer e non vengono mai caricati online.",
+        render: buildOnboardingImport
       }]);
       return;
     }
+    if (!forced && localStorage.getItem(LS_TUTORIAL)) return;
     // Apri un'anagrafica d'esempio (se nessuna già aperta) per mostrare dettaglio e giudizio.
     if (!STATE.selected) {
       const first = STATE.items.find(it => it.kind === "predef");
