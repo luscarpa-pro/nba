@@ -2088,7 +2088,7 @@
 
     // form aggiunta in fondo
     const form = el("div", {class:"comment-add cdrawer-form"});
-    const textarea = el("textarea", {placeholder:"Scrivi un commento per il team…", rows:"2"});
+    const textarea = el("textarea", {placeholder:"Scrivi una nota…", rows:"2"});
     const sendBtn = el("button", {class:"btn", onclick: async () => {
       const body = textarea.value.trim();
       if (!body) return;
@@ -2139,7 +2139,7 @@
       });
       listEl.innerHTML = "";
       if (!comments.length) {
-        listEl.appendChild(el("div", {class:"muted", style:{fontSize:"11px",padding:"6px 0"}}, "Nessun commento ancora — sii il primo a scriverne uno."));
+        listEl.appendChild(el("div", {class:"muted", style:{fontSize:"11px",padding:"6px 0"}}, "Nessuna nota ancora."));
         return;
       }
       comments.forEach(c => {
@@ -2147,8 +2147,7 @@
         const canEdit = isMine || STATE.me?.role === "admin";
         const item = el("div", {class:"comment-item" + (isMine ? " mine" : "")});
         item.appendChild(el("div", {class:"comment-meta"},
-          el("strong", {class:"comment-author"}, c.username),
-          el("span", {class:"comment-time"}, " · " + new Date(c.created_at).toLocaleString()),
+          el("span", {class:"comment-time"}, new Date(c.created_at).toLocaleString()),
           c.created_at !== c.updated_at ? el("span", {class:"comment-edited"}, " · modificato") : null,
           canEdit ? el("div", {class:"comment-actions"},
             el("button", {class:"linkbtn", onclick: () => editCommentInline(c, item, it, listEl)}, "Modifica"),
