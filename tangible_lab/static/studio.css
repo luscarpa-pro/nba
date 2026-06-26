@@ -722,17 +722,34 @@ section.checkup-main{background:#fff;display:flex;flex-direction:column;overflow
 
 
 /* ============ Review bar (giudizio operatore) ============ */
+.review-bar-wrap{container-type:inline-size}
 .review-bar{
-  display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+  display:flex;flex-wrap:nowrap;align-items:center;gap:10px;
   margin-top:12px;padding:10px 14px;
   background:linear-gradient(180deg, #FBFCFE 0%, #F4F6FA 100%);
   border:1px solid var(--border-soft);border-radius:10px
 }
-.review-bar-left{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
-.review-bar-lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:inline-flex;align-items:center;gap:4px;margin-right:4px}
+.review-bar-left{display:flex;flex-wrap:nowrap;align-items:center;gap:8px;flex:0 0 auto}
+.review-bar-lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:inline-flex;align-items:center;gap:4px;margin-right:4px;white-space:nowrap}
 .review-bar-lbl .msi{font-size:16px;color:var(--primary)}
-.review-bar-right{display:flex;flex:1;justify-content:flex-end;align-items:center;gap:8px;min-width:240px}
-.review-bar-right .review-ts{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.review-bar-right{display:flex;flex:1 1 0;justify-content:flex-end;align-items:center;gap:8px;min-width:0;overflow:hidden}
+.review-bar-right .review-ts{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.review-btn{flex:0 0 auto}
+.comments-trigger{flex:0 0 auto}
+/* Compattazione progressiva quando il pannello di dettaglio è stretto (tutto su una riga) */
+@container (max-width:700px){
+  .review-bar-lbl{display:none}
+}
+@container (max-width:560px){
+  .review-bar-right{display:none}
+}
+@container (max-width:440px){
+  .review-btn{width:34px;height:34px;padding:0;font-size:0;gap:0;justify-content:center;border-radius:8px}
+  .review-btn .msi{font-size:17px;margin:0}
+  .review-btn.active{width:auto;padding:0 9px;font-size:11px;gap:4px}
+  .review-btn.active .msi{font-size:14px}
+  .comments-trigger .comments-trigger-lbl{display:none}
+}
 .review-bar-right input{font:inherit;font-size:12px;padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:#fff;min-width:200px;flex:1;max-width:380px}
 
 .review-btn{
@@ -918,8 +935,8 @@ section.ml-detail-pane{background:#fff;overflow:auto;display:flex;flex-direction
   display:inline-flex;align-items:center;gap:6px;font:inherit;letter-spacing:.02em;transition:background .12s,color .12s
 }
 .detail-tabs .dtab:hover{color:var(--primary)}
-.detail-tabs .dtab.active{background:var(--primary);color:#fff;box-shadow:0 1px 2px rgba(31,28,61,.14)}
-.detail-tabs .dtab.active .msi{color:#fff}
+.detail-tabs .dtab.active{background:#fff;color:var(--primary);font-weight:700;box-shadow:0 1px 3px rgba(31,28,61,.12)}
+.detail-tabs .dtab.active .msi{color:var(--primary)}
 .detail-tabs .dtab .msi{font-size:18px}
 
 .tab-pane{display:none}
@@ -1086,10 +1103,10 @@ input.toggle, select.tristate{appearance:none}
     border-bottom:1px solid var(--border-soft) /* override del border-bottom underline */
   }
   .detail-tabs .dtab.active{
-    background:var(--primary);color:#fff;border-color:var(--primary);
-    box-shadow:0 1px 4px rgba(31,28,61,.18)
+    background:#fff;color:var(--primary);border-color:var(--border-soft);
+    box-shadow:0 1px 3px rgba(31,28,61,.12)
   }
-  .detail-tabs .dtab.active .msi{color:#fff}
+  .detail-tabs .dtab.active .msi{color:var(--primary)}
 
   /* Review bar mobile: 3 chip giudizio + chip conversazione tutto su una riga */
   .review-bar{padding:6px 10px;gap:6px;margin-top:6px;flex-wrap:nowrap;align-items:center}

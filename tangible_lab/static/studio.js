@@ -943,8 +943,8 @@
     );
     head.appendChild(titleRow);
 
-    // review bar (operatore)
-    head.appendChild(buildReviewBar(it));
+    // review bar (operatore) — avvolta per le container query (compattazione su pannello stretto)
+    head.appendChild(el("div", {class:"review-bar-wrap"}, buildReviewBar(it)));
 
     // tab strip
     const tabsBar = el("div", {class:"detail-tabs", id:"detail-tabs"},
