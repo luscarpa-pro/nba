@@ -827,6 +827,78 @@
     runNBA();
   }
 
+  // ============================== Pannello Pesature globali ==============================
+  async function reloadAfterConfig() {
+    const [clients, leads, cfg] = await Promise.all([
+      fetchJSON("/nba/clients?n=10000"),
+      fetchJSON("/nba/leads?n=10000"),
+      fetchJSON("/config")
+    ]);
+    STATE.clients = clients || []; STATE.leads = leads || []; STATE.config = cfg;
+    STATE.items = buildItems(); updateFolderCounts(); renderListPane();
+  }
+  function buildWeightsOverlay() {
+    if (document.getElementById("wts-overlay")) return;
+    const panel = el("div", {class:"wts-panel", id:"wts-panel", role:"dialog", "aria-label":"Pesature"});
+    const overlay = el("div", {id:"wts-overlay", class:"wts-overlay"}, panel);
+    overlay.addEventListener("click", e => { if (e.target === overlay) closeWeightsPanel(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && overlay.classList.contains("open")) closeWeightsPanel(); });
+    document.body.appendChild(overlay);
+  }
+  function closeWeightsPanel() { const o = document.getElementById("wts-overlay"); if (o) o.classList.remove("open"); }
+  function openWeightsPanel() {
+    initCmpFromConfig();
+    buildWeightsOverlay();
+    renderWeightsPanel();
+    document.getElementById("wts-overlay").classList.add("open");
+  }
+  function renderWeightsPanel() {
+    const panel = document.getElementById("wts-panel");
+    panel.innerHTML = "";
+    panel.appendChild(el("div", {class:"wts-head"},
+      el("h2", {}, el("span", {class:"msi"}, "tune"), " Pesature globali"),
+      el("p", {class:"muted", style:{margin:"4px 0 0", fontSize:"12px"}}, "Modifica la ricetta del punteggio e applicala a tutte le anagrafiche.")));
+    panel.appendChild(el("div", {class:"cmp-mode-tabs"},
+      cmpModeBtn("weights",  "tune",               "Pesi"),
+      cmpModeBtn("tiers",    "stacked_bar_chart",  "Soglie priorità"),
+      cmpModeBtn("churn",    "trending_down",      "Rischio churn"),
+      cmpModeBtn("leadthr",  "crisis_alert",       "Soglie lead"),
+      cmpModeBtn("boosts",   "north",              "Boost trigger"),
+      cmpModeBtn("premiums", "euro",               "Premi medi"),
+      cmpModeBtn("json",     "code",               "JSON")));
+    const editor = el("div", {id:"cmp-editor", class:"wts-body"});
+    panel.appendChild(editor);
+    renderCmpEditor(editor);
+    const applyBtn = el("button", {class:"btn primary-cta", type:"button"}, el("span", {class:"msi"}, "done_all"), " Applica a tutti");
+    applyBtn.addEventListener("click", async () => {
+      const cfg = buildCmpConfig();
+      if (!cfg) { toast("Configurazione non valida", "err"); return; }
+      applyBtn.disabled = true;
+      try {
+        await fetchJSON("/config", {method:"PUT", headers:{"Content-Type":"application/json"}, body: JSON.stringify(cfg)});
+        await reloadAfterConfig();
+        toast("Pesature applicate a tutte le anagrafiche", "ok");
+        closeWeightsPanel();
+      } catch (e) { toast(e.message, "err"); }
+      finally { applyBtn.disabled = false; }
+    });
+    const resetBtn = el("button", {class:"btn ghost", type:"button"}, el("span", {class:"msi"}, "restart_alt"), " Ripristina default");
+    resetBtn.addEventListener("click", async () => {
+      if (!confirm("Ripristinare le pesature originali Vittoria? Le modifiche applicate verranno perse.")) return;
+      resetBtn.disabled = true;
+      try {
+        await fetchJSON("/lab/admin/config/reset", {method:"POST"});
+        await reloadAfterConfig();
+        initCmpFromConfig(); renderWeightsPanel();
+        toast("Pesature ripristinate ai valori di default", "ok");
+      } catch (e) { toast(e.message, "err"); }
+      finally { resetBtn.disabled = false; }
+    });
+    panel.appendChild(el("div", {class:"wts-foot"},
+      el("button", {class:"btn ghost", type:"button", onclick: closeWeightsPanel}, "Chiudi"),
+      el("div", {class:"wts-foot-right"}, resetBtn, applyBtn)));
+  }
+
   function renderDetail(it) {
     const pane = $("#ml-detail");
     pane.innerHTML = "";
@@ -2377,6 +2449,12 @@
       addLink("/lab/admin.html", "database", "Dati", "Dati — importa/esporta");
       addLink("/lab/guida.html", "menu_book", "Guida", "Guida — come funziona l'algoritmo NBA");
       addLink("/lab/checkup.html", "health_and_safety", "Check-up", "Check-up Vittoria — simulatore bisogni");
+      const wbtn = document.createElement("button");
+      wbtn.className = "home-link"; wbtn.type = "button";
+      wbtn.title = "Pesature — pesi e soglie del motore (globali)";
+      wbtn.innerHTML = '<span class="msi">tune</span><span class="home-link-lbl">Pesature</span>';
+      wbtn.addEventListener("click", () => openWeightsPanel());
+      headerActions.insertBefore(wbtn, headerActions.children[0]);
     }
     // Riapertura tutorial da link esterno (?tutorial=1), poi pulisce l'URL
     if (new URLSearchParams(location.search).get("tutorial") === "1") {
