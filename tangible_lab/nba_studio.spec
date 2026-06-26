@@ -23,6 +23,7 @@ datas = [
     (os.path.join(_ROOT, "static"), "static"),                          # UI del cliente
     (os.path.join(_ROOT, "tangible_lab", "static"), "tangible_lab/static"),  # UI del Lab
     (os.path.join(_ROOT, "tangible_lab", "checkup"), "tangible_lab/checkup"), # dati Check-up + seed
+    (os.path.join(_ROOT, "tangible_lab", "messages_revised.json"), "tangible_lab"), # mappa "messaggi rivisti"
     # Default dei file mutabili: usati come sorgente di seed verso %APPDATA% al primo avvio
     (os.path.join(_ROOT, "nba_config.json"), "."),
     (os.path.join(_ROOT, "trigger_catalog_base.json"), "."),
@@ -34,7 +35,7 @@ hiddenimports = [
     "nba_api", "nba_engine", "nba_config", "nba_catalog",
     # Package del Lab
     "tangible_lab.server", "tangible_lab.db", "tangible_lab.auth",
-    "tangible_lab.models", "tangible_lab.checkup_engine",
+    "tangible_lab.models", "tangible_lab.checkup_engine", "tangible_lab.messages",
     # Dipendenze runtime che PyInstaller a volte non rileva
     "bcrypt", "openpyxl", "itsdangerous", "multipart",
     "uvicorn", "uvicorn.lifespan.on", "uvicorn.lifespan.off",
