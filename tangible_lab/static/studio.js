@@ -2585,7 +2585,7 @@
   // Tappe del tour completo (con dataset). Ogni step: {target, fallback?, icon, title, body}.
   const TOUR_STEPS = [
     { target:null, icon:"auto_awesome", title:"Benvenuto in NBA Studio",
-      body:"Il motore NBA (Next Best Action) di Vittoria assegna a ogni cliente e lead una priorità e suggerisce l'azione migliore e il canale con cui contattarlo. Qui in Tangible Lab mettiamo alla prova quelle raccomandazioni: le leggiamo, le giudichiamo e le esportiamo." },
+      body:"Il motore NBA (Next Best Action) di Vittoria assegna a ogni cliente e lead una priorità e suggerisce l'azione migliore e il canale con cui contattarlo. Qui in NBA Studio mettiamo alla prova quelle raccomandazioni: le leggiamo, le giudichiamo e le esportiamo." },
     { target:"aside.ml-sidebar", icon:"inbox", title:"Le cartelle",
       body:"Sfoglia tutte le anagrafiche oppure filtra per priorità (da CRITICAL a LOW) o per tipo (clienti o lead)." },
     { target:".ml-search-row", fallback:".ml-list-head", icon:"search", title:"Ricerca e filtri",
