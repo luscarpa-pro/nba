@@ -61,6 +61,12 @@ if _DATA_DIR:
     _nba_api.DATASET_PATH = _seeded_dataset
     _nba_config.CONFIG_JSON_PATH = _seeded_config
     _nba_catalog.OVERRIDES_PATH = _seeded_overrides
+    # nba_config carica e CACHA `CONFIG` all'import (avvenuto sopra con
+    # `from nba_api import app`), quando CONFIG_JSON_PATH puntava ancora al default.
+    # Senza questo reload, get_config() resta sulla config vecchia/di default e lo
+    # scoring (es. opportunity via avg_premiums) usa valori errati. Ricarichiamo dal
+    # path seedato appena riassegnato.
+    _nba_config.reload_config()
 
 from fastapi import Body, HTTPException, Request, Response  # noqa: E402
 from fastapi.responses import RedirectResponse, StreamingResponse  # noqa: E402
