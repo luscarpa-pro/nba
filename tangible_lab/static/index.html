@@ -65,11 +65,19 @@
           <input type="search" id="ana-search" placeholder="Cerca per ID, nome del caso, trigger…" />
         </div>
         <div class="ml-list-toolbar">
-          <label class="filter-toggle">
-            <input type="checkbox" id="hide-reviewed-toggle"/>
-            <span class="msi">visibility_off</span>
-            <span>Nascondi analizzati</span>
-          </label>
+          <button type="button" id="filter-btn" class="filter-btn" aria-haspopup="true" aria-expanded="false">
+            <span class="msi">tune</span>
+            <span>Filtri</span>
+            <span class="filter-badge" id="filter-badge" hidden>0</span>
+          </button>
+          <div class="filter-popover" id="filter-popover" hidden role="group" aria-label="Filtri per giudizio operatore">
+            <div class="filter-popover-title">Giudizio operatore</div>
+            <label class="filter-check"><input type="checkbox" data-judge="ok"/><span>Corretto</span></label>
+            <label class="filter-check"><input type="checkbox" data-judge="ko"/><span>Sbagliato</span></label>
+            <label class="filter-check"><input type="checkbox" data-judge="unsure"/><span>Da verificare</span></label>
+            <label class="filter-check"><input type="checkbox" data-judge="none"/><span>Non ancora giudicati</span></label>
+            <button type="button" class="filter-reset" id="filter-reset">Azzera filtri</button>
+          </div>
         </div>
         <div class="ml-list-meta" id="ml-list-meta">·</div>
       </div>

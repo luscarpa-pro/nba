@@ -179,7 +179,7 @@
     profileEdit: false,       // true → form editabile; false → vista read-only
     profileBackup: null,      // snapshot record per "Annulla"
     reviews: {},              // key "kind:type:id" → {judgement: "ok|ko|unsure", note, reviewedAt}
-    hideReviewed: false,      // filtro lista
+    judgeFilter: { ok:true, ko:true, unsure:true, none:true },  // filtro lista per giudizio operatore
     cmpMode: "weights",       // weights | tiers | churn | leadthr | boosts | premiums | json
     cmpWeights: null,         // pesi (chiavi diverse per client/lead)
     cmpTiers: null,           // {CRITICAL, HIGH, MEDIUM} 0-100
@@ -197,6 +197,7 @@
   const LS_TAB = "nba.lab.detail.tab";
   const LS_REVIEWS = "nba.lab.reviews";       // (residuale: solo per migrazione)
   const LS_HIDE_REVIEWED = "nba.lab.hideReviewed";
+  const LS_JUDGE_FILTER = "nba.lab.judgeFilter";
   const LS_TUTORIAL = "nba.lab.tutorial.seen";
 
   // ============================== utils ==============================
@@ -574,7 +575,11 @@
     const box = $("#ml-list"); box.innerHTML = "";
     let items = STATE.items.filter(it => folderMatches(it, STATE.folder));
     items = applyQuery(items, STATE.query);
-    if (STATE.hideReviewed) items = items.filter(it => !getReview(it));
+    items = items.filter(it => {
+      const rev = getReview(it);
+      const key = rev ? rev.judgement : "none";
+      return STATE.judgeFilter[key] !== false;
+    });
     items = sortItems(items);
     const reviewedTot = STATE.items.filter(it => folderMatches(it, STATE.folder) && getReview(it)).length;
     const allTot      = STATE.items.filter(it => folderMatches(it, STATE.folder)).length;
@@ -2268,7 +2273,7 @@
       STATE.reviews = {};
       rows.forEach(r => { STATE.reviews[r.target_key] = { judgement: r.judgement, reviewedAt: r.updated_at }; });
     } catch { STATE.reviews = {}; }
-    STATE.hideReviewed = localStorage.getItem(LS_HIDE_REVIEWED) === "1";
+    loadJudgeFilter();
   }
   function getReview(it) { return it ? STATE.reviews[reviewKey(it)] : null; }
   async function setReview(it, judgement) {
@@ -2289,6 +2294,30 @@
     ko:     { lbl:"Sbagliato",     icon:"thumb_down",  color:"#dc2626", bg:"#FEE2E2", border:"#FCA5A5" },
     unsure: { lbl:"Da verificare", icon:"help",        color:"#a16207", bg:"#FEF3C7", border:"#FCD34D" }
   };
+
+  function loadJudgeFilter() {
+    let stored = null;
+    try { stored = JSON.parse(localStorage.getItem(LS_JUDGE_FILTER) || "null"); } catch { stored = null; }
+    if (stored && typeof stored === "object") {
+      STATE.judgeFilter = {
+        ok:     stored.ok     !== false,
+        ko:     stored.ko     !== false,
+        unsure: stored.unsure !== false,
+        none:   stored.none   !== false
+      };
+      return;
+    }
+    // Migrazione soft dal vecchio toggle "Nascondi analizzati"
+    if (localStorage.getItem(LS_HIDE_REVIEWED) === "1") {
+      STATE.judgeFilter = { ok:false, ko:false, unsure:false, none:true };
+    } else {
+      STATE.judgeFilter = { ok:true, ko:true, unsure:true, none:true };
+    }
+    saveJudgeFilter();
+  }
+  function saveJudgeFilter() {
+    localStorage.setItem(LS_JUDGE_FILTER, JSON.stringify(STATE.judgeFilter));
+  }
 
   function loadSnapshotsFromLS() {
     try { STATE.snapshots = JSON.parse(localStorage.getItem(LS_SNAP) || "{}") || {}; }
@@ -2346,6 +2375,43 @@
     $$('.ml-folders li').forEach(li => li.classList.toggle("active", li.dataset.folder === STATE.folder));
   }
 
+  function updateFilterBadge() {
+    const badge = $("#filter-badge");
+    if (!badge) return;
+    const excluded = ["ok","ko","unsure","none"].filter(k => STATE.judgeFilter[k] === false).length;
+    if (excluded > 0) { badge.textContent = String(excluded); badge.hidden = false; }
+    else { badge.hidden = true; }
+  }
+  function initJudgeFilterUI() {
+    const btn = $("#filter-btn");
+    const pop = $("#filter-popover");
+    if (!btn || !pop) return;
+    pop.querySelectorAll("input[data-judge]").forEach(inp => {
+      inp.checked = STATE.judgeFilter[inp.dataset.judge] !== false;
+      inp.addEventListener("change", () => {
+        STATE.judgeFilter[inp.dataset.judge] = inp.checked;
+        saveJudgeFilter();
+        updateFilterBadge();
+        renderListPane();
+      });
+    });
+    updateFilterBadge();
+    const close = () => { pop.hidden = true; btn.setAttribute("aria-expanded","false"); };
+    const open  = () => { pop.hidden = false; btn.setAttribute("aria-expanded","true"); };
+    btn.addEventListener("click", (e) => { e.stopPropagation(); pop.hidden ? open() : close(); });
+    document.addEventListener("click", (e) => {
+      if (!pop.hidden && !pop.contains(e.target) && e.target !== btn && !btn.contains(e.target)) close();
+    });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !pop.hidden) close(); });
+    $("#filter-reset").addEventListener("click", () => {
+      STATE.judgeFilter = { ok:true, ko:true, unsure:true, none:true };
+      saveJudgeFilter();
+      pop.querySelectorAll("input[data-judge]").forEach(inp => { inp.checked = true; });
+      updateFilterBadge();
+      renderListPane();
+    });
+  }
+
   function bindAll() {
     // folders
     $$('.ml-folders li').forEach(li => {
@@ -2358,16 +2424,8 @@
     });
     // search
     $("#ana-search").addEventListener("input", debounce(e => { STATE.query = e.target.value.trim(); renderListPane(); }, 120));
-    // hide-reviewed toggle
-    const tgl = $("#hide-reviewed-toggle");
-    if (tgl) {
-      tgl.checked = STATE.hideReviewed;
-      tgl.addEventListener("change", () => {
-        STATE.hideReviewed = tgl.checked;
-        localStorage.setItem(LS_HIDE_REVIEWED, tgl.checked ? "1" : "0");
-        renderListPane();
-      });
-    }
+    // filtri giudizio operatore (popover)
+    initJudgeFilterUI();
     // sidebar actions
     $("#ana-new").addEventListener("click", () => openWizard());
     // server URL chip (optional in header)
