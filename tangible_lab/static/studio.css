@@ -807,45 +807,6 @@ html.sidebar-collapsed .ml-layout{grid-template-columns:56px 360px 1fr}
   .ml-layout{grid-template-columns:200px 320px 1fr}
   .ml-layout.sidebar-collapsed, html.sidebar-collapsed .ml-layout{grid-template-columns:56px 320px 1fr}
 }
-/* Modalità compatta (tablet/finestra stretta): drawer sidebar + swap lista/dettaglio.
-   Le rifiniture cosmetiche "telefono" restano nel blocco @media (max-width:760px). */
-@media (max-width:1000px){
-  .mobile-menu{display:inline-flex;align-items:center;justify-content:center}
-  body.ml-mode .ml-layout,
-  body.ml-mode .ml-layout.sidebar-collapsed,
-  html.sidebar-collapsed body.ml-mode .ml-layout{
-    display:block;
-    height:calc(100vh - 64px);
-    overflow:hidden
-  }
-  body.ml-mode section.ml-list-pane,
-  body.ml-mode section.ml-detail-pane{height:100%;width:100%}
-
-  /* Sidebar come drawer */
-  aside.ml-sidebar{
-    position:fixed;top:64px;left:0;bottom:0;width:260px;z-index:30;
-    transform:translateX(-100%);transition:transform .22s ease;
-    border-right:1px solid var(--border);box-shadow:2px 0 12px rgba(15,17,32,.08)
-  }
-  html.mobile-sidebar-open aside.ml-sidebar{transform:translateX(0)}
-  html.mobile-sidebar-open .mobile-overlay{display:block}
-  html.sidebar-collapsed aside.ml-sidebar, .ml-layout.sidebar-collapsed aside.ml-sidebar{width:260px}
-  .sidebar-toggle{display:none}
-  html.sidebar-collapsed .ml-folders li .lbl, html.sidebar-collapsed .ml-folders li .cnt,
-  html.sidebar-collapsed .ml-folders li.sep, html.sidebar-collapsed .ml-side-actions .btn .lbl{display:revert}
-  html.sidebar-collapsed .ml-folders li{justify-content:flex-start;padding:8px 10px;gap:8px}
-
-  /* List vs detail: schermo intero, navigazione via has-selection */
-  section.ml-list-pane{display:flex;flex-direction:column}
-  section.ml-detail-pane{display:none;flex-direction:column}
-  html.has-selection section.ml-list-pane{display:none}
-  html.has-selection section.ml-detail-pane{display:flex}
-
-  /* Detail-pane scrolla, head non sticky */
-  .ml-detail-pane{overflow-y:auto;overflow-x:hidden}
-  .ml-detail-head{position:static !important}
-}
-
 aside.ml-sidebar{background:var(--breeze);border-right:1px solid var(--border-soft);padding:10px;display:flex;flex-direction:column;overflow:hidden;position:relative}
 .sidebar-toggle{background:transparent;border:none;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 8px;border-radius:6px;cursor:pointer;margin-top:8px;font:inherit;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;opacity:.7}
 .sidebar-toggle:hover{background:#fff;color:var(--primary);opacity:1}
@@ -1016,6 +977,46 @@ input.toggle, select.tristate{appearance:none}
 .tristate-wrap button.on[data-val="false"]{color:var(--err)}
 
 /* ============ Mobile breakpoints (moved to end so they win cascade) ============ */
+/* Modalità compatta (tablet/finestra stretta): drawer sidebar + swap lista/dettaglio.
+   Le rifiniture cosmetiche "telefono" restano nel blocco @media (max-width:760px).
+   NB: deve stare DOPO le regole base di .ml-layout/aside.ml-sidebar per vincere il cascade. */
+@media (max-width:1000px){
+  .mobile-menu{display:inline-flex;align-items:center;justify-content:center}
+  body.ml-mode .ml-layout,
+  body.ml-mode .ml-layout.sidebar-collapsed,
+  html.sidebar-collapsed body.ml-mode .ml-layout{
+    display:block;
+    height:calc(100vh - 64px);
+    overflow:hidden
+  }
+  body.ml-mode section.ml-list-pane,
+  body.ml-mode section.ml-detail-pane{height:100%;width:100%}
+
+  /* Sidebar come drawer */
+  aside.ml-sidebar{
+    position:fixed;top:64px;left:0;bottom:0;width:260px;z-index:30;
+    transform:translateX(-100%);transition:transform .22s ease;
+    border-right:1px solid var(--border);box-shadow:2px 0 12px rgba(15,17,32,.08)
+  }
+  html.mobile-sidebar-open aside.ml-sidebar{transform:translateX(0)}
+  html.mobile-sidebar-open .mobile-overlay{display:block}
+  html.sidebar-collapsed aside.ml-sidebar, .ml-layout.sidebar-collapsed aside.ml-sidebar{width:260px}
+  .sidebar-toggle{display:none}
+  html.sidebar-collapsed .ml-folders li .lbl, html.sidebar-collapsed .ml-folders li .cnt,
+  html.sidebar-collapsed .ml-folders li.sep, html.sidebar-collapsed .ml-side-actions .btn .lbl{display:revert}
+  html.sidebar-collapsed .ml-folders li{justify-content:flex-start;padding:8px 10px;gap:8px}
+
+  /* List vs detail: schermo intero, navigazione via has-selection */
+  section.ml-list-pane{display:flex;flex-direction:column}
+  section.ml-detail-pane{display:none;flex-direction:column}
+  html.has-selection section.ml-list-pane{display:none}
+  html.has-selection section.ml-detail-pane{display:flex}
+
+  /* Detail-pane scrolla, head non sticky */
+  .ml-detail-pane{overflow-y:auto;overflow-x:hidden}
+  .ml-detail-head{position:static !important}
+}
+
 @media (max-width:760px){
   /* Header studio mobile */
   header.studio{padding:10px 12px;flex-wrap:nowrap;gap:8px}
