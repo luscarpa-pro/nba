@@ -1196,3 +1196,9 @@ input.toggle, select.tristate{appearance:none}
 .tut-steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:10px;font-size:14px;line-height:1.5;color:var(--ink2)}
 .tut-steps strong{color:var(--ink)}
 .tut-actions{display:flex;justify-content:flex-end;margin-top:4px}
+
+/* ============ Scoperture derivate nella tab Profilo ============ */
+.profile-gaps-note{display:flex;gap:10px;align-items:flex-start;background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px 14px;margin-bottom:14px}
+.profile-gaps-note .msi{color:#ea580c;flex:0 0 auto}
+.profile-gaps-note .gaps-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.profile-gaps-note .gap-chip{background:#ffedd5;color:#9a3412;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600}

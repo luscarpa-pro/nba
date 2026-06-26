@@ -675,6 +675,27 @@
     renderDetail({ kind:"new", type, id:"(nuovo)" });
   }
 
+  function coverageGapsFromResult() {
+    const td = STATE.lastResult && STATE.lastResult.trigger_details;
+    const g = td && td.COVERAGE_GAPS && td.COVERAGE_GAPS.gaps;
+    return Array.isArray(g) ? g : [];
+  }
+  // Mostra nella tab Profilo le scoperture DERIVATE da insurance_needs (read-only):
+  // il campo grezzo cross_sell_gaps è quasi sempre vuoto, le scoperture vere le calcola l'NBA.
+  function fillProfileGaps() {
+    const box = document.getElementById("profile-gaps");
+    if (!box) return;
+    box.innerHTML = "";
+    const gaps = coverageGapsFromResult();
+    if (!gaps.length) return;
+    box.appendChild(el("div", {class:"profile-gaps-note"},
+      el("span", {class:"msi"}, "search_insights"),
+      el("div", {},
+        el("div", {}, el("strong", {}, "Scoperture rilevate "),
+          el("span", {class:"muted"}, "(derivate da insurance_needs — calcolate dall'NBA, non modificabili qui)")),
+        el("div", {class:"gaps-chips"}, ...gaps.map(g => el("span", {class:"gap-chip"}, g))))));
+  }
+
   function renderDetail(it) {
     const pane = $("#ml-detail");
     pane.innerHTML = "";
@@ -752,9 +773,11 @@
     // ---- Profile tab pane ----
     const profilePane = el("div", {class:"tab-pane", "data-tab":"profile"});
     profilePane.appendChild(buildProfileIntro());
+    profilePane.appendChild(el("div", {id:"profile-gaps"}));
     profilePane.appendChild(STATE.profileEdit
       ? renderForm(SCHEMAS[STATE.selected.type], STATE.record)
       : renderFormView(SCHEMAS[STATE.selected.type], STATE.record));
+    fillProfileGaps();
     body.appendChild(profilePane);
 
     pane.appendChild(body);
@@ -1221,6 +1244,7 @@
         if (out) rb.appendChild(renderResultCard(out));
         else rb.appendChild(el("div", {class:"ml-not-run"}, "Nessun NBA generato (record non eleggibile)."));
       }
+      fillProfileGaps();
     } catch (e) {
       STATE.lastResult = null;
       STATE.lastBreakdown = null;
