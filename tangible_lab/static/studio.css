@@ -892,15 +892,16 @@ section.ml-detail-pane{background:#fff;overflow:auto;display:flex;flex-direction
 .ml-detail-meta strong{color:var(--ink2);font-weight:700}
 
 /* Tab strip in the detail pane */
-.detail-tabs{display:flex;gap:0;margin:14px -18px -14px;padding:0 18px;border-top:1px solid var(--border-soft);background:#fff}
+.detail-tabs{display:flex;gap:4px;margin:14px 0 6px;padding:4px;background:var(--breeze, #eef1f7);border:1px solid var(--border-soft);border-radius:10px}
 .detail-tabs .dtab{
-  background:transparent;border:none;color:var(--muted);font-weight:600;
-  font-size:12px;padding:11px 14px;cursor:pointer;border-bottom:2px solid transparent;
-  display:inline-flex;align-items:center;gap:6px;font:inherit;letter-spacing:.02em
+  flex:1;justify-content:center;background:transparent;border:none;color:var(--ink2, #475569);font-weight:600;
+  font-size:13px;padding:9px 14px;cursor:pointer;border-radius:8px;
+  display:inline-flex;align-items:center;gap:6px;font:inherit;letter-spacing:.02em;transition:background .12s,color .12s
 }
 .detail-tabs .dtab:hover{color:var(--primary)}
-.detail-tabs .dtab.active{color:var(--primary);border-bottom-color:var(--highlight)}
-.detail-tabs .dtab .msi{font-size:16px}
+.detail-tabs .dtab.active{background:var(--primary);color:#fff;box-shadow:0 1px 2px rgba(31,28,61,.14)}
+.detail-tabs .dtab.active .msi{color:#fff}
+.detail-tabs .dtab .msi{font-size:18px}
 
 .tab-pane{display:none}
 .tab-pane.active{display:block}
