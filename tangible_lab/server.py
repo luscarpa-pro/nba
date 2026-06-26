@@ -919,6 +919,19 @@ def admin_import_dataset(request: Request, payload: dict = Body(...)):
     return {"clients": len(clients), "leads": len(leads)}
 
 
+@app.post("/lab/admin/config/reset", include_in_schema=False)
+def admin_config_reset(request: Request):
+    """Ripristina la config di default del cliente (re-seed) e ricarica il motore."""
+    require_admin(request)
+    import nba_config as _nc
+    src = os.path.join(_REPO_ROOT, "nba_config.json")
+    if not os.path.exists(src):
+        raise HTTPException(status_code=500, detail="Config di default non trovata")
+    shutil.copy2(src, _nc.CONFIG_JSON_PATH)
+    _nc.reload_config()
+    return {"status": "ok"}
+
+
 # ============================== static mount (alla FINE, così non intercetta /lab/api/*) ==============================
 
 app.mount("/lab", StaticFiles(directory=LAB_DIR, html=True), name="tangible_lab")
