@@ -24,7 +24,9 @@ Tre interventi sulla UI del Lab (`tangible_lab/static/`):
 
 ## Vincoli
 
-- Solo `tangible_lab/static/studio.js` e `studio.css`. Nessun backend, nessun file vendored.
+- Solo file del Lab: `tangible_lab/static/studio.js`, `studio.css`, `index.html` (il markup
+  della toolbar di ricerca vive in `index.html`). Nessun backend, nessun file vendored
+  (`static/` in root è del cliente, non si tocca).
 - Lingua italiana per ogni copy/commento. Riuso degli helper esistenti.
 - Niente framework di test: `node --check tangible_lab/static/studio.js` + verifica Playwright.
 - Stato dei filtri persistito in `localStorage` sotto chiavi `nba.lab.*` (come l'attuale
@@ -71,18 +73,30 @@ restano invariate.
   per ogni item, ricavare la chiave di giudizio (`getReview(it)?.judgement` oppure `none`)
   e tenerlo solo se `STATE.judgeFilter[key]` è `true`.
 
-### 3. Responsive (~700–1000px)
+### 3. Responsive (~760–1000px)
 
-Solo `studio.css` ove possibile.
-- **`.detail-tabs`**: correggere lo sforamento (box-sizing/padding/gap) così le tab restano
-  nella larghezza del pannello senza overflow.
-- **Composizione del punteggio** (le barre `span.s`): il contenitore deve adattarsi alla
-  larghezza disponibile (larghezza fluida / wrap) invece di clippare il contenuto.
-- **`.ml-list-toolbar`**: ricerca + "Filtri" (+ eventuali altri controlli) devono andare a
-  capo in modo pulito quando lo spazio si stringe, senza schiacciare l'input di ricerca.
-- Verificare il passaggio già esistente a layout compatto a 1000px (`.ml-layout` → `1fr`,
-  bottone "indietro") e rifinire ciò che stona in quel range. Niente nuovi breakpoint se
-  non necessari.
+Solo `studio.css`. **Diagnosi (verificata con Playwright a 900px):** oggi a `≤1000px` la
+griglia `.ml-layout` collassa a `1fr` con `height:auto;overflow:visible` (riga ~803), ma la
+**modalità compatta** (drawer sidebar + swap lista/dettaglio + contenimento altezza) scatta
+solo a `≤760px`. Risultato: nella fascia 760–1000px sidebar, lista e dettaglio si **impilano
+verticalmente senza scroll interno** — la lista renderizza a piena altezza (~47000px) e il
+dettaglio finisce fuori schermo. Inutilizzabile.
+
+**Intervento:** alzare la soglia della **modalità compatta strutturale** da 760px a **1000px**,
+mantenendo a `≤760px` solo le rifiniture cosmetiche "telefono".
+- Estrarre in un nuovo blocco `@media (max-width:1000px)` le regole **strutturali** oggi nel
+  blocco `@media (max-width:760px)`: layout a blocco con `height:calc(100vh - 56px)` +
+  `overflow:hidden`; `section.ml-list-pane`/`.ml-detail-pane` a `height:100%;width:100%`;
+  sidebar come drawer (`position:fixed`, `transform:translateX(-100%)`, overlay); swap
+  lista↔dettaglio via `html.has-selection`; hamburger `.mobile-menu{display:inline-flex}`;
+  `.ml-detail-pane{overflow-y:auto}` + `.ml-detail-head{position:static}`.
+- La riga `@media (max-width:1000px){.ml-layout … height:auto;overflow:visible}` (riga ~803)
+  va **rimossa/sostituita** dalle regole di modalità compatta (era la causa dello stacking).
+- Restano a `@media (max-width:760px)` solo le regole **cosmetiche**: compattazione header,
+  pulsanti azione solo-icona, `.ml-detail-meta{display:none}`, tab a pillola sticky/scrollabili,
+  back-button solo-icona, dimensioni font del titolo.
+- La nuova `.ml-list-toolbar` (che ora ospita il bottone "Filtri") deve andare a capo in modo
+  pulito quando lo spazio si stringe.
 
 ## Data flow
 
@@ -105,12 +119,16 @@ persiste in `localStorage`, aggiorna badge, richiama `renderListPane`.
     spariscono dalla lista; "Azzera filtri" li riporta; badge coerente col numero di giudizi
     esclusi; stato persiste dopo reload.
   - "Nascondi analizzati" non è più nella toolbar.
-  - Responsive a ~768px e ~960px: nessun overflow orizzontale, tab del dettaglio dentro la
-    riga, barre punteggio non tagliate, toolbar che va a capo in modo leggibile.
+  - Responsive a ~768px e ~960px: la lista NON renderizza a piena altezza (ha scroll interno),
+    il dettaglio è raggiungibile (swap lista↔dettaglio col bottone "indietro"), l'hamburger
+    apre la sidebar drawer, nessun overflow orizzontale, toolbar che va a capo in modo
+    leggibile.
 
 ## Rischi
 
 - Migrazione `hideReviewed` → `judgeFilter`: se la migrazione non scatta, l'utente riparte
   con tutti i giudizi visibili (degradazione innocua, non un crash).
-- Individuare il contenitore delle barre punteggio per il fix responsive: se la struttura
-  cambia lato motore, il fix CSS potrebbe non agganciarsi (degradazione innocua).
+- Spostare le regole strutturali da `≤760px` a `≤1000px`: il blocco 760px mescola regole
+  strutturali e cosmetiche; partizionarle male potrebbe lasciare la sidebar drawer
+  inaccessibile (es. hamburger nascosto) o le tab senza scroll. Mitigazione: verifica
+  Playwright a 768/900/1000px che la sidebar si apra e lista/dettaglio facciano swap.
