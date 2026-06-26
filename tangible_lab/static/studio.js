@@ -697,6 +697,129 @@
         el("div", {class:"gaps-chips"}, ...gaps.map(g => el("span", {class:"gap-chip"}, g))))));
   }
 
+  // ============================== Wizard nuova anagrafica ==============================
+  const WIZARD_STEPS = {
+    client: [
+      { title: "Identità & contatti", keys: ["client_id","email","phone","preferred_channel"] },
+      { title: "Polizze", array: "policies" },
+      { title: "Pagamenti & relazione", keys: ["unpaid_days","last_contact_days","birthday_days","anniversary_days","checkup_done"] },
+      { title: "Scoperture (cross-sell)", keys: ["cross_sell_gaps"] },
+      { title: "VIVA & campagne", optional: true, keys: ["viva_enrolled","viva_points","viva_points_expiring"], array: "active_campaigns" },
+    ],
+    lead: [
+      { title: "Dati lead", keys: ["lead_id","product","marketing_consent"] },
+      { title: "Timing & preventivo", keys: ["created_hours_ago","last_contact_days","quote_premium","coverage_start_days"] },
+    ],
+  };
+  const WIZ = { type: null, record: null, step: 0 };
+
+  function wizardFieldDef(type, k) {
+    for (const sec of SCHEMAS[type].sections) {
+      if (sec.fields) { const f = sec.fields.find(x => x.k === k); if (f) return f; }
+    }
+    return { k, label: k, type: "text" };
+  }
+  function wizardArraySection(type, arrayKey) {
+    return SCHEMAS[type].sections.find(s => s.arrayKey === arrayKey);
+  }
+
+  function buildWizardOverlay() {
+    if (document.getElementById("wiz-overlay")) return;
+    const panel = el("div", {class:"wiz-panel", id:"wiz-panel", role:"dialog", "aria-label":"Nuova anagrafica"});
+    const overlay = el("div", {id:"wiz-overlay", class:"wiz-overlay"}, panel);
+    overlay.addEventListener("click", e => { if (e.target === overlay) closeWizard(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && overlay.classList.contains("open")) closeWizard(); });
+    document.body.appendChild(overlay);
+  }
+  function openWizard() {
+    WIZ.type = null; WIZ.record = null; WIZ.step = 0;
+    buildWizardOverlay();
+    renderWizard();
+    document.getElementById("wiz-overlay").classList.add("open");
+  }
+  function closeWizard() {
+    const o = document.getElementById("wiz-overlay"); if (o) o.classList.remove("open");
+  }
+
+  function renderWizard() {
+    const panel = document.getElementById("wiz-panel");
+    panel.innerHTML = "";
+    if (!WIZ.type) {
+      panel.appendChild(el("div", {class:"wiz-head"}, el("h2", {}, "Nuova anagrafica di test")));
+      const pick = (t) => {
+        WIZ.type = t; WIZ.record = emptyRecord(t); WIZ.step = 0;
+        if (t === "client") WIZ.record.client_id = "C" + String(Date.now()).slice(-6);
+        else WIZ.record.lead_id = "L" + String(Date.now()).slice(-6);
+        renderWizard();
+      };
+      panel.appendChild(el("div", {class:"wiz-typecards"},
+        el("button", {class:"wiz-typecard", type:"button", onclick:()=>pick("client")}, el("span",{class:"msi"},"person"), el("div",{},"Cliente")),
+        el("button", {class:"wiz-typecard", type:"button", onclick:()=>pick("lead")}, el("span",{class:"msi"},"crisis_alert"), el("div",{},"Lead"))));
+      panel.appendChild(el("div", {class:"wiz-foot"}, el("button", {class:"btn ghost", type:"button", onclick:closeWizard}, "Annulla")));
+      return;
+    }
+    const steps = WIZARD_STEPS[WIZ.type];
+    const total = steps.length + 1;
+    const isSummary = WIZ.step >= steps.length;
+    panel.appendChild(el("div", {class:"wiz-head"},
+      el("h2", {}, isSummary ? "Riepilogo" : steps[WIZ.step].title),
+      el("div", {class:"wiz-progress"}, ...Array.from({length: total}, (_, i) => el("span", {class:"wiz-dot" + (i <= WIZ.step ? " on" : "")})))));
+    const bodyEl = el("div", {class:"wiz-body"});
+    if (!isSummary) {
+      const step = steps[WIZ.step];
+      (step.keys || []).forEach(k => bodyEl.appendChild(renderField(wizardFieldDef(WIZ.type, k), WIZ.record)));
+      if (step.array) {
+        if (!Array.isArray(WIZ.record[step.array])) WIZ.record[step.array] = [];
+        const sec = wizardArraySection(WIZ.type, step.array);
+        if (sec) bodyEl.appendChild(renderArraySection(sec, WIZ.record));
+      }
+      if (step.optional) bodyEl.appendChild(el("div", {class:"muted", style:{fontSize:"12px",marginTop:"8px"}}, "Step facoltativo — puoi saltarlo."));
+    } else {
+      bodyEl.appendChild(el("div", {id:"wiz-preview", class:"muted"}, "Calcolo anteprima…"));
+      wizardPreview();
+    }
+    panel.appendChild(bodyEl);
+    const foot = el("div", {class:"wiz-foot"});
+    foot.appendChild(el("button", {class:"btn ghost", type:"button", onclick:closeWizard}, "Annulla"));
+    const right = el("div", {class:"wiz-foot-right"});
+    if (WIZ.step > 0 || isSummary) right.appendChild(el("button", {class:"btn ghost", type:"button", onclick:()=>{ WIZ.step--; renderWizard(); }}, "Indietro"));
+    if (!isSummary) {
+      if (steps[WIZ.step].optional) right.appendChild(el("button", {class:"btn ghost", type:"button", onclick:()=>{ WIZ.step++; renderWizard(); }}, "Salta"));
+      right.appendChild(el("button", {class:"btn primary-cta", type:"button", onclick:()=>{ WIZ.step++; renderWizard(); }}, "Avanti"));
+    } else {
+      right.appendChild(el("button", {class:"btn primary-cta", type:"button", onclick:wizardFinish}, "Crea e testa"));
+    }
+    foot.appendChild(right);
+    panel.appendChild(foot);
+  }
+
+  async function wizardPreview() {
+    const box = document.getElementById("wiz-preview");
+    if (!box) return;
+    try {
+      const url = WIZ.type === "client" ? "/nba/client/preview?debug=true" : "/nba/lead/preview";
+      const body = WIZ.type === "client" ? {client: WIZ.record, config: STATE.config} : {lead: WIZ.record, config: STATE.config};
+      const out = await fetchJSON(url, {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)});
+      const trigs = (out && out.triggers) || [];
+      box.innerHTML = "";
+      box.appendChild(el("div", {}, el("strong", {}, "Trigger che si attiveranno:")));
+      if (!trigs.length) box.appendChild(el("div", {class:"muted"}, "Nessun trigger — il record potrebbe non generare un'azione."));
+      else box.appendChild(el("div", {class:"wiz-trigs"}, ...trigs.map(t => el("span", {class:"gap-chip"}, (TRIG_LABELS[t] && TRIG_LABELS[t].lbl) || t))));
+    } catch (e) { box.textContent = "Anteprima non disponibile: " + e.message; }
+  }
+
+  function wizardFinish() {
+    const type = WIZ.type, rec = WIZ.record;
+    closeWizard();
+    STATE.selected = { kind:"new", type, id: rec[type === "client" ? "client_id" : "lead_id"] || "(nuovo)" };
+    STATE.record = rec;
+    STATE.lastResult = null; STATE.lastBreakdown = null; STATE.profileEdit = false;
+    document.documentElement.classList.add("has-selection");
+    renderListPane();
+    renderDetail(STATE.selected);
+    runNBA();
+  }
+
   function renderDetail(it) {
     const pane = $("#ml-detail");
     pane.innerHTML = "";
@@ -2170,12 +2293,7 @@
       });
     }
     // sidebar actions
-    $("#ana-new").addEventListener("click", () => {
-      // chiedi tipo
-      const t = (prompt("Tipo? Scrivi 'client' o 'lead':", "client") || "").trim().toLowerCase();
-      if (t !== "client" && t !== "lead") { toast("Tipo non valido", "err"); return; }
-      openNewDraft(t);
-    });
+    $("#ana-new").addEventListener("click", () => openWizard());
     // server URL chip (optional in header)
     const serverChip = $("#server-url"); if (serverChip) serverChip.textContent = location.origin;
     // sidebar collapse toggle (persisted; initial class is applied by the
