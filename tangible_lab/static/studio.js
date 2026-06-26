@@ -1010,7 +1010,6 @@
     // Card 1: Riepilogo (score bubble + mini stats)
     const tierLabel = TIER_LABELS[tier] || tier;
     const stratLabel = STRATEGY_LABELS[out.strategic_category] || out.strategic_category || "—";
-    const presLabel = out.presentation_mode || "—";
     const nTrigs = (out.triggers || []).length;
     const nActs = acts.length;
     // dominant weight factor (from config)
@@ -1035,7 +1034,6 @@
           ),
           el("div", {class:"summary-stats"},
             statTile("Strategia", stratLabel, "track_changes"),
-            statTile("Modalità", presLabel, "view_compact"),
             statTile("Trigger attivi", String(nTrigs), "bolt"),
             statTile("Azioni totali", String(nActs) + (primary.length ? ` (${primary.length} primary)` : ""), "checklist"),
             topFactor ? statTile("Fattore dominante", (FACTOR_LABELS[topFactor.k] || topFactor.k) + " · " + Math.round(topFactor.v*100) + "%", "leaderboard") : null
