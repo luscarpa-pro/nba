@@ -687,8 +687,8 @@
   }
   // Mostra nella tab Profilo le scoperture DERIVATE da insurance_needs (read-only):
   // il campo grezzo cross_sell_gaps è quasi sempre vuoto, le scoperture vere le calcola l'NBA.
-  function fillProfileGaps() {
-    const box = document.getElementById("profile-gaps");
+  function fillProfileGaps(box) {
+    box = box || document.getElementById("profile-gaps");
     if (!box) return;
     box.innerHTML = "";
     const gaps = coverageGapsFromResult();
@@ -929,8 +929,6 @@
         )
       ),
       el("div", {class:"ml-detail-actions"},
-        el("button", {class:"btn primary-cta", onclick: () => { switchDetailTab("nba"); runNBA(); }, id:"detail-run"}, el("span", {class:"msi"}, "play_arrow"), " Esegui NBA"),
-        el("button", {class:"btn ghost", onclick: () => { startProfileEdit(); switchDetailTab("profile"); }}, el("span", {class:"msi"}, "edit"), " Modifica record"),
         el("button", {class:"btn ghost", onclick: showSaveDialog}, el("span", {class:"msi"}, "save"), " Salva caso"),
         it.kind === "saved" ? el("button", {class:"btn danger", onclick: () => deleteCurrentSaved()}, el("span", {class:"msi"}, "delete"), " Elimina") : null
       )
@@ -968,12 +966,7 @@
 
     // ---- Profile tab pane ----
     const profilePane = el("div", {class:"tab-pane", "data-tab":"profile"});
-    profilePane.appendChild(buildProfileIntro());
-    profilePane.appendChild(el("div", {id:"profile-gaps"}));
-    profilePane.appendChild(STATE.profileEdit
-      ? renderForm(SCHEMAS[STATE.selected.type], STATE.record)
-      : renderFormView(SCHEMAS[STATE.selected.type], STATE.record));
-    fillProfileGaps();
+    renderProfileBody(profilePane);
     body.appendChild(profilePane);
 
     pane.appendChild(body);
@@ -1113,6 +1106,21 @@
     return wrap;
   }
 
+  // Costruisce il corpo della tab Profilo: intro + form, con il riquadro
+  // "Scoperture rilevate" inserito subito dopo la sezione "VIVA Points".
+  function renderProfileBody(pane) {
+    pane.innerHTML = "";
+    pane.appendChild(buildProfileIntro());
+    const form = STATE.profileEdit
+      ? renderForm(SCHEMAS[STATE.selected.type], STATE.record)
+      : renderFormView(SCHEMAS[STATE.selected.type], STATE.record);
+    pane.appendChild(form);
+    const gaps = el("div", {id:"profile-gaps"});
+    const viva = [...form.querySelectorAll(".section-block")].find(b => /VIVA Points/.test(b.textContent));
+    if (viva) viva.after(gaps); else form.appendChild(gaps);
+    fillProfileGaps(gaps);
+  }
+
   // ---- Profile view/edit ----
   function buildProfileIntro() {
     const it = STATE.selected;
@@ -1156,16 +1164,13 @@
     STATE.profileEdit = false;
     STATE.profileBackup = null;
     rerenderProfilePane();
-    toast("Modifiche applicate — puoi ora rieseguire l'NBA", "ok");
+    runNBA();
+    toast("Modifiche applicate — NBA ricalcolato", "ok");
   }
   function rerenderProfilePane() {
     const pane = document.querySelector('.tab-pane[data-tab="profile"]');
     if (!pane) return;
-    pane.innerHTML = "";
-    pane.appendChild(buildProfileIntro());
-    pane.appendChild(STATE.profileEdit
-      ? renderForm(SCHEMAS[STATE.selected.type], STATE.record)
-      : renderFormView(SCHEMAS[STATE.selected.type], STATE.record));
+    renderProfileBody(pane);
   }
 
   function renderFormView(schema, data) {
