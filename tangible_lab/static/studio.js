@@ -2274,6 +2274,7 @@
       rows.forEach(r => { STATE.reviews[r.target_key] = { judgement: r.judgement, reviewedAt: r.updated_at }; });
     } catch { STATE.reviews = {}; }
     loadJudgeFilter();
+    syncJudgeFilterUI();  // riallinea checkbox+badge allo stato persistito/migrato (bindAll è già passato)
   }
   function getReview(it) { return it ? STATE.reviews[reviewKey(it)] : null; }
   async function setReview(it, judgement) {
@@ -2382,12 +2383,21 @@
     if (excluded > 0) { badge.textContent = String(excluded); badge.hidden = false; }
     else { badge.hidden = true; }
   }
+  // Allinea checkbox + badge allo stato STATE.judgeFilter (es. dopo loadJudgeFilter al boot).
+  function syncJudgeFilterUI() {
+    const pop = $("#filter-popover");
+    if (pop) {
+      pop.querySelectorAll("input[data-judge]").forEach(inp => {
+        inp.checked = STATE.judgeFilter[inp.dataset.judge] !== false;
+      });
+    }
+    updateFilterBadge();
+  }
   function initJudgeFilterUI() {
     const btn = $("#filter-btn");
     const pop = $("#filter-popover");
     if (!btn || !pop) return;
     pop.querySelectorAll("input[data-judge]").forEach(inp => {
-      inp.checked = STATE.judgeFilter[inp.dataset.judge] !== false;
       inp.addEventListener("change", () => {
         STATE.judgeFilter[inp.dataset.judge] = inp.checked;
         saveJudgeFilter();
@@ -2395,7 +2405,7 @@
         renderListPane();
       });
     });
-    updateFilterBadge();
+    syncJudgeFilterUI();
     const close = () => { pop.hidden = true; btn.setAttribute("aria-expanded","false"); };
     const open  = () => { pop.hidden = false; btn.setAttribute("aria-expanded","true"); };
     btn.addEventListener("click", (e) => { e.stopPropagation(); pop.hidden ? open() : close(); });
@@ -2406,8 +2416,7 @@
     $("#filter-reset").addEventListener("click", () => {
       STATE.judgeFilter = { ok:true, ko:true, unsure:true, none:true };
       saveJudgeFilter();
-      pop.querySelectorAll("input[data-judge]").forEach(inp => { inp.checked = true; });
-      updateFilterBadge();
+      syncJudgeFilterUI();
       renderListPane();
     });
   }
