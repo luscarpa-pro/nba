@@ -2246,70 +2246,25 @@
       if (String(e.message).startsWith("401")) { location.href = "/lab/login.html"; return; }
       toast("Errore auth: " + e.message, "err"); return;
     }
-    // Header utente con dropdown
+    // Header: solo link essenziali (single-user: niente user-chip, niente link Tutorial)
     const headerActions = document.querySelector("header.studio .actions");
-    if (headerActions && !document.querySelector(".user-chip-wrap")) {
-      const wrap = document.createElement("div");
-      wrap.className = "user-chip-wrap";
-      wrap.innerHTML = `
-        <button class="user-chip" type="button" id="user-chip-btn">
-          <span class="msi">person</span>
-          <span class="user-name">${STATE.me.username}</span>
-          <span class="msi user-caret">expand_more</span>
-        </button>
-        <div class="user-menu" id="user-menu" hidden>
-          <div class="user-menu-header">
-            <span class="msi">account_circle</span>
-            <div>
-              <div class="umh-name">${STATE.me.username}</div>
-            </div>
-          </div>
-          <a class="user-menu-item" id="menu-original" href="/" title="UI originale del backend Vittoria (solo lettura)">
-            <span class="msi">code</span> Tool originale Vittoria
-            <span class="user-menu-arrow msi">open_in_new</span>
-          </a>
-        </div>`;
-      headerActions.insertBefore(wrap, headerActions.children[0]);
-
-      const menu = wrap.querySelector("#user-menu");
-      const closeMenu = () => menu.setAttribute("hidden", "");
-      wrap.querySelector("#user-chip-btn").addEventListener("click", e => {
-        e.stopPropagation();
-        if (menu.hasAttribute("hidden")) menu.removeAttribute("hidden");
-        else closeMenu();
-      });
-      document.addEventListener("click", closeMenu);
-      document.addEventListener("keydown", e => { if (e.key === "Escape") closeMenu(); });
-      // Link al Check-up Vittoria (per tutti gli utenti loggati)
-      const checkupLink = document.createElement("a");
-      checkupLink.className = "home-link";
-      checkupLink.href = "/lab/checkup.html";
-      checkupLink.title = "Check-up Vittoria — simulatore bisogni";
-      checkupLink.innerHTML = '<span class="msi">health_and_safety</span><span class="home-link-lbl">Check-up</span>';
-      headerActions.insertBefore(checkupLink, headerActions.children[0]);
-      // Link alla Guida "Come funziona" (per tutti gli utenti loggati)
-      const guidaLink = document.createElement("a");
-      guidaLink.className = "home-link";
-      guidaLink.href = "/lab/guida.html";
-      guidaLink.title = "Guida — come funziona l'algoritmo NBA";
-      guidaLink.innerHTML = '<span class="msi">menu_book</span><span class="home-link-lbl">Guida</span>';
-      headerActions.insertBefore(guidaLink, headerActions.children[0]);
-      // Pulsante "?" — riapre il tutorial di utilizzo iniziale
-      const helpBtn = document.createElement("button");
-      helpBtn.className = "home-link";
-      helpBtn.type = "button";
-      helpBtn.title = "Come iniziare — tutorial";
-      helpBtn.innerHTML = '<span class="msi">help</span><span class="home-link-lbl">Tutorial</span>';
-      helpBtn.addEventListener("click", () => showTutorial());
-      headerActions.insertBefore(helpBtn, headerActions.children[0]);
-      if (STATE.me.role === "admin") {
-        const adminLink = document.createElement("a");
-        adminLink.className = "home-link";
-        adminLink.href = "/lab/admin.html";
-        adminLink.title = "Strumenti";
-        adminLink.innerHTML = '<span class="msi">build</span><span class="home-link-lbl">Strumenti</span>';
-        headerActions.insertBefore(adminLink, headerActions.children[0]);
-      }
+    if (headerActions && !headerActions.dataset.built) {
+      headerActions.dataset.built = "1";
+      const addLink = (href, icon, label, title) => {
+        const a = document.createElement("a");
+        a.className = "home-link"; a.href = href; a.title = title || label;
+        a.innerHTML = `<span class="msi">${icon}</span><span class="home-link-lbl">${label}</span>`;
+        headerActions.insertBefore(a, headerActions.children[0]);
+        return a;
+      };
+      addLink("/lab/admin.html", "database", "Dati", "Dati — importa/esporta");
+      addLink("/lab/guida.html", "menu_book", "Guida", "Guida — come funziona l'algoritmo NBA");
+      addLink("/lab/checkup.html", "health_and_safety", "Check-up", "Check-up Vittoria — simulatore bisogni");
+    }
+    // Riapertura tutorial da link esterno (?tutorial=1), poi pulisce l'URL
+    if (new URLSearchParams(location.search).get("tutorial") === "1") {
+      showTutorial();
+      history.replaceState(null, "", location.pathname);
     }
 
     bindAll();
