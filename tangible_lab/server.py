@@ -60,6 +60,10 @@ if _DATA_DIR:
     import nba_catalog as _nba_catalog
     _nba_api.DATASET_PATH = _seeded_dataset
     _nba_config.CONFIG_JSON_PATH = _seeded_config
+    # nba_api ha fatto `from nba_config import CONFIG_JSON_PATH` (cattura per valore):
+    # va riassegnato anche lì, altrimenti GET/PUT /config leggono/scrivono il path di
+    # default (repo) invece di quello seedato → la config persiste nel posto sbagliato.
+    _nba_api.CONFIG_JSON_PATH = _seeded_config
     _nba_catalog.OVERRIDES_PATH = _seeded_overrides
     # nba_config carica e CACHA `CONFIG` all'import (avvenuto sopra con
     # `from nba_api import app`), quando CONFIG_JSON_PATH puntava ancora al default.
