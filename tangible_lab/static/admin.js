@@ -60,10 +60,13 @@
       el("li", {}, el("strong", {}, "Note"), " — testo di tutte le note/commenti: utente, target, nota, date")
     ));
 
+    // Applica il flag "messaggi rivisti" all'export se il toggle è attivo in studio
+    const revisedFlag = localStorage.getItem("nba.lab.revisedMessages") === "1" ? "1" : "0";
+    const exportUrl = `/lab/admin/export/state.xlsx?revised=${revisedFlag}`;
     body.appendChild(el("div", {style:{display:"flex",gap:"10px",marginTop:"6px",flexWrap:"wrap"}},
       el("a", {
         class:"btn primary-cta",
-        href:"/lab/admin/export/state.xlsx",
+        href: exportUrl,
         download:"stato-test.xlsx",
         style:{textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"6px",padding:"10px 18px"}
       }, el("span", {class:"msi"}, "download"), " Scarica Excel"),

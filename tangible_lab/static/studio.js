@@ -180,6 +180,8 @@
     profileBackup: null,      // snapshot record per "Annulla"
     reviews: {},              // key "kind:type:id" → {judgement: "ok|ko|unsure", note, reviewedAt}
     judgeFilter: { ok:true, ko:true, unsure:true, none:true },  // filtro lista per giudizio operatore
+    revisedMessages: false,   // toggle "Messaggi rivisti"
+    messagesMap: null,        // mappa compilata (caricata da /lab/api/messages-map)
     cmpMode: "weights",       // weights | tiers | churn | leadthr | boosts | premiums | json
     cmpWeights: null,         // pesi (chiavi diverse per client/lead)
     cmpTiers: null,           // {CRITICAL, HIGH, MEDIUM} 0-100
@@ -199,6 +201,7 @@
   const LS_HIDE_REVIEWED = "nba.lab.hideReviewed";
   const LS_JUDGE_FILTER = "nba.lab.judgeFilter";
   const LS_TUTORIAL = "nba.lab.tutorial.seen";
+  const LS_REVISED_MSG = "nba.lab.revisedMessages";
 
   // ============================== utils ==============================
   const $ = s => document.querySelector(s);
@@ -475,7 +478,7 @@
       out.push({
         kind:"predef", type:"client", id:c.client_id,
         name: c.client_id,
-        snippet: summarizeTriggers(det),
+        snippet: predefSnippet(det, c.nba),
         score: c.priority_score, tier: c.priority_tier, strategy: c.strategic_category,
         ts: relTs("client", c.client_json),
         data: c.client_json
@@ -486,7 +489,7 @@
       out.push({
         kind:"predef", type:"lead", id:l.lead_id,
         name: l.lead_id,
-        snippet: summarizeTriggers(det),
+        snippet: predefSnippet(det, l.nba),
         score: l.priority_score, tier: l.priority_tier, strategy: l.strategic_category,
         ts: relTs("lead", l.lead_json),
         data: l.lead_json
@@ -1243,6 +1246,61 @@
     );
   }
 
+  // ============================== revisione messaggi ==============================
+  // token -> frammento regex (identico a tangible_lab/messages.py)
+  const REV_TOKENS = { PRODOTTO:"(.+?)", PREMIO:"([\\d.,]+)", N:"(\\d+)", CAMPAGNA:"(.+?)", NEAR:"(\\d+)", OLD:"(\\d+)" };
+  const REV_TOKEN_RE = /\{([A-Z]+)\}/g;
+  const REV_SPLIT_CATS = new Set(["CROSS_SELL","VIVA","CHECKUP"]);
+  const REV_BLOCK_SEP = " — ";  // em-dash U+2014 con spazi
+
+  function compileMessagesMap(raw) {
+    return (raw || []).map(entry => {
+      const tokens = [];
+      // costruisce il pattern: escape dei letterali, token -> frammento
+      let pattern = "", last = 0, m;
+      REV_TOKEN_RE.lastIndex = 0;
+      while ((m = REV_TOKEN_RE.exec(entry.match)) !== null) {
+        pattern += entry.match.slice(last, m.index).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        pattern += REV_TOKENS[m[1]] || m[0].replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        tokens.push(m[1]);
+        last = m.index + m[0].length;
+      }
+      pattern += entry.match.slice(last).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      return { category: entry.category, regex: new RegExp("^" + pattern + "$"), tokens, revised: entry.revised };
+    });
+  }
+
+  function reviseOne(category, text) {
+    const map = STATE.messagesMap || [];
+    for (const e of map) {
+      if (e.category !== null && e.category !== category) continue;
+      const mm = e.regex.exec(text);
+      if (!mm) continue;
+      const values = {};
+      e.tokens.forEach((t, i) => { values[t] = mm[i+1]; });
+      return e.revised.replace(REV_TOKEN_RE, (_, tk) => (tk in values ? values[tk] : "{"+tk+"}"));
+    }
+    return text;
+  }
+
+  function reviseMessage(category, text) {
+    if (!text || !STATE.revisedMessages || !STATE.messagesMap) return text;
+    if (REV_SPLIT_CATS.has(category) && text.includes(REV_BLOCK_SEP)) {
+      return text.split(REV_BLOCK_SEP).map(seg => reviseOne(category, seg)).join(REV_BLOCK_SEP);
+    }
+    return reviseOne(category, text);
+  }
+
+  // snippet per item predef: usa il messaggio rivisto se il toggle è attivo
+  function predefSnippet(det, nbaActions) {
+    if (STATE.revisedMessages && Array.isArray(nbaActions) && nbaActions.length) {
+      const primary = nbaActions.find(a => a.primary) || nbaActions[0];
+      const t = reviseMessage(primary.action_category, primary.recommended_action);
+      if (t) return t;
+    }
+    return summarizeTriggers(det);
+  }
+
   function renderActionCards(acts, out, primary) {
     const wrap = el("div", {class:"actions-list"});
     const presentTriggers = new Set(out?.triggers || []);
@@ -1255,7 +1313,7 @@
           el("span", {class:"chip"}, el("span", {class:"msi"}, channelIcon(a.recommended_channel)), " " + (a.recommended_channel || "—")),
           a.suggest_appointment ? el("span", {class:"chip"}, el("span", {class:"msi"}, "event"), " appuntamento") : null
         ),
-        el("div", {class:"desc"}, a.recommended_action || ""),
+        el("div", {class:"desc"}, reviseMessage(a.action_category, a.recommended_action) || ""),
         causeLabels.length ? el("div", {class:"caused-by"},
           el("span", {class:"caused-by-lbl"}, "Causata da:"),
           " " + causeLabels.join(" · ")
@@ -1413,7 +1471,7 @@
           el("span", {class:"chip"}, el("span", {class:"msi"}, channelIcon(a.recommended_channel)), " " + (a.recommended_channel || "—")),
           a.suggest_appointment ? el("span", {class:"chip"}, el("span", {class:"msi"}, "event"), " appuntamento") : null
         ),
-        el("div", {class:"desc"}, a.recommended_action || ""),
+        el("div", {class:"desc"}, reviseMessage(a.action_category, a.recommended_action) || ""),
         causeLabels.length ? el("div", {class:"caused-by"},
           el("span", {class:"caused-by-lbl"}, "Causata da:"),
           " " + causeLabels.join(" · ")
@@ -2451,6 +2509,18 @@
       localStorage.setItem(LS_SIDEBAR, collapsed ? "1" : "0");
     });
 
+    // Toggle "Messaggi rivisti"
+    const revTgl = $("#revised-messages-toggle");
+    if (revTgl) {
+      revTgl.checked = STATE.revisedMessages;
+      revTgl.addEventListener("change", () => {
+        STATE.revisedMessages = revTgl.checked;
+        localStorage.setItem(LS_REVISED_MSG, revTgl.checked ? "1" : "0");
+        STATE.items = buildItems(); updateFolderCounts(); renderListPane();
+        if (STATE.selected) runNBA();   // re-render del dettaglio aperto
+      });
+    }
+
     // Mobile: hamburger → apre sidebar come drawer
     const closeMobileSidebar = () => html.classList.remove("mobile-sidebar-open");
     $("#mobile-menu")?.addEventListener("click", () => html.classList.toggle("mobile-sidebar-open"));
@@ -2541,6 +2611,16 @@
     loadSnapshotsFromLS();
     await loadReviewsFromAPI();
     updateFolderActive();
+    // Carica la mappa messaggi rivisti e legge il toggle da localStorage
+    try {
+      const rawMap = await fetchJSON("/lab/api/messages-map");
+      STATE.messagesMap = compileMessagesMap(rawMap);
+    } catch { STATE.messagesMap = []; }
+    STATE.revisedMessages = localStorage.getItem(LS_REVISED_MSG) === "1";
+    // Allinea la checkbox dopo che lo stato è stato letto
+    const revTglBoot = $("#revised-messages-toggle");
+    if (revTglBoot) revTglBoot.checked = STATE.revisedMessages;
+
     try {
       const [clients, leads, cfg] = await Promise.all([
         fetchJSON("/nba/clients?n=10000"),
