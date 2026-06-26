@@ -66,12 +66,6 @@
   async function init() {
     try { STATE.me = await fetchJSON("/lab/api/me"); }
     catch { return; }
-    $("#user-chip").innerHTML = `<span class="msi">person</span> ${STATE.me.username}`;
-    if (STATE.me.role === "admin") $("#admin-link").style.display = "";
-    $("#logout-btn").addEventListener("click", async () => {
-      await fetch("/lab/api/logout", {method:"POST", credentials:"include"});
-      location.href = "/lab/login.html";
-    });
 
     try {
       STATE.data = await fetchJSON("/lab/api/checkup/data");

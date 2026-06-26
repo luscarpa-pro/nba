@@ -434,11 +434,17 @@
   }
 
   function reRenderSection(sec, data, container) {
-    // Replace the whole <.section-block> that wraps this section
+    // Caso form normale: rimpiazza l'intero <.section-block> che avvolge la sezione
     const sectionBlock = container.closest(".section-block");
-    if (!sectionBlock) return;
-    const newRoot = renderForm({sections:[sec]}, data);
-    sectionBlock.parentNode.replaceChild(newRoot.firstChild, sectionBlock);
+    if (sectionBlock) {
+      const newRoot = renderForm({sections:[sec]}, data);
+      sectionBlock.parentNode.replaceChild(newRoot.firstChild, sectionBlock);
+      return;
+    }
+    // Caso wizard (nessun .section-block): rirenderizza la sezione array in place
+    if (container.parentNode) {
+      container.parentNode.replaceChild(renderArraySection(sec, data), container);
+    }
   }
 
   function renderArrayCard(sec, list, idx, parentNode, data) {

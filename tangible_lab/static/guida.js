@@ -255,7 +255,6 @@
     let me;
     try { me = await fetchJSON("/lab/api/me"); }
     catch { return; } // 401 → redirect già fatto
-    $("#user-chip").innerHTML = `<span class="msi">person</span> ${me.username}`;
 
     setupScrollspy();
 

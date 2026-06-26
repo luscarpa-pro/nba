@@ -31,7 +31,6 @@
     try { STATE.me = await fetchJSON("/lab/api/me"); }
     catch { return; }
     if (STATE.me.role !== "admin") { location.href = "/lab/"; return; }
-    $("#me-name").textContent = STATE.me.username;
     $$('.admin-tabs button').forEach(b => b.addEventListener("click", () => switchTab(b.dataset.tab)));
     $("#modal-bg").addEventListener("click", e => { if (e.target.id === "modal-bg") closeModal(); });
     switchTab("export");
