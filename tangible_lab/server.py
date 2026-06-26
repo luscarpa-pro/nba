@@ -98,6 +98,7 @@ from tangible_lab.auth import (  # noqa: E402
 )
 from tangible_lab import models  # noqa: E402
 from tangible_lab import checkup_engine, checkup_models  # noqa: E402
+from tangible_lab import messages as lab_messages  # noqa: E402
 
 
 LAB_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
@@ -454,9 +455,11 @@ def admin_list_cases(request: Request):
 
 
 @app.get("/lab/admin/export/state.xlsx", include_in_schema=False)
-def admin_export_state(request: Request):
-    """Export Excel multi-foglio dello stato dei test (solo admin)."""
+def admin_export_state(request: Request, revised: str = "0"):
+    """Export Excel multi-foglio dello stato dei test (solo admin).
+    Parametro query ?revised=1 applica i messaggi rivisti all'azione primaria."""
     require_admin(request)
+    _use_revised = str(revised) in ("1", "true", "True")
     import io as _io
     from datetime import datetime as _dt
     try:
@@ -486,7 +489,7 @@ def admin_export_state(request: Request):
     leads_by_id   = {l.get("lead_id"): l for l in (dataset.get("leads") or [])}
 
     def _nba_for_target(key: str):
-        """Ritorna (kind, type, record_id, tier, score, strategy, primary_action) o None."""
+        """Ritorna (kind, type, record_id, tier, score, strategy, primary_action, action_category) o None."""
         parts = key.split(":")
         if len(parts) < 2:
             return None
@@ -497,26 +500,27 @@ def admin_export_state(request: Request):
             try:
                 if rec_type == "client":
                     rec = clients_by_id.get(rec_id)
-                    if not rec: return (kind, rec_type, rec_id, "", "", "", "")
+                    if not rec: return (kind, rec_type, rec_id, "", "", "", "", "")
                     out = generate_client_nba(rec)
                 elif rec_type == "lead":
                     rec = leads_by_id.get(rec_id)
-                    if not rec: return (kind, rec_type, rec_id, "", "", "", "")
+                    if not rec: return (kind, rec_type, rec_id, "", "", "", "", "")
                     out = generate_lead_nba(rec)
                 else:
-                    return (kind, rec_type, rec_id, "", "", "", "")
-                if not out: return (kind, rec_type, rec_id, "", "", "", "")
+                    return (kind, rec_type, rec_id, "", "", "", "", "")
+                if not out: return (kind, rec_type, rec_id, "", "", "", "", "")
                 primary = next((a for a in (out.get("recommended_actions") or []) if a.get("primary")), None)
                 return (kind, rec_type, rec_id,
                         out.get("priority_tier") or "",
                         round(out.get("priority_score") or 0, 1),
                         out.get("strategic_category") or "",
-                        (primary.get("recommended_action") if primary else ""))
+                        (primary.get("recommended_action") if primary else ""),
+                        (primary.get("action_category") if primary else ""))
             except Exception:
-                return (kind, rec_type, rec_id, "", "", "", "")
+                return (kind, rec_type, rec_id, "", "", "", "", "")
         elif kind == "case":
-            return (kind, "case", rec_id, "", "", "", "")
-        return (kind, rec_type, rec_id, "", "", "", "")
+            return (kind, "case", rec_id, "", "", "", "", "")
+        return (kind, rec_type, rec_id, "", "", "", "", "")
 
     # ---- build workbook ----
     wb = openpyxl.Workbook()
@@ -576,8 +580,11 @@ def admin_export_state(request: Request):
     style_header(ws2, 14)
     rows_for_target = []
     for key, st in target_stats.items():
-        nba = _nba_for_target(key) or ("", "", "", "", "", "", "")
-        kind, rec_type, rec_id, tier, score, strategy, primary = nba
+        nba = _nba_for_target(key) or ("", "", "", "", "", "", "", "")
+        kind, rec_type, rec_id, tier, score, strategy, primary, act_cat = nba
+        # Applica messaggi rivisti se richiesto dal parametro ?revised=1
+        if _use_revised and primary:
+            primary = lab_messages.revise(act_cat, primary)
         n_giudizi = st["ok"] + st["ko"] + st["unsure"]
         rows_for_target.append([
             key, kind, rec_type, rec_id, tier, score, strategy, primary,
@@ -600,7 +607,7 @@ def admin_export_state(request: Request):
                 "giudizio", "creato", "aggiornato"])
     style_header(ws3, 9)
     for r in models.list_all_reviews_export():
-        nba = _nba_for_target(r["target_key"]) or ("", "", "", "", "", "", "")
+        nba = _nba_for_target(r["target_key"]) or ("", "", "", "", "", "", "", "")
         kind, rec_type, rec_id, *_ = nba
         ws3.append([r["id"], r["username"], r["target_key"], kind, rec_type, rec_id,
                     r["judgement"], r["created_at"], r["updated_at"]])
@@ -613,7 +620,7 @@ def admin_export_state(request: Request):
                 "nota", "creato", "aggiornato"])
     style_header(ws4, 9)
     for r in models.list_all_comments_export():
-        nba = _nba_for_target(r["target_key"]) or ("", "", "", "", "", "", "")
+        nba = _nba_for_target(r["target_key"]) or ("", "", "", "", "", "", "", "")
         kind, rec_type, rec_id, *_ = nba
         ws4.append([r["id"], r["username"], r["target_key"], kind, rec_type, rec_id,
                     r["body"], r["created_at"], r["updated_at"]])
@@ -934,6 +941,14 @@ def admin_config_reset(request: Request):
     shutil.copy2(src, _nc.CONFIG_JSON_PATH)
     _nc.reload_config()
     return {"status": "ok"}
+
+
+@app.get("/lab/api/messages-map", include_in_schema=False)
+def lab_messages_map():
+    """Mappa dei messaggi rivisti per il frontend (toggle 'Messaggi rivisti')."""
+    import json as _json
+    with open(lab_messages.MAP_PATH, encoding="utf-8") as f:
+        return _json.load(f)
 
 
 # ============================== static mount (alla FINE, così non intercetta /lab/api/*) ==============================
