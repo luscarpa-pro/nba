@@ -758,7 +758,9 @@ section.checkup-main{background:#fff;display:flex;flex-direction:column;overflow
 .ml-item.reviewed .ml-snippet{color:var(--muted);opacity:.8}
 
 /* List toolbar */
-.ml-list-toolbar{display:flex;align-items:center;justify-content:flex-end;margin-top:8px;position:relative;flex-wrap:wrap;gap:6px}
+.ml-search-row{display:flex;align-items:center;gap:8px}
+.ml-search-row .search-wrap{flex:1;min-width:0}
+.ml-list-toolbar{display:flex;align-items:center;justify-content:flex-end;position:relative;flex:0 0 auto;gap:6px}
 .filter-btn{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font:inherit;font-size:11px;font-weight:600;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:8px;padding:5px 10px}
 .filter-btn:hover{color:var(--primary);border-color:var(--primary)}
 .filter-btn .msi{font-size:16px}
@@ -848,6 +850,18 @@ html.sidebar-collapsed .ml-side-actions .btn .msi{margin-right:0;font-size:20px}
 .ml-folders li.sep:hover{background:transparent}
 .ml-side-actions{display:flex;flex-direction:column;gap:6px;padding-top:10px;border-top:1px solid var(--border)}
 .ml-side-actions .btn{font-size:12px;padding:8px;display:flex;align-items:center;justify-content:center}
+/* Toggle "Messaggi rivisti" sopra la CTA Nuova anagrafica */
+.rev-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink2,#475569);user-select:none;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:#fff}
+.rev-toggle:hover{border-color:var(--primary)}
+.rev-toggle .msi{font-size:18px}
+.rev-toggle input{margin:0;cursor:pointer;flex:0 0 auto}
+.rev-toggle .rev-toggle-lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rev-toggle:has(input:checked){color:var(--primary);border-color:var(--highlight);background:#effffd}
+/* Sidebar compressa: solo icona */
+.ml-layout.sidebar-collapsed .rev-toggle .rev-toggle-lbl,
+html.sidebar-collapsed .rev-toggle .rev-toggle-lbl{display:none}
+.ml-layout.sidebar-collapsed .rev-toggle,
+html.sidebar-collapsed .rev-toggle{justify-content:center;padding:7px 0;gap:0}
 
 section.ml-list-pane{background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
 .ml-list-head{padding:10px;border-bottom:1px solid var(--border);background:#fafbfc}
@@ -1169,7 +1183,6 @@ input.toggle, select.tristate{appearance:none}
 
   /* List head */
   .ml-list-head{padding:10px 12px}
-  .ml-list-toolbar{margin-top:6px}
 
   /* Toast posizionato per non coprire i bottoni in basso */
   .toast{left:12px;right:12px;bottom:12px;text-align:center;max-width:none}
