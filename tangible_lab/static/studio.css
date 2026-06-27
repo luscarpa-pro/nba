@@ -1318,7 +1318,7 @@ input.toggle, select.tristate{appearance:none}
 .section-block.collapsible.collapsed .section-body{display:none}
 .section-block.collapsible.collapsed .collapse-caret{transform:rotate(-90deg)}
 
-/* ===== Modalità esercizio ===== */
+/* ===== Modalità guidata ===== */
 html.exercise-mode .ml-item .ml-dot{background:var(--border)!important}
 html.exercise-mode .ml-item .ml-score{display:none}
 html.exercise-mode .ml-item .ml-snippet{display:none}

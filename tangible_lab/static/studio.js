@@ -203,7 +203,7 @@
     reviews: {},              // key "kind:type:id" → {judgement: "ok|ko|unsure", note, reviewedAt}
     judgeFilter: { ok:true, ko:true, unsure:true, none:true },  // filtro lista per giudizio operatore
     revisedMessages: false,   // toggle "Messaggi rivisti"
-    exerciseMode: false,      // modalità esercizio (nasconde criticità/NBA)
+    exerciseMode: false,      // modalità guidata (nasconde criticità/NBA)
     revealed: {},             // reviewKey -> true (rivelati, effimero)
     hypotheses: {},           // reviewKey -> tier ipotizzato (effimero)
     exerciseActions: {},      // reviewKey -> array card {text,isReal,rank} (ordine del giocatore)
@@ -625,7 +625,7 @@
     items.forEach(it => {
       const isActive = STATE.selected && STATE.selected.kind === it.kind && STATE.selected.id === it.id;
       const rev = getReview(it);
-      // In modalità esercizio: marca le anagrafiche già ipotizzate (criticità scelta o rivelate)
+      // In modalità guidata: marca le anagrafiche già ipotizzate (criticità scelta o rivelate)
       const exKey = reviewKey(it);
       const exDone = STATE.exerciseMode && !!(STATE.revealed[exKey] || STATE.hypotheses[exKey]);
       const node = el("div", {class:"ml-item" + (isActive ? " active" : "") + (rev ? " reviewed" : "") + (exDone ? " ex-done" : "")},
@@ -1106,7 +1106,7 @@
     let guess = STATE.hypotheses[key] || null;
     const panel = el("div", {class:"exercise-panel"});
     panel.appendChild(el("div", {class:"exercise-panel-head"},
-      el("span", {class:"msi"}, "psychology"), el("strong", {}, "Modalità esercizio")));
+      el("span", {class:"msi"}, "fact_check"), el("strong", {}, "Modalità guidata")));
     panel.appendChild(el("div", {class:"exercise-panel-sub"},
       "Osserva il profilo e ipotizza la criticità di questa anagrafica, poi rivela quella del motore."));
     const reveal = el("button", {class:"btn primary-cta", type:"button"},
@@ -2837,7 +2837,7 @@
 
     // Messaggi rivisti: sempre attivi (nessun toggle).
 
-    // Toggle "Modalità esercizio"
+    // Toggle "Modalità guidata"
     const exTgl = $("#exercise-toggle");
     if (exTgl) {
       exTgl.checked = STATE.exerciseMode;
