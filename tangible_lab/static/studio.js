@@ -162,6 +162,19 @@
   const TIER_LABELS = { CRITICAL:"Priorità massima", HIGH:"Priorità alta", MEDIUM:"Priorità media", LOW:"Priorità bassa" };
   const TIER_LABELS_IT = { CRITICAL:"Critica", HIGH:"Alta", MEDIUM:"Media", LOW:"Bassa" };
 
+  const DECOY_ACTIONS = [
+    "Inviare la newsletter mensile",
+    "Programmare una telefonata di cortesia",
+    "Proporre un upgrade della polizza Auto",
+    "Inviare un questionario di soddisfazione",
+    "Aggiornare i dati di contatto",
+    "Proporre la polizza Vita Protezione",
+    "Invitare a un webinar informativo",
+    "Proporre il pagamento rateale",
+    "Segnalare un'offerta stagionale",
+    "Proporre una consulenza previdenziale"
+  ];
+
   // ============================== state ==============================
   const STATE = {
     clients: [], leads: [],
@@ -185,6 +198,7 @@
     exerciseMode: false,      // modalità esercizio (nasconde criticità/NBA)
     revealed: {},             // reviewKey -> true (rivelati, effimero)
     hypotheses: {},           // reviewKey -> tier ipotizzato (effimero)
+    exerciseActions: {},      // reviewKey -> array card {text,isReal,rank} (ordine del giocatore)
     messagesMap: null,        // mappa compilata (caricata da /lab/api/messages-map)
     cmpMode: "weights",       // weights | tiers | churn | leadthr | boosts | premiums | json
     cmpWeights: null,         // pesi (chiavi diverse per client/lead)
@@ -487,7 +501,7 @@
         snippet: predefSnippet(det, c.nba),
         score: c.priority_score, tier: c.priority_tier, strategy: c.strategic_category,
         ts: relTs("client", c.client_json),
-        data: c.client_json
+        data: c.client_json, nba: c.nba || []
       });
     });
     STATE.leads.forEach(l => {
@@ -498,7 +512,7 @@
         snippet: predefSnippet(det, l.nba),
         score: l.priority_score, tier: l.priority_tier, strategy: l.strategic_category,
         ts: relTs("lead", l.lead_json),
-        data: l.lead_json
+        data: l.lead_json, nba: l.nba || []
       });
     });
     STATE.saved.forEach(s => {
@@ -1006,6 +1020,49 @@
     syncDetailTab();
   }
 
+  function shuffleArr(a) {
+    const r = a.slice();
+    for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; }
+    return r;
+  }
+  function pickDecoys(n, exclude) {
+    const pool = DECOY_ACTIONS.filter(t => !exclude.includes(t));
+    return shuffleArr(pool).slice(0, Math.max(0, n));
+  }
+  function getExerciseCards(it, key) {
+    if (STATE.exerciseActions[key]) return STATE.exerciseActions[key];
+    const reals = (it.nba || []).slice(0, 4).map((a, i) => ({
+      text: reviseMessage(a.action_category, a.recommended_action) || a.recommended_action || "—",
+      isReal: true, rank: i
+    }));
+    const decoys = pickDecoys(5 - reals.length, reals.map(r => r.text)).map(t => ({ text: t, isReal: false, rank: null }));
+    const cards = shuffleArr(reals.concat(decoys));
+    STATE.exerciseActions[key] = cards;
+    return cards;
+  }
+  function renderExerciseOrder(container, key) {
+    container.innerHTML = "";
+    STATE.exerciseActions[key].forEach((c, idx) => {
+      const row = el("div", {class:"exercise-card", draggable:"true"},
+        el("span", {class:"exercise-card-grip msi"}, "drag_indicator"),
+        el("span", {class:"exercise-card-rank"}, String(idx + 1)),
+        el("span", {class:"exercise-card-text"}, c.text));
+      row.addEventListener("dragstart", e => { e.dataTransfer.effectAllowed = "move"; e.dataTransfer.setData("text/plain", String(idx)); row.classList.add("dragging"); });
+      row.addEventListener("dragend", () => row.classList.remove("dragging"));
+      row.addEventListener("dragover", e => { e.preventDefault(); row.classList.add("drag-over"); });
+      row.addEventListener("dragleave", () => row.classList.remove("drag-over"));
+      row.addEventListener("drop", e => {
+        e.preventDefault(); row.classList.remove("drag-over");
+        const from = parseInt(e.dataTransfer.getData("text/plain"), 10);
+        if (isNaN(from) || from === idx) return;
+        const arr = STATE.exerciseActions[key];
+        const [moved] = arr.splice(from, 1); arr.splice(idx, 0, moved);
+        renderExerciseOrder(container, key);
+      });
+      container.appendChild(row);
+    });
+  }
+
   function buildExercisePanel(it) {
     const key = reviewKey(it);
     let guess = STATE.hypotheses[key] || null;
@@ -1015,7 +1072,7 @@
     panel.appendChild(el("div", {class:"exercise-panel-sub"},
       "Osserva il profilo e ipotizza la criticità di questa anagrafica, poi rivela quella del motore."));
     const reveal = el("button", {class:"btn primary-cta", type:"button"},
-      el("span", {class:"msi"}, "visibility"), " Rivela criticità");
+      el("span", {class:"msi"}, "visibility"), " Rivela");
     reveal.disabled = !guess;
     const opts = el("div", {class:"exercise-opts"});
     ["CRITICAL","HIGH","MEDIUM","LOW"].forEach(t => {
@@ -1029,6 +1086,12 @@
       opts.appendChild(b);
     });
     panel.appendChild(opts);
+    panel.appendChild(el("div", {class:"exercise-panel-sub"},
+      "Ordina le azioni per priorità, dalla più alla meno prioritaria (alcune sono inventate)."));
+    const actionsBox = el("div", {class:"exercise-actions"});
+    getExerciseCards(it, key);
+    renderExerciseOrder(actionsBox, key);
+    panel.appendChild(actionsBox);
     reveal.addEventListener("click", () => { STATE.revealed[key] = true; loadAnagrafica(it); });
     panel.appendChild(reveal);
     return panel;
@@ -1039,10 +1102,32 @@
     const guess = STATE.hypotheses[key];
     const actual = it.tier || STATE.lastResult?.priority_tier || null;
     const match = !!guess && guess === actual;
-    return el("div", {class:"exercise-result " + (match ? "ok" : "ko")},
+    const wrap = el("div", {class:"exercise-result-wrap"});
+    // confronto criticità
+    wrap.appendChild(el("div", {class:"exercise-result " + (match ? "ok" : "ko")},
       el("span", {class:"msi"}, match ? "check_circle" : "cancel"),
       el("span", {}, "La tua ipotesi: "), el("strong", {}, TIER_LABELS_IT[guess] || guess || "—"),
-      el("span", {}, " — Reale: "), el("strong", {}, TIER_LABELS_IT[actual] || actual || "—"));
+      el("span", {}, " — Reale: "), el("strong", {}, TIER_LABELS_IT[actual] || actual || "—")));
+    // verifica azioni
+    const cards = STATE.exerciseActions[key];
+    if (cards && cards.length) {
+      const realRanks = cards.filter(c => c.isReal).map(c => c.rank);
+      const ordered = realRanks.length <= 1 || realRanks.every((r, i) => i === 0 || realRanks[i - 1] < r);
+      wrap.appendChild(el("div", {class:"exercise-actions-verdict " + (ordered ? "ok" : "ko")},
+        el("span", {class:"msi"}, ordered ? "check_circle" : "cancel"),
+        el("span", {}, ordered ? "Ordine delle azioni reali: corretto" : "Ordine delle azioni reali: da rivedere")));
+      const list = el("div", {class:"exercise-actions"});
+      cards.forEach((c, i) => {
+        list.appendChild(el("div", {class:"exercise-card reveal " + (c.isReal ? "real" : "decoy")},
+          el("span", {class:"exercise-card-rank"}, String(i + 1)),
+          el("span", {class:"exercise-card-text"}, c.text),
+          el("span", {class:"exercise-card-tag"},
+            el("span", {class:"msi"}, c.isReal ? "check_circle" : "cancel"),
+            c.isReal ? ` Reale · priorità ${c.rank + 1}` : " Esca")));
+      });
+      wrap.appendChild(list);
+    }
+    return wrap;
   }
 
   function switchDetailTab(tab) {
@@ -2720,7 +2805,7 @@
         STATE.exerciseMode = exTgl.checked;
         localStorage.setItem(LS_EXERCISE, exTgl.checked ? "1" : "0");
         document.documentElement.classList.toggle("exercise-mode", exTgl.checked);
-        STATE.revealed = {}; STATE.hypotheses = {};
+        STATE.revealed = {}; STATE.hypotheses = {}; STATE.exerciseActions = {};
         if (STATE.exerciseMode && String(STATE.folder).startsWith("tier:")) {
           STATE.folder = "all"; updateFolderActive();
         }
