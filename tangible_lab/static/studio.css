@@ -1326,13 +1326,14 @@ html.exercise-mode .ml-item .ml-snippet{display:none}
 html.exercise-mode .ml-item .ml-foot .strat{display:none}
 html.exercise-mode .ml-folders [data-sep="tier"],
 html.exercise-mode .ml-folders li[data-folder^="tier:"]{display:none}
-/* giudizio operatore nascosto in esercizio (si valuta solo in modalità normale) */
-html.exercise-mode .review-bar-wrap{display:none}
-/* anagrafiche già ipotizzate: badge + lieve attenuazione per far risaltare le altre */
-.ml-ex-done{position:absolute;top:10px;right:12px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#166534;background:#DCFCE7;border:1px solid #86EFAC;border-radius:999px;padding:1px 8px;text-transform:uppercase;letter-spacing:.03em}
+/* Giudizio operatore: nascosto solo nella fase "cieca" (non rivelato);
+   dopo il "Rivela" ricompare, così si può anche giudicare l'NBA. */
+html.exercise-mode .ml-detail-pane.exercise-hidden .review-bar-wrap{display:none}
+/* anagrafiche già ipotizzate: segnalazione esplicita (tinta + barra verde + badge) */
+.ml-ex-done{position:absolute;top:10px;right:12px;display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;color:#166534;background:#DCFCE7;border:1px solid #86EFAC;border-radius:999px;padding:2px 9px;text-transform:uppercase;letter-spacing:.03em}
 .ml-ex-done .msi{font-size:13px}
-html.exercise-mode .ml-item.ex-done{opacity:.6}
-html.exercise-mode .ml-item.ex-done:hover{opacity:1}
+html.exercise-mode .ml-item.ex-done{background:#F2FCF6;box-shadow:inset 4px 0 0 #16a34a}
+html.exercise-mode .ml-item.ex-done.active{background:#E3F7EC}
 /* dettaglio non rivelato: niente tier/NBA */
 html.exercise-mode .ml-detail-pane.exercise-hidden .ml-title .tier{display:none}
 html.exercise-mode .ml-detail-pane.exercise-hidden .ml-detail-meta{display:none}
