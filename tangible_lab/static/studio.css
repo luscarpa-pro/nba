@@ -1326,6 +1326,8 @@ html.exercise-mode .ml-item .ml-snippet{display:none}
 html.exercise-mode .ml-item .ml-foot .strat{display:none}
 html.exercise-mode .ml-folders [data-sep="tier"],
 html.exercise-mode .ml-folders li[data-folder^="tier:"]{display:none}
+/* giudizio operatore nascosto in esercizio (si valuta solo in modalità normale) */
+html.exercise-mode .review-bar-wrap{display:none}
 /* dettaglio non rivelato: niente tier/NBA */
 html.exercise-mode .ml-detail-pane.exercise-hidden .ml-title .tier{display:none}
 html.exercise-mode .ml-detail-pane.exercise-hidden .ml-detail-meta{display:none}

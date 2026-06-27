@@ -93,9 +93,8 @@
       el("li", {}, el("strong", {}, "Note"), " — testo di tutte le note/commenti: utente, target, nota, date")
     ));
 
-    // Applica il flag "messaggi rivisti" all'export se il toggle è attivo in studio
-    const revisedFlag = localStorage.getItem("nba.lab.revisedMessages") === "1" ? "1" : "0";
-    const exportUrl = `/lab/admin/export/state.xlsx?revised=${revisedFlag}`;
+    // Messaggi rivisti sempre attivi: l'export usa sempre i testi rivisti.
+    const exportUrl = `/lab/admin/export/state.xlsx?revised=1`;
     body.appendChild(el("div", {style:{display:"flex",gap:"10px",marginTop:"6px",flexWrap:"wrap"}},
       el("a", {
         class:"btn primary-cta",

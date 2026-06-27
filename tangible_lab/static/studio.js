@@ -483,7 +483,7 @@
       const det = STATE.detailCache[`client:${c.client_id}`];
       out.push({
         kind:"predef", type:"client", id:c.client_id,
-        name: c.client_id,
+        name: (c.client_json && c.client_json.email) || c.client_id,  // email più riconoscibile dell'UUID
         snippet: predefSnippet(det, c.nba),
         score: c.priority_score, tier: c.priority_tier, strategy: c.strategic_category,
         ts: relTs("client", c.client_json),
@@ -494,7 +494,7 @@
       const det = STATE.detailCache[`lead:${l.lead_id}`];
       out.push({
         kind:"predef", type:"lead", id:l.lead_id,
-        name: l.lead_id,
+        name: (l.lead_json && l.lead_json.email) || l.lead_id,
         snippet: predefSnippet(det, l.nba),
         score: l.priority_score, tier: l.priority_tier, strategy: l.strategic_category,
         ts: relTs("lead", l.lead_json),
@@ -935,7 +935,7 @@
       backBtn,                                            // su mobile è il primo, su desktop è display:none
       el("div", {class:"title-block"},
         el("div", {class:"ml-title"},
-          el("span", {class:"ml-id-big"}, it.id),
+          el("span", {class:"ml-id-big", title: it.id}, it.name),
           el("span", {class:`type-tag ${it.type}`}, it.type === "client" ? "Cliente" : "Lead"),
           tier ? el("span", {class:`tier ${tier}`}, tier) : null
         ),
@@ -2710,17 +2710,7 @@
       localStorage.setItem(LS_SIDEBAR, collapsed ? "1" : "0");
     });
 
-    // Toggle "Messaggi rivisti"
-    const revTgl = $("#revised-messages-toggle");
-    if (revTgl) {
-      revTgl.checked = STATE.revisedMessages;
-      revTgl.addEventListener("change", () => {
-        STATE.revisedMessages = revTgl.checked;
-        localStorage.setItem(LS_REVISED_MSG, revTgl.checked ? "1" : "0");
-        STATE.items = buildItems(); updateFolderCounts(); renderListPane();
-        if (STATE.selected) runNBA();   // re-render del dettaglio aperto
-      });
-    }
+    // Messaggi rivisti: sempre attivi (nessun toggle).
 
     // Toggle "Modalità esercizio"
     const exTgl = $("#exercise-toggle");
@@ -2970,10 +2960,7 @@
       const rawMap = await fetchJSON("/lab/api/messages-map");
       STATE.messagesMap = compileMessagesMap(rawMap);
     } catch { STATE.messagesMap = []; }
-    STATE.revisedMessages = localStorage.getItem(LS_REVISED_MSG) === "1";
-    // Allinea la checkbox dopo che lo stato è stato letto
-    const revTglBoot = $("#revised-messages-toggle");
-    if (revTglBoot) revTglBoot.checked = STATE.revisedMessages;
+    STATE.revisedMessages = true;   // sempre attivi (toggle rimosso)
     STATE.exerciseMode = localStorage.getItem(LS_EXERCISE) === "1";
     document.documentElement.classList.toggle("exercise-mode", STATE.exerciseMode);
     const exBoot = $("#exercise-toggle"); if (exBoot) exBoot.checked = STATE.exerciseMode;
