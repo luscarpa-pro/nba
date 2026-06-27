@@ -161,6 +161,14 @@
   const STRATEGY_LABELS = { RETENTION:"Retention", CONVERSION:"Conversion", GROWTH:"Crescita / Cross-sell", NURTURING:"Nurturing" };
   const TIER_LABELS = { CRITICAL:"Priorità massima", HIGH:"Priorità alta", MEDIUM:"Priorità media", LOW:"Priorità bassa" };
   const TIER_LABELS_IT = { CRITICAL:"Critica", HIGH:"Alta", MEDIUM:"Media", LOW:"Bassa" };
+  // Etichette leggibili per le scoperture (need_key -> nome area, allineate a GAP_PRODUCT_LABELS del motore)
+  const NEED_LABELS_IT = {
+    CASA:"Casa", INFORTUNI:"Infortuni", MALATTIA:"Malattia", VITA_PROTEZIONE:"Vita Protezione",
+    PREVIDENZA_COMPLEMENTARE:"Previdenza Complementare", RESPONSABILITA_PROFESSIONALE:"Responsabilità Professionale",
+    VITA_PRIVATA_RESPONSABILITA_CIVILE:"RC Vita Privata", VITA_PRIVATA_ANIMALI_DOMESTICI:"Animali Domestici",
+    VITA_PRIVATA_TUTELA_LEGALE:"Tutela Legale", VITA_PRIVATA_MICROMOBILITA:"Micromobilità", VITA_PRIVATA_VIAGGI:"Viaggi",
+    HOME:"Casa", AUTO:"Auto", VITA:"Vita", PET:"Animali Domestici"
+  };
 
   const DECOY_ACTIONS = [
     "Inviare la newsletter mensile",
@@ -728,12 +736,18 @@
     box.innerHTML = "";
     const gaps = coverageGapsFromResult();
     if (!gaps.length) return;
-    box.appendChild(el("div", {class:"profile-gaps-note"},
-      el("span", {class:"msi"}, "search_insights"),
-      el("div", {},
-        el("div", {}, el("strong", {}, "Scoperture rilevate "),
-          el("span", {class:"muted"}, "(derivate da insurance_needs — calcolate dall'NBA, non modificabili qui)")),
-        el("div", {class:"gaps-chips"}, ...gaps.map(g => el("span", {class:"gap-chip"}, g))))));
+    const card = el("div", {class:"section-block"});
+    card.appendChild(el("div", {class:"section-head"},
+      el("span", {class:"msi section-ico"}, "search_insights"),
+      el("h3", {}, "Scoperture rilevate"),
+      el("span", {class:"section-count"}, String(gaps.length))));
+    const body = el("div", {class:"section-body"});
+    body.appendChild(el("div", {class:"muted", style:{fontSize:"12px",marginBottom:"8px",lineHeight:"1.5"}},
+      "Bisogni rilevati ma non coperti con Vittoria (derivati da insurance_needs, calcolati dall'NBA — non modificabili qui)."));
+    body.appendChild(el("div", {class:"gaps-chips"},
+      ...gaps.map(g => el("span", {class:"gap-chip", title:g}, NEED_LABELS_IT[g] || g))));
+    card.appendChild(body);
+    box.appendChild(card);
   }
 
   // ============================== Wizard nuova anagrafica ==============================
