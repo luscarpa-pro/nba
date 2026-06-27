@@ -616,7 +616,10 @@
     items.forEach(it => {
       const isActive = STATE.selected && STATE.selected.kind === it.kind && STATE.selected.id === it.id;
       const rev = getReview(it);
-      const node = el("div", {class:"ml-item" + (isActive ? " active" : "") + (rev ? " reviewed" : "")},
+      // In modalità esercizio: marca le anagrafiche già ipotizzate (criticità scelta o rivelate)
+      const exKey = reviewKey(it);
+      const exDone = STATE.exerciseMode && !!(STATE.revealed[exKey] || STATE.hypotheses[exKey]);
+      const node = el("div", {class:"ml-item" + (isActive ? " active" : "") + (rev ? " reviewed" : "") + (exDone ? " ex-done" : "")},
         el("div", {class:"ml-dot " + (it.tier || "LOW")}),
         el("div", {class:"ml-id"}, it.name, el("span", {class:"type-mini"}, it.type === "client" ? "CLI" : "LEAD")),
         el("div", {class:"ml-score"},
@@ -624,6 +627,7 @@
                   el("span", {class:"msi"}, REVIEW_META[rev.judgement].icon)) : null,
           " " + (it.score != null ? Math.round(it.score) : "—")
         ),
+        exDone ? el("span", {class:"ml-ex-done", title:"Ipotesi già fatta"}, el("span", {class:"msi"}, "task_alt"), " ipotizzata") : null,
         el("div", {class:"ml-snippet"}, it.snippet || "—"),
         el("div", {class:"ml-foot"},
           el("span", {class:"strat"}, (STRATEGY_LABELS[it.strategy] || it.strategy || "—")),
@@ -1082,6 +1086,7 @@
         opts.querySelectorAll(".exercise-opt").forEach(x => { x.className = "exercise-opt"; });
         b.className = "exercise-opt sel " + t;
         reveal.disabled = false;
+        renderListPane();   // marca l'anagrafica come ipotizzata nella lista
       });
       opts.appendChild(b);
     });
