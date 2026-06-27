@@ -233,7 +233,8 @@ def lab_me(request: Request):
     u = user_from_request(request)
     if not u:
         raise HTTPException(status_code=401, detail="Non autenticato")
-    return u
+    from tangible_lab.version import __version__ as _ver
+    return {**u, "version": _ver}
 
 
 @app.post("/lab/api/me/acknowledge-password", include_in_schema=False)

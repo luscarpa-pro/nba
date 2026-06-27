@@ -3052,6 +3052,9 @@
       if (String(e.message).startsWith("401")) { location.href = "/lab/login.html"; return; }
       toast("Errore auth: " + e.message, "err"); return;
     }
+    // Versione nell'header (riconosce l'eseguibile in uso)
+    const verEl = $("#brand-ver");
+    if (verEl && STATE.me && STATE.me.version) verEl.textContent = "v" + STATE.me.version;
     // Header: solo link essenziali (single-user: niente user-chip, niente link Tutorial)
     const headerActions = document.querySelector("header.studio .actions");
     if (headerActions && !headerActions.dataset.built) {

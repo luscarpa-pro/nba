@@ -31,6 +31,7 @@
     try { STATE.me = await fetchJSON("/lab/api/me"); }
     catch { return; }
     if (STATE.me.role !== "admin") { location.href = "/lab/"; return; }
+    const verEl = $("#brand-ver"); if (verEl && STATE.me.version) verEl.textContent = "v" + STATE.me.version;
     $$('.admin-tabs button').forEach(b => b.addEventListener("click", () => switchTab(b.dataset.tab)));
     $("#modal-bg").addEventListener("click", e => { if (e.target.id === "modal-bg") closeModal(); });
     switchTab("export");

@@ -36,6 +36,7 @@ hiddenimports = [
     # Package del Lab
     "tangible_lab.server", "tangible_lab.db", "tangible_lab.auth",
     "tangible_lab.models", "tangible_lab.checkup_engine", "tangible_lab.messages",
+    "tangible_lab.version",
     # Dipendenze runtime che PyInstaller a volte non rileva
     "bcrypt", "openpyxl", "itsdangerous", "multipart",
     "uvicorn", "uvicorn.lifespan.on", "uvicorn.lifespan.off",
