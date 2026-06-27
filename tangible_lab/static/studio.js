@@ -2145,11 +2145,14 @@
         const b = el("button", {class:"review-btn" + (active ? " active " + j : ""), "data-j":j, title:m.lbl},
           el("span", {class:"msi"}, m.icon), " " + m.lbl);
         b.addEventListener("click", async () => {
-          await setReview(it, active ? null : j);
-          STATE.items = buildItems(); updateFolderCounts(); renderListPane();
-          const newBar = buildReviewBar(it);
-          bar.parentNode.replaceChild(newBar, bar);
-          toast(active ? "Giudizio rimosso" : `Marcato come "${m.lbl}"`, "ok");
+          if (j === "ok") {
+            // "Corretto" non richiede motivazione: toggle diretto
+            if (active) { await setReview(it, null); } else { await setReview(it, "ok"); }
+            afterReviewChange(it, bar);
+            return;
+          }
+          // ko / unsure → popover motivazione (nuovo o in modifica)
+          openReasonPopover(b, it, j, active ? current : null, bar);
         });
         return b;
       })
@@ -2159,9 +2162,91 @@
         el("span", {class:"review-ts"}, "Revisionato il " + new Date(current.reviewedAt).toLocaleString())
       ));
     }
+    // Chip motivazione (solo per ko/unsure con reason impostata)
+    if (current && (current.judgement === "ko" || current.judgement === "unsure") && current.reason) {
+      const label = current.reason === "Altro" && current.reason_text ? `Altro: ${current.reason_text}` : current.reason;
+      const chip = el("button", {class:"review-reason-chip", type:"button", title:"Modifica motivazione"},
+        el("span", {class:"msi"}, "edit_note"), " " + label);
+      chip.addEventListener("click", () => {
+        const btn = bar.querySelector(`.review-btn[data-j="${current.judgement}"]`);
+        openReasonPopover(btn || chip, it, current.judgement, current, bar);
+      });
+      bar.appendChild(chip);
+    }
     // Thread commenti (caricato da API)
     bar.appendChild(buildCommentsThread(it));
     return bar;
+  }
+
+  // Aggiorna stato UI dopo un cambio di giudizio
+  function afterReviewChange(it, bar) {
+    STATE.items = buildItems(); updateFolderCounts(); renderListPane();
+    const newBar = buildReviewBar(it);
+    if (bar && bar.parentNode) bar.parentNode.replaceChild(newBar, bar);
+  }
+
+  // Apre il popover di selezione motivazione per ko/unsure
+  function openReasonPopover(anchorBtn, it, judgement, current, bar) {
+    document.querySelectorAll(".reason-popover").forEach(n => n.remove());
+    const reasons = REVIEW_REASONS[judgement] || [];
+    const meta = REVIEW_META[judgement];
+    let selected = current?.reason || null;
+    let otherText = current?.reason_text || "";
+
+    const pop = el("div", {class:"reason-popover"});
+    pop.appendChild(el("div", {class:"reason-popover-title"}, "Motivazione — " + meta.lbl));
+    const otherInput = el("input", {type:"text", class:"reason-other-input", placeholder:"Specifica…", value: otherText});
+    const otherWrap = el("div", {class:"reason-other-wrap"}, otherInput);
+    otherWrap.style.display = (selected === "Altro") ? "block" : "none";
+
+    const confirm = el("button", {class:"btn primary-cta", type:"button"}, "Conferma");
+    const validate = () => {
+      const ok = !!selected && (selected !== "Altro" || otherInput.value.trim().length > 0);
+      confirm.disabled = !ok;
+    };
+    reasons.forEach(r => {
+      const id = "rsn-" + Math.abs(hashStr(r));
+      const radio = el("input", {type:"radio", name:"reason", id, value:r});
+      if (selected === r) radio.checked = true;
+      radio.addEventListener("change", () => {
+        selected = r;
+        otherWrap.style.display = (r === "Altro") ? "block" : "none";
+        if (r === "Altro") otherInput.focus();
+        validate();
+      });
+      pop.appendChild(el("label", {class:"reason-opt", for:id}, radio, el("span", {}, r)));
+    });
+    pop.appendChild(otherWrap);
+    otherInput.addEventListener("input", validate);
+
+    confirm.addEventListener("click", async () => {
+      await setReview(it, judgement, selected, selected === "Altro" ? otherInput.value.trim() : null);
+      pop.remove();
+      afterReviewChange(it, bar);
+      toast(`Marcato come "${meta.lbl}"`, "ok");
+    });
+    const cancel = el("button", {class:"btn ghost", type:"button"}, "Annulla");
+    cancel.addEventListener("click", () => pop.remove());
+    const remove = current ? el("button", {class:"reason-remove", type:"button"}, "Rimuovi giudizio") : null;
+    if (remove) remove.addEventListener("click", async () => {
+      await setReview(it, null);
+      pop.remove();
+      afterReviewChange(it, bar);
+      toast("Giudizio rimosso", "ok");
+    });
+    pop.appendChild(el("div", {class:"reason-popover-foot"}, remove, el("div", {class:"reason-popover-btns"}, cancel, confirm)));
+
+    validate();
+    document.body.appendChild(pop);
+    // Posiziona sotto il bottone àncora
+    const r = anchorBtn.getBoundingClientRect();
+    const pw = pop.offsetWidth || 280;
+    let left = Math.min(r.left, window.innerWidth - pw - 12);
+    pop.style.left = Math.max(12, left) + "px";
+    pop.style.top = (r.bottom + 6) + "px";
+    // Chiudi su click esterno
+    const onDoc = (e) => { if (!pop.contains(e.target) && e.target !== anchorBtn) { pop.remove(); document.removeEventListener("mousedown", onDoc); } };
+    setTimeout(() => document.addEventListener("mousedown", onDoc), 0);
   }
 
   function buildCommentsThread(it) {
@@ -2330,23 +2415,23 @@
     try {
       const rows = await fetchJSON("/lab/api/reviews");
       STATE.reviews = {};
-      rows.forEach(r => { STATE.reviews[r.target_key] = { judgement: r.judgement, reviewedAt: r.updated_at }; });
+      rows.forEach(r => { STATE.reviews[r.target_key] = { judgement: r.judgement, reason: r.reason, reason_text: r.reason_text, reviewedAt: r.updated_at }; });
     } catch { STATE.reviews = {}; }
     loadJudgeFilter();
     syncJudgeFilterUI();  // riallinea checkbox+badge allo stato persistito/migrato (bindAll è già passato)
   }
   function getReview(it) { return it ? STATE.reviews[reviewKey(it)] : null; }
-  async function setReview(it, judgement) {
+  async function setReview(it, judgement, reason = null, reason_text = null) {
     if (!it) return;
     const k = reviewKey(it);
     try {
       await fetchJSON(`/lab/api/reviews/${encodeURIComponent(k)}`, {
         method: "PUT",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ judgement })
+        body: JSON.stringify({ judgement, reason, reason_text })
       });
       if (judgement == null) delete STATE.reviews[k];
-      else STATE.reviews[k] = { judgement, reviewedAt: new Date().toISOString() };
+      else STATE.reviews[k] = { judgement, reason, reason_text, reviewedAt: new Date().toISOString() };
     } catch (e) { toast("Errore salvataggio giudizio: " + e.message, "err"); }
   }
   const REVIEW_META = {
@@ -2354,6 +2439,13 @@
     ko:     { lbl:"Sbagliato",     icon:"thumb_down",  color:"#dc2626", bg:"#FEE2E2", border:"#FCA5A5" },
     unsure: { lbl:"Da verificare", icon:"help",        color:"#a16207", bg:"#FEF3C7", border:"#FCD34D" }
   };
+  // Set di motivazioni obbligatorie per ko/unsure
+  const REVIEW_REASONS = {
+    ko:     ["Priorità errata", "Azione non pertinente", "Canale sbagliato", "Tempistica sbagliata", "Dato o trigger errato", "Altro"],
+    unsure: ["Dato di base dubbio/incompleto", "Caso limite / situazione ambigua", "Manca contesto sul cliente", "Plausibile, ma da confermare", "Sospetto errore, da approfondire", "Altro"]
+  };
+  // Funzione hash semplice per generare id unici per i radio button motivazione
+  function hashStr(s) { let h = 0; for (let i = 0; i < s.length; i++) { h = (h * 31 + s.charCodeAt(i)) | 0; } return h; }
 
   function loadJudgeFilter() {
     let stored = null;
