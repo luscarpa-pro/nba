@@ -221,6 +221,7 @@
   const LS_TUTORIAL = "nba.lab.tutorial.seen";
   const LS_REVISED_MSG = "nba.lab.revisedMessages";
   const LS_EXERCISE = "nba.lab.exerciseMode";
+  const LS_EXERCISE_STATE = "nba.lab.exercise";   // ipotesi/rivelati/ordinamenti, persistiti tra le sessioni
   const LS_COLS = "nba.lab.cols";
 
   // ============================== utils ==============================
@@ -1033,6 +1034,23 @@
     const pool = DECOY_ACTIONS.filter(t => !exclude.includes(t));
     return shuffleArr(pool).slice(0, Math.max(0, n));
   }
+  function saveExerciseState() {
+    try {
+      localStorage.setItem(LS_EXERCISE_STATE, JSON.stringify({
+        hypotheses: STATE.hypotheses, revealed: STATE.revealed, exerciseActions: STATE.exerciseActions
+      }));
+    } catch (e) {}
+  }
+  function loadExerciseState() {
+    try {
+      const s = JSON.parse(localStorage.getItem(LS_EXERCISE_STATE) || "null");
+      if (s && typeof s === "object") {
+        STATE.hypotheses = s.hypotheses || {};
+        STATE.revealed = s.revealed || {};
+        STATE.exerciseActions = s.exerciseActions || {};
+      }
+    } catch (e) {}
+  }
   function getExerciseCards(it, key) {
     if (STATE.exerciseActions[key]) return STATE.exerciseActions[key];
     const reals = (it.nba || []).slice(0, 4).map((a, i) => ({
@@ -1042,6 +1060,7 @@
     const decoys = pickDecoys(5 - reals.length, reals.map(r => r.text)).map(t => ({ text: t, isReal: false, rank: null }));
     const cards = shuffleArr(reals.concat(decoys));
     STATE.exerciseActions[key] = cards;
+    saveExerciseState();
     return cards;
   }
   function renderExerciseOrder(container, key) {
@@ -1061,6 +1080,7 @@
         if (isNaN(from) || from === idx) return;
         const arr = STATE.exerciseActions[key];
         const [moved] = arr.splice(from, 1); arr.splice(idx, 0, moved);
+        saveExerciseState();
         renderExerciseOrder(container, key);
       });
       container.appendChild(row);
@@ -1086,6 +1106,7 @@
         opts.querySelectorAll(".exercise-opt").forEach(x => { x.className = "exercise-opt"; });
         b.className = "exercise-opt sel " + t;
         reveal.disabled = false;
+        saveExerciseState();
         renderListPane();   // marca l'anagrafica come ipotizzata nella lista
       });
       opts.appendChild(b);
@@ -1097,7 +1118,7 @@
     getExerciseCards(it, key);
     renderExerciseOrder(actionsBox, key);
     panel.appendChild(actionsBox);
-    reveal.addEventListener("click", () => { STATE.revealed[key] = true; loadAnagrafica(it); });
+    reveal.addEventListener("click", () => { STATE.revealed[key] = true; saveExerciseState(); loadAnagrafica(it); });
     panel.appendChild(reveal);
     return panel;
   }
@@ -2810,7 +2831,7 @@
         STATE.exerciseMode = exTgl.checked;
         localStorage.setItem(LS_EXERCISE, exTgl.checked ? "1" : "0");
         document.documentElement.classList.toggle("exercise-mode", exTgl.checked);
-        STATE.revealed = {}; STATE.hypotheses = {}; STATE.exerciseActions = {};
+        // lo stato dell'esercizio (ipotesi/rivelati/ordinamenti) è persistito: NON si azzera al toggle
         if (STATE.exerciseMode && String(STATE.folder).startsWith("tier:")) {
           STATE.folder = "all"; updateFolderActive();
         }
@@ -3052,6 +3073,7 @@
     } catch { STATE.messagesMap = []; }
     STATE.revisedMessages = true;   // sempre attivi (toggle rimosso)
     STATE.exerciseMode = localStorage.getItem(LS_EXERCISE) === "1";
+    loadExerciseState();   // ripristina ipotesi/rivelati/ordinamenti salvati
     document.documentElement.classList.toggle("exercise-mode", STATE.exerciseMode);
     const exBoot = $("#exercise-toggle"); if (exBoot) exBoot.checked = STATE.exerciseMode;
 
