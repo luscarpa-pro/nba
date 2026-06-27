@@ -341,7 +341,15 @@ def api_set_review(target_key: str, request: Request, payload: dict = Body(...))
         return {"ok": True}
     if judgement not in ("ok", "ko", "unsure"):
         raise HTTPException(status_code=400, detail="judgement deve essere ok|ko|unsure")
-    return models.upsert_review(u["id"], target_key, judgement)
+    reason = (payload.get("reason") or "").strip() or None
+    reason_text = (payload.get("reason_text") or "").strip() or None
+    # La motivazione è obbligatoria per ko e unsure
+    if judgement in ("ko", "unsure"):
+        if not reason:
+            raise HTTPException(status_code=400, detail="Motivazione obbligatoria per ko/unsure")
+        if reason.lower() == "altro" and not reason_text:
+            raise HTTPException(status_code=400, detail="Per 'Altro' serve il testo della motivazione")
+    return models.upsert_review(u["id"], target_key, judgement, reason, reason_text)
 
 
 @app.post("/lab/api/comments/{target_key:path}", include_in_schema=False)
@@ -575,9 +583,17 @@ def admin_export_state(request: Request, revised: str = "0"):
     ws2.append([
         "target_key", "kind", "tipo", "record_id", "tier", "score", "strategy",
         "primary_action", "n_giudizi", "corretti", "sbagliati", "da_verificare",
-        "n_commenti", "ultimo_giudizio"
+        "motivazione", "n_commenti", "ultimo_giudizio"
     ])
-    style_header(ws2, 14)
+    style_header(ws2, 15)
+    # Mappa target→motivazione (single-user: una review per target; in multi prende la più recente)
+    reason_by_target = {}
+    for r in models.list_all_reviews_export():
+        if r["target_key"] not in reason_by_target:
+            txt = r.get("reason") or ""
+            if txt and r.get("reason_text"):
+                txt = f'{txt} — {r["reason_text"]}'
+            reason_by_target[r["target_key"]] = txt
     rows_for_target = []
     for key, st in target_stats.items():
         nba = _nba_for_target(key) or ("", "", "", "", "", "", "", "")
@@ -588,8 +604,9 @@ def admin_export_state(request: Request, revised: str = "0"):
         n_giudizi = st["ok"] + st["ko"] + st["unsure"]
         rows_for_target.append([
             key, kind, rec_type, rec_id, tier, score, strategy, primary,
-            n_giudizi, st["ok"], st["ko"], st["unsure"], st["comments"],
-            st["last_review_at"]
+            n_giudizi, st["ok"], st["ko"], st["unsure"],
+            reason_by_target.get(key, ""),
+            st["comments"], st["last_review_at"]
         ])
     # Ordina per priorità (tier CRITICAL prima, poi HIGH, ecc.)
     tier_rank = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3, "": 4}
@@ -597,21 +614,22 @@ def admin_export_state(request: Request, revised: str = "0"):
     for r in rows_for_target:
         ws2.append(r)
     # Larghezza colonne
-    widths = [22, 8, 8, 10, 10, 8, 14, 60, 10, 9, 10, 13, 11, 22]
+    widths = [22, 8, 8, 10, 10, 8, 14, 60, 10, 9, 10, 13, 30, 11, 22]
     for i, w in enumerate(widths, start=1):
         ws2.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
 
     # --- Sheet 3: Giudizi ---
     ws3 = wb.create_sheet("Giudizi")
     ws3.append(["id", "utente", "target_key", "kind", "tipo", "record_id",
-                "giudizio", "creato", "aggiornato"])
-    style_header(ws3, 9)
+                "giudizio", "motivazione", "dettaglio", "creato", "aggiornato"])
+    style_header(ws3, 11)
     for r in models.list_all_reviews_export():
         nba = _nba_for_target(r["target_key"]) or ("", "", "", "", "", "", "", "")
         kind, rec_type, rec_id, *_ = nba
         ws3.append([r["id"], r["username"], r["target_key"], kind, rec_type, rec_id,
-                    r["judgement"], r["created_at"], r["updated_at"]])
-    for i, w in enumerate([7, 16, 24, 9, 9, 12, 13, 22, 22], start=1):
+                    r["judgement"], r.get("reason") or "", r.get("reason_text") or "",
+                    r["created_at"], r["updated_at"]])
+    for i, w in enumerate([7, 16, 24, 9, 9, 12, 13, 28, 30, 22, 22], start=1):
         ws3.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
 
     # --- Sheet 4: Note (commenti) ---
