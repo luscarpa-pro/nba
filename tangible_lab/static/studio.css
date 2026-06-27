@@ -1318,3 +1318,35 @@ input.toggle, select.tristate{appearance:none}
 .section-block.collapsible .collapse-caret{margin-left:auto;transition:transform .15s;color:var(--muted)}
 .section-block.collapsible.collapsed .section-body{display:none}
 .section-block.collapsible.collapsed .collapse-caret{transform:rotate(-90deg)}
+
+/* ===== Modalità esercizio ===== */
+html.exercise-mode .ml-item .ml-dot{background:var(--border)!important}
+html.exercise-mode .ml-item .ml-score{display:none}
+html.exercise-mode .ml-item .ml-snippet{display:none}
+html.exercise-mode .ml-item .ml-foot .strat{display:none}
+html.exercise-mode .ml-folders [data-sep="tier"],
+html.exercise-mode .ml-folders li[data-folder^="tier:"]{display:none}
+/* dettaglio non rivelato: niente tier/NBA */
+html.exercise-mode .ml-detail-pane.exercise-hidden .ml-title .tier{display:none}
+html.exercise-mode .ml-detail-pane.exercise-hidden .ml-detail-meta{display:none}
+html.exercise-mode .ml-detail-pane.exercise-hidden .detail-tabs .dtab[data-tab="nba"]{display:none}
+html.exercise-mode .ml-detail-pane.exercise-hidden .tab-pane[data-tab="nba"]{display:none}
+/* pannello ipotesi */
+.exercise-panel{background:linear-gradient(180deg,#FBFCFE,#F4F6FA);border:1px solid var(--border-soft);border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;flex-direction:column;gap:10px}
+.exercise-panel-head{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:var(--ink)}
+.exercise-panel-head .msi{color:var(--primary)}
+.exercise-panel-sub{font-size:12.5px;color:var(--ink2,#475569);line-height:1.5}
+.exercise-opts{display:flex;gap:8px;flex-wrap:wrap}
+.exercise-opt{font:inherit;font-size:13px;font-weight:600;padding:8px 14px;border:1px solid var(--border);border-radius:999px;background:#fff;color:var(--ink2,#475569);cursor:pointer}
+.exercise-opt:hover{border-color:var(--primary);color:var(--primary)}
+.exercise-opt.sel{color:#fff;border-color:transparent}
+.exercise-opt.sel.CRITICAL{background:#dc2626}
+.exercise-opt.sel.HIGH{background:#ea580c}
+.exercise-opt.sel.MEDIUM{background:#ca8a04}
+.exercise-opt.sel.LOW{background:#16a34a}
+.exercise-panel .primary-cta{align-self:flex-start}
+/* banner confronto */
+.exercise-result{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;margin-bottom:14px;font-size:13px;font-weight:600}
+.exercise-result.ok{background:#DCFCE7;color:#166534;border:1px solid #86EFAC}
+.exercise-result.ko{background:#FEE2E2;color:#991b1b;border:1px solid #FCA5A5}
+.exercise-result .msi{font-size:18px}

@@ -160,6 +160,7 @@
   const FACTOR_LABELS = { urgency:"Urgenza", value:"Valore", opportunity:"Opportunità", recency:"Recency / contatto recente" };
   const STRATEGY_LABELS = { RETENTION:"Retention", CONVERSION:"Conversion", GROWTH:"Crescita / Cross-sell", NURTURING:"Nurturing" };
   const TIER_LABELS = { CRITICAL:"Priorità massima", HIGH:"Priorità alta", MEDIUM:"Priorità media", LOW:"Priorità bassa" };
+  const TIER_LABELS_IT = { CRITICAL:"Critica", HIGH:"Alta", MEDIUM:"Media", LOW:"Bassa" };
 
   // ============================== state ==============================
   const STATE = {
@@ -181,6 +182,9 @@
     reviews: {},              // key "kind:type:id" → {judgement: "ok|ko|unsure", note, reviewedAt}
     judgeFilter: { ok:true, ko:true, unsure:true, none:true },  // filtro lista per giudizio operatore
     revisedMessages: false,   // toggle "Messaggi rivisti"
+    exerciseMode: false,      // modalità esercizio (nasconde criticità/NBA)
+    revealed: {},             // reviewKey -> true (rivelati, effimero)
+    hypotheses: {},           // reviewKey -> tier ipotizzato (effimero)
     messagesMap: null,        // mappa compilata (caricata da /lab/api/messages-map)
     cmpMode: "weights",       // weights | tiers | churn | leadthr | boosts | premiums | json
     cmpWeights: null,         // pesi (chiavi diverse per client/lead)
@@ -202,6 +206,7 @@
   const LS_JUDGE_FILTER = "nba.lab.judgeFilter";
   const LS_TUTORIAL = "nba.lab.tutorial.seen";
   const LS_REVISED_MSG = "nba.lab.revisedMessages";
+  const LS_EXERCISE = "nba.lab.exerciseMode";
   const LS_COLS = "nba.lab.cols";
 
   // ============================== utils ==============================
@@ -584,7 +589,9 @@
       const key = rev ? rev.judgement : "none";
       return STATE.judgeFilter[key] !== false;
     });
-    items = sortItems(items);
+    items = STATE.exerciseMode
+      ? items.slice().sort((a, b) => String(a.id).localeCompare(String(b.id)))
+      : sortItems(items);
     const reviewedTot = STATE.items.filter(it => folderMatches(it, STATE.folder) && getReview(it)).length;
     const allTot      = STATE.items.filter(it => folderMatches(it, STATE.folder)).length;
     $("#ml-list-meta").textContent = `${items.length} su ${allTot} · ${reviewedTot} analizzat${reviewedTot===1?"o":"i"}`;
@@ -911,6 +918,7 @@
   function renderDetail(it) {
     const pane = $("#ml-detail");
     pane.innerHTML = "";
+    pane.classList.remove("exercise-hidden");
 
     // header
     const head = el("div", {class:"ml-detail-head"});
@@ -978,13 +986,63 @@
     renderProfileBody(profilePane);
     body.appendChild(profilePane);
 
+    if (STATE.exerciseMode) {
+      const exKey = reviewKey(it);
+      if (!STATE.revealed[exKey]) {
+        pane.classList.add("exercise-hidden");
+        body.insertBefore(buildExercisePanel(it), body.firstChild);
+      } else {
+        body.insertBefore(buildExerciseResult(it), body.firstChild);
+      }
+    }
+
     pane.appendChild(body);
 
     // initial tab: new records open on Profilo, others restore from LS or default NBA
     const tabFromLS = localStorage.getItem(LS_TAB);
     const valid = ["nba","profile"];
-    STATE.detailTab = isNew ? "profile" : (valid.includes(tabFromLS) ? tabFromLS : "nba");
+    const exHidden = STATE.exerciseMode && !STATE.revealed[reviewKey(it)];
+    STATE.detailTab = (isNew || exHidden) ? "profile" : (valid.includes(tabFromLS) ? tabFromLS : "nba");
     syncDetailTab();
+  }
+
+  function buildExercisePanel(it) {
+    const key = reviewKey(it);
+    let guess = STATE.hypotheses[key] || null;
+    const panel = el("div", {class:"exercise-panel"});
+    panel.appendChild(el("div", {class:"exercise-panel-head"},
+      el("span", {class:"msi"}, "psychology"), el("strong", {}, "Modalità esercizio")));
+    panel.appendChild(el("div", {class:"exercise-panel-sub"},
+      "Osserva il profilo e ipotizza la criticità di questa anagrafica, poi rivela quella del motore."));
+    const reveal = el("button", {class:"btn primary-cta", type:"button"},
+      el("span", {class:"msi"}, "visibility"), " Rivela criticità");
+    reveal.disabled = !guess;
+    const opts = el("div", {class:"exercise-opts"});
+    ["CRITICAL","HIGH","MEDIUM","LOW"].forEach(t => {
+      const b = el("button", {class:"exercise-opt" + (guess===t ? " sel "+t : ""), type:"button"}, TIER_LABELS_IT[t]);
+      b.addEventListener("click", () => {
+        guess = t; STATE.hypotheses[key] = t;
+        opts.querySelectorAll(".exercise-opt").forEach(x => { x.className = "exercise-opt"; });
+        b.className = "exercise-opt sel " + t;
+        reveal.disabled = false;
+      });
+      opts.appendChild(b);
+    });
+    panel.appendChild(opts);
+    reveal.addEventListener("click", () => { STATE.revealed[key] = true; loadAnagrafica(it); });
+    panel.appendChild(reveal);
+    return panel;
+  }
+
+  function buildExerciseResult(it) {
+    const key = reviewKey(it);
+    const guess = STATE.hypotheses[key];
+    const actual = it.tier || STATE.lastResult?.priority_tier || null;
+    const match = !!guess && guess === actual;
+    return el("div", {class:"exercise-result " + (match ? "ok" : "ko")},
+      el("span", {class:"msi"}, match ? "check_circle" : "cancel"),
+      el("span", {}, "La tua ipotesi: "), el("strong", {}, TIER_LABELS_IT[guess] || guess || "—"),
+      el("span", {}, " — Reale: "), el("strong", {}, TIER_LABELS_IT[actual] || actual || "—"));
   }
 
   function switchDetailTab(tab) {
@@ -2664,6 +2722,26 @@
       });
     }
 
+    // Toggle "Modalità esercizio"
+    const exTgl = $("#exercise-toggle");
+    if (exTgl) {
+      exTgl.checked = STATE.exerciseMode;
+      exTgl.addEventListener("change", () => {
+        STATE.exerciseMode = exTgl.checked;
+        localStorage.setItem(LS_EXERCISE, exTgl.checked ? "1" : "0");
+        document.documentElement.classList.toggle("exercise-mode", exTgl.checked);
+        STATE.revealed = {}; STATE.hypotheses = {};
+        if (STATE.exerciseMode && String(STATE.folder).startsWith("tier:")) {
+          STATE.folder = "all"; updateFolderActive();
+        }
+        renderListPane();
+        if (STATE.selected) {
+          const it = STATE.items.find(x => x.kind === STATE.selected.kind && x.id === STATE.selected.id);
+          if (it) loadAnagrafica(it);
+        }
+      });
+    }
+
     // Mobile: hamburger → apre sidebar come drawer
     const closeMobileSidebar = () => html.classList.remove("mobile-sidebar-open");
     $("#mobile-menu")?.addEventListener("click", () => html.classList.toggle("mobile-sidebar-open"));
@@ -2896,6 +2974,9 @@
     // Allinea la checkbox dopo che lo stato è stato letto
     const revTglBoot = $("#revised-messages-toggle");
     if (revTglBoot) revTglBoot.checked = STATE.revisedMessages;
+    STATE.exerciseMode = localStorage.getItem(LS_EXERCISE) === "1";
+    document.documentElement.classList.toggle("exercise-mode", STATE.exerciseMode);
+    const exBoot = $("#exercise-toggle"); if (exBoot) exBoot.checked = STATE.exerciseMode;
 
     try {
       const [clients, leads, cfg] = await Promise.all([

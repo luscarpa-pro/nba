@@ -37,7 +37,7 @@
     <aside class="ml-sidebar">
       <ul class="ml-folders" id="ml-folders">
         <li data-folder="all" class="active" title="Tutti"><span class="msi">inbox</span><span class="lbl">Tutti</span><span class="cnt" data-cnt="all">·</span></li>
-        <li class="sep">Per priorità</li>
+        <li class="sep" data-sep="tier">Per priorità</li>
         <li data-folder="tier:CRITICAL" title="CRITICAL"><span class="msi t-crit">local_fire_department</span><span class="lbl">CRITICAL</span><span class="cnt" data-cnt="tier:CRITICAL">·</span></li>
         <li data-folder="tier:HIGH" title="HIGH"><span class="msi t-high">warning</span><span class="lbl">HIGH</span><span class="cnt" data-cnt="tier:HIGH">·</span></li>
         <li data-folder="tier:MEDIUM" title="MEDIUM"><span class="msi t-med">info</span><span class="lbl">MEDIUM</span><span class="cnt" data-cnt="tier:MEDIUM">·</span></li>
@@ -49,6 +49,11 @@
         <li data-folder="saved" title="Casi salvati"><span class="msi">bookmark</span><span class="lbl">Casi salvati</span><span class="cnt" data-cnt="saved">·</span></li>
       </ul>
       <div class="ml-side-actions">
+        <label class="rev-toggle" title="Nascondi criticità e NBA: ipotizza tu, poi rivela">
+          <input type="checkbox" id="exercise-toggle"/>
+          <span class="msi">psychology</span>
+          <span class="rev-toggle-lbl">Modalità esercizio</span>
+        </label>
         <label class="rev-toggle" title="Mostra i messaggi rivisti al posto di quelli del motore">
           <input type="checkbox" id="revised-messages-toggle"/>
           <span class="msi">auto_fix_high</span>
