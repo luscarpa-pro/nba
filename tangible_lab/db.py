@@ -82,6 +82,8 @@ SCHEMA = [
         user_id INTEGER NOT NULL,
         target_key TEXT NOT NULL,    -- 'predef:client:C001' | 'case:<id>'
         judgement TEXT NOT NULL,     -- 'ok' | 'ko' | 'unsure'
+        reason TEXT,                 -- motivazione (label) per ko/unsure; NULL per ok
+        reason_text TEXT,            -- testo libero quando reason = 'Altro'
         created_at TEXT NOT NULL DEFAULT (datetime('now')),
         updated_at TEXT NOT NULL DEFAULT (datetime('now')),
         UNIQUE(user_id, target_key),
@@ -120,10 +122,20 @@ SCHEMA = [
 ]
 
 
+def _ensure_columns(conn, table: str, columns: dict) -> None:
+    """Aggiunge colonne mancanti a una tabella esistente (migrazione additiva idempotente)."""
+    existing = {row["name"] for row in conn.execute(f"PRAGMA table_info({table})")}
+    for col, decl in columns.items():
+        if col not in existing:
+            conn.execute(f"ALTER TABLE {table} ADD COLUMN {col} {decl}")
+
+
 def init_db() -> None:
     with get_conn() as conn:
         for stmt in SCHEMA:
             conn.execute(stmt)
+        # Migrazioni additive su DB esistenti
+        _ensure_columns(conn, "reviews", {"reason": "TEXT", "reason_text": "TEXT"})
         # Bootstrap admin se non esiste nessun utente
         cur = conn.execute("SELECT COUNT(*) AS c FROM users")
         if cur.fetchone()["c"] == 0:

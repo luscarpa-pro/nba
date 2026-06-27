@@ -155,7 +155,7 @@ def delete_case(case_id: int) -> None:
 def get_user_review(user_id: int, target_key: str) -> Optional[Dict[str, Any]]:
     with get_conn() as conn:
         row = conn.execute(
-            "SELECT id, judgement, created_at, updated_at FROM reviews WHERE user_id = ? AND target_key = ?",
+            "SELECT id, judgement, reason, reason_text, created_at, updated_at FROM reviews WHERE user_id = ? AND target_key = ?",
             (user_id, target_key),
         ).fetchone()
         return dict(row) if row else None
@@ -164,7 +164,7 @@ def get_user_review(user_id: int, target_key: str) -> Optional[Dict[str, Any]]:
 def list_reviews_for_target(target_key: str) -> List[Dict[str, Any]]:
     with get_conn() as conn:
         rows = conn.execute(
-            """SELECT r.id, r.user_id, u.username, r.judgement, r.created_at, r.updated_at
+            """SELECT r.id, r.user_id, u.username, r.judgement, r.reason, r.reason_text, r.created_at, r.updated_at
                FROM reviews r JOIN users u ON u.id = r.user_id
                WHERE r.target_key = ?
                ORDER BY r.updated_at DESC""",
@@ -177,31 +177,35 @@ def list_all_user_reviews(user_id: int) -> List[Dict[str, Any]]:
     """Tutte le review di un utente, per popolare i badge nella lista."""
     with get_conn() as conn:
         rows = conn.execute(
-            "SELECT target_key, judgement, updated_at FROM reviews WHERE user_id = ?",
+            "SELECT target_key, judgement, reason, reason_text, updated_at FROM reviews WHERE user_id = ?",
             (user_id,),
         ).fetchall()
     return [dict(r) for r in rows]
 
 
-def upsert_review(user_id: int, target_key: str, judgement: str) -> Dict[str, Any]:
+def upsert_review(user_id: int, target_key: str, judgement: str,
+                  reason: Optional[str] = None, reason_text: Optional[str] = None) -> Dict[str, Any]:
+    # Per "ok" non si conserva motivazione
+    if judgement == "ok":
+        reason, reason_text = None, None
     with get_conn() as conn:
         existing = conn.execute(
             "SELECT id FROM reviews WHERE user_id = ? AND target_key = ?", (user_id, target_key)
         ).fetchone()
         if existing:
             conn.execute(
-                "UPDATE reviews SET judgement = ?, updated_at = datetime('now') WHERE id = ?",
-                (judgement, existing["id"]),
+                "UPDATE reviews SET judgement = ?, reason = ?, reason_text = ?, updated_at = datetime('now') WHERE id = ?",
+                (judgement, reason, reason_text, existing["id"]),
             )
             rid = existing["id"]
         else:
             cur = conn.execute(
-                "INSERT INTO reviews(user_id, target_key, judgement) VALUES (?, ?, ?)",
-                (user_id, target_key, judgement),
+                "INSERT INTO reviews(user_id, target_key, judgement, reason, reason_text) VALUES (?, ?, ?, ?, ?)",
+                (user_id, target_key, judgement, reason, reason_text),
             )
             rid = int(cur.lastrowid)
         row = conn.execute(
-            "SELECT id, judgement, created_at, updated_at FROM reviews WHERE id = ?", (rid,)
+            "SELECT id, judgement, reason, reason_text, created_at, updated_at FROM reviews WHERE id = ?", (rid,)
         ).fetchone()
         return dict(row)
 
@@ -214,7 +218,7 @@ def delete_review(user_id: int, target_key: str) -> None:
 def list_all_reviews_export() -> List[Dict[str, Any]]:
     with get_conn() as conn:
         rows = conn.execute(
-            """SELECT r.id, r.target_key, u.username, r.judgement, r.created_at, r.updated_at
+            """SELECT r.id, r.target_key, u.username, r.judgement, r.reason, r.reason_text, r.created_at, r.updated_at
                FROM reviews r JOIN users u ON u.id = r.user_id
                ORDER BY r.updated_at DESC"""
         ).fetchall()
