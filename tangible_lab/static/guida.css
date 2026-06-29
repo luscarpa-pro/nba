@@ -81,3 +81,12 @@
   .guida-body table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
   .guida-body th,.guida-body td{padding:8px 9px}
 }
+
+/* ===== Catalogo azioni NBA ===== */
+.nba-catalog h3{margin:22px 0 6px;font-size:15px}
+.nba-catalog .nba-cat{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:14px 0 6px}
+.nba-catalog .nba-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.nba-catalog .nba-list li{display:grid;grid-template-columns:220px 1fr;gap:12px;align-items:start;background:#fff;border:1px solid var(--border-soft);border-radius:8px;padding:8px 12px}
+.nba-catalog .nba-situation{font-weight:700;color:var(--ink);font-size:13px}
+.nba-catalog .nba-msg{color:var(--ink2,#475569);font-size:13px;line-height:1.45}
+@media (max-width:760px){ .nba-catalog .nba-list li{grid-template-columns:1fr;gap:2px} }

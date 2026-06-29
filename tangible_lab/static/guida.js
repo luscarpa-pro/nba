@@ -250,6 +250,73 @@
     });
   }
 
+  // ---------- Catalogo di tutte le azioni NBA (da /lab/api/messages-map) ----------
+  const CATALOG_GROUPS = [
+    { tipo: "Cliente", cats: [
+      ["PAYMENT", "Pagamenti / insoluti"],
+      ["RENEWAL", "Rinnovi"],
+      ["CHURN_PREVENTION", "Prevenzione abbandono"],
+      ["CROSS_SELL", "Cross-sell / opportunità"],
+      ["VIVA", "Programma Viva"],
+      ["CHECKUP", "Check-up dei bisogni"],
+      ["RELATIONSHIP", "Relazione"],
+    ]},
+    { tipo: "Lead", cats: [
+      ["LEAD_CONVERSION", "Conversione"],
+      ["QUOTE_FOLLOW_UP", "Preventivo"],
+      ["FIRST_CONTACT", "Primo contatto"],
+      ["RE_ENGAGEMENT", "Riattivazione"],
+    ]},
+    { tipo: "Leve commerciali (aggiunte alle azioni di sviluppo)", cats: [
+      [null, "Leve concatenabili"],
+    ]},
+  ];
+
+  async function renderNbaCatalog() {
+    const box = $("#nba-catalog");
+    if (!box) return;
+    let map;
+    try { map = await fetchJSON("/lab/api/messages-map"); }
+    catch { box.innerHTML = '<div class="w-error">Catalogo non disponibile.</div>'; return; }
+    box.innerHTML = "";
+    let total = 0;
+    CATALOG_GROUPS.forEach(group => {
+      if (!group.cats.some(([cat]) => map.some(m => m.category === cat))) return;
+      const h = document.createElement("h3");
+      h.textContent = group.tipo;
+      box.appendChild(h);
+      group.cats.forEach(([cat, label]) => {
+        const items = map.filter(m => m.category === cat);
+        if (!items.length) return;
+        const catEl = document.createElement("div");
+        catEl.className = "nba-cat";
+        catEl.textContent = label;
+        box.appendChild(catEl);
+        const ul = document.createElement("ul");
+        ul.className = "nba-list";
+        items.forEach(m => {
+          total++;
+          const li = document.createElement("li");
+          const sit = document.createElement("span");
+          sit.className = "nba-situation";
+          sit.textContent = m.note || "—";
+          const msg = document.createElement("span");
+          msg.className = "nba-msg";
+          msg.textContent = m.revised || m.match || "—";
+          li.appendChild(sit);
+          li.appendChild(msg);
+          ul.appendChild(li);
+        });
+        box.appendChild(ul);
+      });
+    });
+    const count = document.createElement("div");
+    count.className = "muted";
+    count.style.cssText = "font-size:12px;margin-top:10px";
+    count.textContent = `${total} azioni NBA possibili in totale.`;
+    box.appendChild(count);
+  }
+
   // ---------- init ----------
   async function init() {
     let me;
@@ -257,6 +324,7 @@
     catch { return; } // 401 → redirect già fatto
 
     setupScrollspy();
+    renderNbaCatalog();
 
     let cfg = null;
     try { cfg = await fetchJSON("/config"); }
