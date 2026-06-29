@@ -3061,6 +3061,9 @@
       }]);
       return;
     }
+    // Niente tour onboarding mentre la Modalità guidata è attiva: criticità/NBA sono nascosti
+    // e le aree differiscono → eviti confusione (il tour resta richiamabile da "Rivedi tutorial").
+    if (STATE.exerciseMode) return;
     if (!forced && localStorage.getItem(LS_TUTORIAL)) return;
     // Apri un'anagrafica d'esempio (se nessuna già aperta) per mostrare dettaglio e giudizio.
     if (!STATE.selected) {
