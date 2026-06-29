@@ -464,11 +464,21 @@ def admin_list_cases(request: Request):
 
 
 @app.get("/lab/admin/export/state.xlsx", include_in_schema=False)
-def admin_export_state(request: Request, revised: str = "0"):
+@app.post("/lab/admin/export/state.xlsx", include_in_schema=False)
+async def admin_export_state(request: Request, revised: str = "0"):
     """Export Excel multi-foglio dello stato dei test (solo admin).
-    Parametro query ?revised=1 applica i messaggi rivisti all'azione primaria."""
+    Parametro query ?revised=1 applica i messaggi rivisti all'azione primaria.
+    In POST può ricevere {guided:{hypotheses,revealed,exerciseActions}} (stato Modalità
+    guidata dal browser) per aggiungere il foglio 'Modalità guidata'."""
     require_admin(request)
     _use_revised = str(revised) in ("1", "true", "True")
+    guided = None
+    if request.method == "POST":
+        try:
+            _body = await request.json()
+            guided = _body.get("guided") if isinstance(_body, dict) else None
+        except Exception:
+            guided = None
     import io as _io
     from datetime import datetime as _dt
     try:
@@ -645,6 +655,46 @@ def admin_export_state(request: Request, revised: str = "0"):
                     r["body"], r["created_at"], r["updated_at"]])
     for i, w in enumerate([7, 16, 24, 9, 9, 12, 70, 22, 22], start=1):
         ws4.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
+
+    # --- Sheet 5: Modalità guidata (se presente lo stato dal browser) ---
+    _TIER_IT = {"CRITICAL": "Critica", "HIGH": "Alta", "MEDIUM": "Media", "LOW": "Bassa"}
+    if isinstance(guided, dict):
+        hyp = guided.get("hypotheses") or {}
+        revealed = guided.get("revealed") or {}
+        actions = guided.get("exerciseActions") or {}
+        keys = sorted(set(list(hyp.keys()) + list(revealed.keys()) + list(actions.keys())))
+        if keys:
+            ws5 = wb.create_sheet("Modalità guidata")
+            ws5.append(["target_key", "tipo", "anagrafica", "ipotesi_criticità",
+                        "criticità_reale", "esito_criticità", "rivelata",
+                        "ordine_azioni_proposto", "ordine_reali_corretto"])
+            style_header(ws5, 9)
+            for key in keys:
+                nba = _nba_for_target(key) or ("", "", "", "", "", "", "", "")
+                _kind, rec_type, rec_id, tier, _score, _strat, _primary, _cat = nba
+                rec = clients_by_id.get(rec_id) if rec_type == "client" else leads_by_id.get(rec_id)
+                anagrafica = (rec.get("email") if rec else None) or rec_id or key
+                guess = hyp.get(key)
+                guess_it = _TIER_IT.get(guess, guess or "—")
+                real_it = _TIER_IT.get(tier, tier or "—")
+                esito = "—"
+                if guess and tier:
+                    esito = "✓ indovinata" if guess == tier else "✗ errata"
+                cards = actions.get(key) or []
+                # ordine proposto: "1. testo [reale|esca]" ...
+                ordine = " | ".join(
+                    f"{i+1}. {c.get('text','')} [{'reale' if c.get('isReal') else 'esca'}]"
+                    for i, c in enumerate(cards)
+                )
+                real_ranks = [c.get("rank") for c in cards if c.get("isReal") and c.get("rank") is not None]
+                if len(real_ranks) <= 1:
+                    ordine_ok = "—"
+                else:
+                    ordine_ok = "sì" if all(real_ranks[i] > real_ranks[i-1] for i in range(1, len(real_ranks))) else "no"
+                ws5.append([key, rec_type, anagrafica, guess_it, real_it, esito,
+                            "sì" if revealed.get(key) else "no", ordine, ordine_ok])
+            for i, w in enumerate([24, 8, 28, 14, 14, 14, 9, 80, 16], start=1):
+                ws5.column_dimensions[openpyxl.utils.get_column_letter(i)].width = w
 
     buf = _io.BytesIO()
     wb.save(buf)

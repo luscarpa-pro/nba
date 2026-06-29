@@ -95,14 +95,32 @@
     ));
 
     // Messaggi rivisti sempre attivi: l'export usa sempre i testi rivisti.
-    const exportUrl = `/lab/admin/export/state.xlsx?revised=1`;
+    // POST (non semplice link) per includere lo stato "Modalità guidata" dal browser.
+    const xlsBtn = el("button", {
+      class:"btn primary-cta",
+      style:{display:"inline-flex",alignItems:"center",gap:"6px",padding:"10px 18px"},
+      onclick: async () => {
+        let guided = null;
+        try { guided = JSON.parse(localStorage.getItem("nba.lab.exercise") || "null"); } catch { guided = null; }
+        xlsBtn.disabled = true;
+        try {
+          const r = await fetch("/lab/admin/export/state.xlsx?revised=1", {
+            method: "POST", credentials: "include",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ guided })
+          });
+          if (!r.ok) throw new Error(r.status + ": " + r.statusText);
+          const blob = await r.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url; a.download = "stato-test.xlsx"; document.body.appendChild(a); a.click();
+          a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+        } catch (e) { toast("Errore export: " + e.message, "err"); }
+        finally { xlsBtn.disabled = false; }
+      }
+    }, el("span", {class:"msi"}, "download"), " Scarica Excel");
     body.appendChild(el("div", {style:{display:"flex",gap:"10px",marginTop:"6px",flexWrap:"wrap"}},
-      el("a", {
-        class:"btn primary-cta",
-        href: exportUrl,
-        download:"stato-test.xlsx",
-        style:{textDecoration:"none",display:"inline-flex",alignItems:"center",gap:"6px",padding:"10px 18px"}
-      }, el("span", {class:"msi"}, "download"), " Scarica Excel"),
+      xlsBtn,
       el("a", {
         class:"btn ghost",
         href:"/lab/admin/reviews?format=csv",
