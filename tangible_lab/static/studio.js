@@ -229,6 +229,7 @@
   const LS_TUTORIAL = "nba.lab.tutorial.seen";
   const LS_REVISED_MSG = "nba.lab.revisedMessages";
   const LS_EXERCISE = "nba.lab.exerciseMode";
+  const LS_GUIDED_TUT = "nba.lab.guidedTutorialSeen";   // mini-tutorial alla 1ª attivazione Modalità guidata
   const LS_EXERCISE_STATE = "nba.lab.exercise";   // ipotesi/rivelati/ordinamenti, persistiti tra le sessioni
   const LS_COLS = "nba.lab.cols";
 
@@ -2854,6 +2855,7 @@
           const it = STATE.items.find(x => x.kind === STATE.selected.kind && x.id === STATE.selected.id);
           if (it) loadAnagrafica(it);
         }
+        if (exTgl.checked) maybeStartGuidedTutorial();   // mini-tutorial alla 1ª attivazione
       });
     }
 
@@ -2897,16 +2899,32 @@
     else if (e.key === "ArrowLeft") { if (!blocking) tourGoTo(TOUR.i - 1); }
   }
   function endTour(markSeen) {
+    const seenKey = (TOUR && TOUR.seenKey) || LS_TUTORIAL;
     document.querySelectorAll(".tour-spot,.tour-callout,.tour-backdrop").forEach(n => n.remove());
     window.removeEventListener("resize", tourReposition);
     document.removeEventListener("keydown", tourKey);
     TOUR = null;
-    if (markSeen) localStorage.setItem(LS_TUTORIAL, "1");
+    if (markSeen) localStorage.setItem(seenKey, "1");
   }
-  function startTour(steps) {
+  // Mini-tutorial mostrato alla PRIMA attivazione della Modalità guidata.
+  const GUIDED_TUTORIAL_STEPS = [
+    { target: null, icon: "fact_check", title: "Modalità guidata",
+      body: "Qui criticità e azioni del motore sono nascoste: l'obiettivo è validare l'algoritmo formulando prima le tue ipotesi, poi confrontandole con quello che emerge." },
+    { target: null, icon: "leaderboard", title: "1 · Ipotizza la criticità",
+      body: "Apri un'anagrafica, osserva solo il profilo e scegli la criticità che ti aspetti: Critica, Alta, Media o Bassa." },
+    { target: null, icon: "reorder", title: "2 · Ordina le azioni",
+      body: "Trascina le azioni proposte dalla più alla meno prioritaria. Attenzione: alcune sono reali, altre sono esche da scartare." },
+    { target: null, icon: "visibility", title: "3 · Rivela e confronta",
+      body: "Premi «Rivela»: compaiono criticità e azioni reali con il confronto sulle tue ipotesi. Le anagrafiche già fatte restano segnate, il lavoro è salvato e si può esportare." },
+  ];
+  function maybeStartGuidedTutorial() {
+    if (localStorage.getItem(LS_GUIDED_TUT)) return;
+    startTour(GUIDED_TUTORIAL_STEPS, LS_GUIDED_TUT);
+  }
+  function startTour(steps, seenKey) {
     if (!steps || !steps.length) return;
     endTour(false);
-    TOUR = { steps, i: 0 };
+    TOUR = { steps, i: 0, seenKey: seenKey || LS_TUTORIAL };
     document.body.appendChild(el("div", {class:"tour-backdrop"}));
     window.addEventListener("resize", tourReposition);
     document.addEventListener("keydown", tourKey);
