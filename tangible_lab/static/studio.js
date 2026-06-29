@@ -2906,20 +2906,28 @@
     TOUR = null;
     if (markSeen) localStorage.setItem(seenKey, "1");
   }
-  // Mini-tutorial mostrato alla PRIMA attivazione della Modalità guidata.
+  // Mini-tutorial (con spotlight sulle aree) alla PRIMA attivazione della Modalità guidata.
   const GUIDED_TUTORIAL_STEPS = [
     { target: null, icon: "fact_check", title: "Modalità guidata",
-      body: "Qui criticità e azioni del motore sono nascoste: l'obiettivo è validare l'algoritmo formulando prima le tue ipotesi, poi confrontandole con quello che emerge." },
-    { target: null, icon: "leaderboard", title: "1 · Ipotizza la criticità",
-      body: "Apri un'anagrafica, osserva solo il profilo e scegli la criticità che ti aspetti: Critica, Alta, Media o Bassa." },
-    { target: null, icon: "reorder", title: "2 · Ordina le azioni",
-      body: "Trascina le azioni proposte dalla più alla meno prioritaria. Attenzione: alcune sono reali, altre sono esche da scartare." },
-    { target: null, icon: "visibility", title: "3 · Rivela e confronta",
-      body: "Premi «Rivela»: compaiono criticità e azioni reali con il confronto sulle tue ipotesi. Le anagrafiche già fatte restano segnate, il lavoro è salvato e si può esportare." },
+      body: "Criticità e azioni del motore sono nascoste: validi l'algoritmo formulando prima le tue ipotesi, poi confrontandole con quello che emerge." },
+    { target: "section.ml-list-pane", fallback: ".ml-list", icon: "visibility_off", title: "Lista «in cieco»",
+      body: "Qui colore, punteggio e cartelle per priorità sono nascosti. Le anagrafiche già ipotizzate restano segnate, così ti concentri sulle altre." },
+    { target: ".exercise-opts", fallback: "#ml-detail", icon: "leaderboard", title: "1 · Ipotizza la criticità",
+      body: "Osserva il profilo e scegli la criticità che ti aspetti: Critica, Alta, Media o Bassa." },
+    { target: ".exercise-actions", fallback: "#ml-detail", icon: "reorder", title: "2 · Ordina le azioni",
+      body: "Trascina le azioni dalla più alla meno prioritaria. Attenzione: alcune sono reali, altre sono esche da scartare." },
+    { target: ".exercise-panel .btn.primary-cta", fallback: ".exercise-panel", icon: "visibility", title: "3 · Rivela e confronta",
+      body: "Premi «Rivela»: compaiono criticità e azioni reali con il confronto sulle tue ipotesi. Il lavoro è salvato e puoi esportarlo." },
   ];
   function maybeStartGuidedTutorial() {
     if (localStorage.getItem(LS_GUIDED_TUT)) return;
-    startTour(GUIDED_TUTORIAL_STEPS, LS_GUIDED_TUT);
+    // Apri un'anagrafica d'esempio così il pannello dell'esercizio esiste per lo spotlight.
+    if (!STATE.selected) {
+      const first = STATE.items.find(it => it.kind === "predef");
+      if (first) loadAnagrafica(first);
+    }
+    // Attendi il render del dettaglio/pannello, poi avvia il tour con gli spotlight.
+    setTimeout(() => startTour(GUIDED_TUTORIAL_STEPS, LS_GUIDED_TUT), 500);
   }
   function startTour(steps, seenKey) {
     if (!steps || !steps.length) return;
