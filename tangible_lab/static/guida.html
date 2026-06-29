@@ -133,10 +133,10 @@
       <table>
         <thead><tr><th>Livello</th><th>Soglia attuale</th><th>Significato operativo</th></tr></thead>
         <tbody>
-          <tr><td><strong style="color:#E80E3F">CRITICAL</strong></td><td>≥ <span class="live" data-cfg="tiers.CRITICAL">—</span></td><td>Azione immediata — contattare nella giornata</td></tr>
-          <tr><td><strong style="color:#F59E0B">HIGH</strong></td><td>≥ <span class="live" data-cfg="tiers.HIGH">—</span></td><td>Alta priorità — contattare entro 24–48 ore</td></tr>
-          <tr><td><strong style="color:#00B5A3">MEDIUM</strong></td><td>≥ <span class="live" data-cfg="tiers.MEDIUM">—</span></td><td>Priorità media — pianificare il contatto nella settimana</td></tr>
-          <tr><td><strong style="color:#6b7280">LOW</strong></td><td>sotto la soglia MEDIUM</td><td>Bassa urgenza — gestione ordinaria</td></tr>
+          <tr><td><strong style="color:#E80E3F">Critica</strong></td><td>≥ <span class="live" data-cfg="tiers.CRITICAL">—</span></td><td>Azione immediata — contattare nella giornata</td></tr>
+          <tr><td><strong style="color:#F59E0B">Alta</strong></td><td>≥ <span class="live" data-cfg="tiers.HIGH">—</span></td><td>Alta priorità — contattare entro 24–48 ore</td></tr>
+          <tr><td><strong style="color:#00B5A3">Media</strong></td><td>≥ <span class="live" data-cfg="tiers.MEDIUM">—</span></td><td>Priorità media — pianificare il contatto nella settimana</td></tr>
+          <tr><td><strong style="color:#6b7280">Bassa</strong></td><td>sotto la soglia Media</td><td>Bassa urgenza — gestione ordinaria</td></tr>
         </tbody>
       </table>
       <p>Il tier determina <strong>quando</strong> agire. La categoria strategica
@@ -157,7 +157,7 @@
           <tr>
             <td>Churn elevato + scadenza imminente</td>
             <td>Rischio abbandono sopra soglia su una polizza <em>che è anche in scadenza</em></td>
-            <td>Lo score viene portato almeno alla soglia CRITICAL (<span class="live" data-cfg="tiers.CRITICAL">—</span>) e l'azione primaria diventa la <strong>prevenzione dell'abbandono</strong></td>
+            <td>Il punteggio viene portato almeno alla soglia Critica (<span class="live" data-cfg="tiers.CRITICAL">—</span>) e l'azione primaria diventa la <strong>prevenzione dell'abbandono</strong></td>
           </tr>
           <tr>
             <td>Churn elevato (in generale)</td>

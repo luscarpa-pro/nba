@@ -24,7 +24,7 @@
       { k:"active_policies_count", label:"# polizze attive", type:"number", nullable:true },
       { k:"checkup_done", label:"Checkup eseguito", type:"tristate" }
     ]},
-    { title: "VIVA Points", icon:"loyalty", fields: [
+    { title: "Punti VIVA", icon:"loyalty", fields: [
       { k:"viva_enrolled", label:"Iscritto VIVA", type:"tristate" },
       { k:"viva_points", label:"Saldo punti", type:"number", nullable:true },
       { k:"viva_points_expiring", label:"Punti in scadenza", type:"number", nullable:true }
@@ -157,8 +157,18 @@
   };
 
   const SEV_RANK = { hi:3, med:2, lo:1 };
-  const FACTOR_LABELS = { urgency:"Urgenza", value:"Valore", opportunity:"Opportunità", recency:"Recency / contatto recente" };
-  const STRATEGY_LABELS = { RETENTION:"Retention", CONVERSION:"Conversion", GROWTH:"Crescita / Cross-sell", NURTURING:"Nurturing" };
+  const FACTOR_LABELS = { urgency:"Urgenza", value:"Valore", opportunity:"Opportunità", recency:"Freschezza contatto" };
+  const STRATEGY_LABELS = { RETENTION:"Fidelizzazione", CONVERSION:"Conversione", GROWTH:"Crescita / Cross-sell", NURTURING:"Nurturing", SERVICE:"Servizio" };
+  // Canali (PHONE tradotto; Email/SMS/WhatsApp restano)
+  const CHANNEL_LABELS = { PHONE:"Telefono", EMAIL:"Email", SMS:"SMS", WHATSAPP:"WhatsApp" };
+  const channelLabel = ch => CHANNEL_LABELS[ch] || ch || "—";
+  // Categorie azione (etichette IT; Cross-sell/VIVA restano)
+  const ACTION_CAT_LABELS = {
+    PAYMENT:"Pagamenti", RENEWAL:"Rinnovi", CHURN_PREVENTION:"Prevenzione abbandono",
+    CROSS_SELL:"Cross-sell", VIVA:"VIVA", CHECKUP:"Check-up", RELATIONSHIP:"Relazione",
+    LEAD_CONVERSION:"Conversione", QUOTE_FOLLOW_UP:"Preventivo", FIRST_CONTACT:"Primo contatto", RE_ENGAGEMENT:"Riattivazione"
+  };
+  const actionCatLabel = c => ACTION_CAT_LABELS[c] || c || "";
   const TIER_LABELS = { CRITICAL:"Priorità massima", HIGH:"Priorità alta", MEDIUM:"Priorità media", LOW:"Priorità bassa" };
   const TIER_LABELS_IT = { CRITICAL:"Critica", HIGH:"Alta", MEDIUM:"Media", LOW:"Bassa" };
   // Etichette leggibili per le scoperture (need_key -> nome area, allineate a GAP_PRODUCT_LABELS del motore)
@@ -971,7 +981,7 @@
         el("div", {class:"ml-title"},
           el("span", {class:"ml-id-big", title: it.id}, it.name),
           el("span", {class:`type-tag ${it.type}`}, it.type === "client" ? "Cliente" : "Lead"),
-          tier ? el("span", {class:`tier ${tier}`}, tier) : null
+          tier ? el("span", {class:`tier ${tier}`}, TIER_LABELS_IT[tier] || tier) : null
         ),
         el("div", {class:"ml-detail-meta"},
           STATE.lastResult ? el("span", {}, el("strong", {}, "Strategia: "), STRATEGY_LABELS[STATE.lastResult.strategic_category] || STATE.lastResult.strategic_category || "—") : null,
@@ -1221,14 +1231,14 @@
           el("div", {class:"summary-score"},
             el("div", {class:"score-bubble " + tier}, score == null ? "—" : String(Math.round(score))),
             el("div", {class:"score-meta"},
-              el("div", {class:"score-tier-name"}, tier),
+              el("div", {class:"score-tier-name"}, TIER_LABELS_IT[tier] || tier),
               el("div", {class:"score-tier-label"}, tierLabel)
             )
           ),
           el("div", {class:"summary-stats"},
             statTile("Strategia", stratLabel, "track_changes"),
             statTile("Trigger attivi", String(nTrigs), "bolt"),
-            statTile("Azioni totali", String(nActs) + (primary.length ? ` (${primary.length} primary)` : ""), "checklist"),
+            statTile("Azioni totali", String(nActs) + (primary.length ? ` (${primary.length} principali)` : ""), "checklist"),
             topFactor ? statTile("Fattore dominante", (FACTOR_LABELS[topFactor.k] || topFactor.k) + " · " + Math.round(topFactor.v*100) + "%", "leaderboard") : null
           )
         )
@@ -1246,24 +1256,24 @@
     whyCard.appendChild(el("div", {class:"section-body"}, renderExplanation(out)));
     wrap.appendChild(whyCard);
 
-    // Card 3: Azione principale (PRIMARY)
+    // Card 3: Azione principale
     if (primary.length) {
       wrap.appendChild(el("div", {class:"section-block primary-section"},
         el("div", {class:"section-head"},
           el("span", {class:"msi section-ico"}, "flag"),
-          el("h3", {}, "Azione principale (PRIMARY)"),
+          el("h3", {}, "Azione principale"),
           el("span", {class:"section-count"}, String(primary.length))
         ),
         el("div", {class:"section-body"}, renderActionCards(primary, out, true))
       ));
     }
 
-    // Card 4: Azioni complementari (SECONDARY)
+    // Card 4: Azioni complementari
     if (secondary.length) {
       wrap.appendChild(el("div", {class:"section-block"},
         el("div", {class:"section-head"},
           el("span", {class:"msi section-ico"}, "list_alt"),
-          el("h3", {}, "Azioni complementari (SECONDARY)"),
+          el("h3", {}, "Azioni complementari"),
           el("span", {class:"section-count"}, String(secondary.length))
         ),
         el("div", {class:"section-body"}, renderActionCards(secondary, out, false))
@@ -1274,7 +1284,7 @@
     const techBody = el("div", {class:"section-body"});
     if (out.value_breakdown) {
       techBody.appendChild(el("details", {class:"acc"},
-        el("summary", {}, el("span", {class:"msi"}, "analytics"), " Breakdown VALUE score (debug)"),
+        el("summary", {}, el("span", {class:"msi"}, "analytics"), " Scomposizione punteggio Valore (debug)"),
         el("div", {class:"body"}, el("pre", {class:"json", innerHTML: jsonHL(out.value_breakdown)}))
       ));
     }
@@ -1307,7 +1317,7 @@
       : renderFormView(SCHEMAS[STATE.selected.type], STATE.record);
     pane.appendChild(form);
     const gaps = el("div", {id:"profile-gaps"});
-    const viva = [...form.querySelectorAll(".section-block")].find(b => /VIVA Points/.test(b.textContent));
+    const viva = [...form.querySelectorAll(".section-block")].find(b => /Punti VIVA/.test(b.textContent));
     if (viva) viva.after(gaps); else form.appendChild(gaps);
     fillProfileGaps(gaps);
   }
@@ -1494,8 +1504,8 @@
       const causeLabels = causes.map(c => (TRIG_LABELS[c]?.lbl || c)).slice(0, 3);
       wrap.appendChild(el("div", {class:"action-card" + (primary ? " primary" : "")},
         el("div", {class:"head"},
-          el("span", {class:"act-cat"}, a.action_category || ""),
-          el("span", {class:"chip"}, el("span", {class:"msi"}, channelIcon(a.recommended_channel)), " " + (a.recommended_channel || "—")),
+          el("span", {class:"act-cat"}, actionCatLabel(a.action_category)),
+          el("span", {class:"chip"}, el("span", {class:"msi"}, channelIcon(a.recommended_channel)), " " + channelLabel(a.recommended_channel)),
           a.suggest_appointment ? el("span", {class:"chip"}, el("span", {class:"msi"}, "event"), " appuntamento") : null
         ),
         el("div", {class:"desc"}, reviseMessage(a.action_category, a.recommended_action) || ""),
@@ -1543,7 +1553,7 @@
     const wEntries = Object.entries(weights).map(([k,v]) => ({k, v: (v && typeof v === "object" ? v.value : v)})).filter(x => typeof x.v === "number");
     wEntries.sort((a,b) => b.v - a.v);
     const top1 = wEntries[0];
-    const tierBits = [`Score ${fmtScore(out.priority_score)}/100 → ${out.priority_tier}`];
+    const tierBits = [`Punteggio ${fmtScore(out.priority_score)}/100 → ${TIER_LABELS_IT[out.priority_tier] || out.priority_tier}`];
     if (thr != null) tierBits.push(`soglia ≥ ${thr}`);
     if (top1) tierBits.push(`fattore con peso maggiore: ${FACTOR_LABELS[top1.k] || top1.k} (${Math.round(top1.v*100)}%)`);
     wrap.appendChild(el("div", {class:"why-tier"}, tierBits.join(" · ")));
@@ -1581,7 +1591,7 @@
       urgency:     { lbl:"Urgenza",     desc:"Tempo / criticità (rinnovi, sinistri, scadenze)" },
       value:       { lbl:"Valore",      desc:"Importanza economica (premio, polizze, redditività)" },
       opportunity: { lbl:"Opportunità", desc:"Cross-sell, campagne, preventivi pendenti" },
-      recency:     { lbl:"Recency",     desc:"Freschezza dell'ultimo contatto" },
+      recency:     { lbl:"Freschezza contatto", desc:"Freschezza dell'ultimo contatto" },
       timing:      { lbl:"Timing",      desc:"Reattività / età del lead" }
     };
     const wrap = el("div", {class:"breakdown-panel"});
@@ -1652,8 +1662,8 @@
       const causeLabels = causes.map(c => (TRIG_LABELS[c]?.lbl || c)).slice(0, 3);
       return el("div", {class:"action-card" + (a.primary ? " primary" : "")},
         el("div", {class:"head"},
-          el("span", {class:"act-cat"}, a.action_category || ""),
-          el("span", {class:"chip"}, el("span", {class:"msi"}, channelIcon(a.recommended_channel)), " " + (a.recommended_channel || "—")),
+          el("span", {class:"act-cat"}, actionCatLabel(a.action_category)),
+          el("span", {class:"chip"}, el("span", {class:"msi"}, channelIcon(a.recommended_channel)), " " + channelLabel(a.recommended_channel)),
           a.suggest_appointment ? el("span", {class:"chip"}, el("span", {class:"msi"}, "event"), " appuntamento") : null
         ),
         el("div", {class:"desc"}, reviseMessage(a.action_category, a.recommended_action) || ""),
@@ -1664,11 +1674,11 @@
       );
     };
     if (primary.length) {
-      wrap.appendChild(el("div", {class:"actions-section-label primary-label"}, el("span", {class:"msi"}, "flag"), " Azione principale (PRIMARY)"));
+      wrap.appendChild(el("div", {class:"actions-section-label primary-label"}, el("span", {class:"msi"}, "flag"), " Azione principale"));
       primary.forEach(a => wrap.appendChild(card(a)));
     }
     if (secondary.length) {
-      wrap.appendChild(el("div", {class:"actions-section-label"}, `Azioni complementari (SECONDARY) · ${secondary.length}`));
+      wrap.appendChild(el("div", {class:"actions-section-label"}, `Azioni complementari · ${secondary.length}`));
       secondary.forEach(a => wrap.appendChild(card(a)));
     }
     return wrap;
@@ -1710,7 +1720,7 @@
     { k:"urgency",     lbl:"Urgenza",      desc:"Trigger temporali (sinistri aperti, scadenze, rinnovi imminenti)", icon:"bolt" },
     { k:"value",       lbl:"Valore",       desc:"Premio, numero di polizze attive, redditività del cliente",         icon:"euro" },
     { k:"opportunity", lbl:"Opportunità",  desc:"Cross-sell, campagne attive, preventivi in sospeso",                 icon:"diversity_3" },
-    { k:"recency",     lbl:"Recency",      desc:"Freschezza del contatto",                                            icon:"schedule" }
+    { k:"recency",     lbl:"Freschezza contatto", desc:"Freschezza del contatto",                                            icon:"schedule" }
   ];
   const WEIGHT_FACTORS_LEAD = [
     { k:"urgency", lbl:"Urgenza", desc:"Quanto è caldo il lead (creazione recente, copertura imminente)", icon:"bolt" },
@@ -1883,13 +1893,13 @@
     card.appendChild(el("div", {class:"section-head"},
       el("span", {class:"msi section-ico"}, "stacked_bar_chart"),
       el("h3", {}, "Soglie di priorità"),
-      el("span", {class:"section-hint"}, "Score minimo per assegnare il tier corrispondente (0–100)")
+      el("span", {class:"section-hint"}, "Punteggio minimo per assegnare il livello corrispondente (0–100)")
     ));
     const body = el("div", {class:"section-body"});
     const TIERS = [
-      { k:"CRITICAL", lbl:"CRITICAL", desc:"Score ≥ N → Priorità massima",  color:"#E80E3F" },
-      { k:"HIGH",     lbl:"HIGH",     desc:"Score ≥ N → Priorità alta",     color:"#F59E0B" },
-      { k:"MEDIUM",   lbl:"MEDIUM",   desc:"Score ≥ N → Priorità media (sotto: LOW)", color:"#00E0CA" }
+      { k:"CRITICAL", lbl:"Critica", desc:"Punteggio ≥ N → Priorità massima",  color:"#E80E3F" },
+      { k:"HIGH",     lbl:"Alta",     desc:"Punteggio ≥ N → Priorità alta",     color:"#F59E0B" },
+      { k:"MEDIUM",   lbl:"Media",   desc:"Punteggio ≥ N → Priorità media (sotto: Bassa)", color:"#00E0CA" }
     ];
     TIERS.forEach(t => {
       const v = STATE.cmpTiers[t.k];
@@ -1926,10 +1936,10 @@
     const t = STATE.cmpTiers;
     box.innerHTML = "";
     box.appendChild(el("div", {class:"tprev-bar"},
-      el("div", {class:"tprev-seg low",  style:{flex: String(t.MEDIUM)}}, "LOW 0–"+(t.MEDIUM-1)),
-      el("div", {class:"tprev-seg med",  style:{flex: String(t.HIGH - t.MEDIUM)}}, "MED "+t.MEDIUM+"–"+(t.HIGH-1)),
-      el("div", {class:"tprev-seg high", style:{flex: String(t.CRITICAL - t.HIGH)}}, "HIGH "+t.HIGH+"–"+(t.CRITICAL-1)),
-      el("div", {class:"tprev-seg crit", style:{flex: String(100 - t.CRITICAL)}}, "CRIT "+t.CRITICAL+"+")
+      el("div", {class:"tprev-seg low",  style:{flex: String(t.MEDIUM)}}, "Bassa 0–"+(t.MEDIUM-1)),
+      el("div", {class:"tprev-seg med",  style:{flex: String(t.HIGH - t.MEDIUM)}}, "Media "+t.MEDIUM+"–"+(t.HIGH-1)),
+      el("div", {class:"tprev-seg high", style:{flex: String(t.CRITICAL - t.HIGH)}}, "Alta "+t.HIGH+"–"+(t.CRITICAL-1)),
+      el("div", {class:"tprev-seg crit", style:{flex: String(100 - t.CRITICAL)}}, "Critica "+t.CRITICAL+"+")
     ));
   }
 
@@ -2234,7 +2244,7 @@
         el("div", {class:"cmp-side-lbl"}, "Baseline (corrente)"),
         el("div", {class:"cmp-score-big " + (a.priority_tier || "LOW")}, String(sa)),
         el("div", {class:"cmp-side-meta"},
-          el("span", {class:`tier ${a.priority_tier||"LOW"}`}, a.priority_tier || "—"),
+          el("span", {class:`tier ${a.priority_tier||"LOW"}`}, TIER_LABELS_IT[a.priority_tier] || a.priority_tier || "—"),
           el("span", {class:"chip"}, STRATEGY_LABELS[a.strategic_category] || a.strategic_category || "—")
         )
       ),
@@ -2248,7 +2258,7 @@
         el("div", {class:"cmp-side-lbl"}, "Con nuova pesatura"),
         el("div", {class:"cmp-score-big " + (b.priority_tier || "LOW")}, String(sb)),
         el("div", {class:"cmp-side-meta"},
-          el("span", {class:`tier ${b.priority_tier||"LOW"}` + (tierChg ? " chg" : "")}, b.priority_tier || "—"),
+          el("span", {class:`tier ${b.priority_tier||"LOW"}` + (tierChg ? " chg" : "")}, TIER_LABELS_IT[b.priority_tier] || b.priority_tier || "—"),
           el("span", {class:"chip" + (stratChg ? " chg" : "")}, STRATEGY_LABELS[b.strategic_category] || b.strategic_category || "—")
         )
       )

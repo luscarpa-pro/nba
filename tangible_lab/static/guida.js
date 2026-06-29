@@ -48,7 +48,7 @@
   // ---------- widget 1: pesi ----------
   const DIM_LABELS = {
     urgency: "Urgenza", value: "Valore economico",
-    opportunity: "Opportunità commerciale", recency: "Recency contatto",
+    opportunity: "Opportunità commerciale", recency: "Freschezza contatto",
     timing: "Timing",
   };
 
@@ -90,6 +90,10 @@
     LOW:      { color: "#6b7280", desc: "Bassa urgenza — gestione ordinaria" },
   };
 
+  const TIER_IT = { CRITICAL:"Critica", HIGH:"Alta", MEDIUM:"Media", LOW:"Bassa" };
+  const CHANNEL_IT = { PHONE:"Telefono", EMAIL:"Email", SMS:"SMS", WHATSAPP:"WhatsApp" };
+  const STRAT_IT = { RETENTION:"Fidelizzazione", CONVERSION:"Conversione", GROWTH:"Crescita / Cross-sell", NURTURING:"Nurturing", SERVICE:"Servizio" };
+
   function tierFor(score, t) {
     if (score >= t.CRITICAL) return "CRITICAL";
     if (score >= t.HIGH) return "HIGH";
@@ -124,7 +128,7 @@
       const tier = tierFor(score, t);
       $("#tier-score").textContent = score;
       const chip = $("#tier-chip");
-      chip.textContent = tier;
+      chip.textContent = TIER_IT[tier] || tier;
       chip.style.background = TIER_META[tier].color;
       $("#tier-desc").textContent = TIER_META[tier].desc;
     };
@@ -213,14 +217,14 @@
       `<td style="text-align:right"><strong>+${fmt1(b.value)}</strong></td></tr>`).join("");
 
     const overrideRow = bd.churn_override_applied
-      ? `<tr><td colspan="4">⚠ Regola di eccezione applicata: score portato alla soglia CRITICAL (${fmt1(bd.critical_threshold)})</td></tr>`
+      ? `<tr><td colspan="4">⚠ Regola di eccezione applicata: punteggio portato alla soglia Critica (${fmt1(bd.critical_threshold)})</td></tr>`
       : "";
 
     const primary = nba?.recommended_actions?.find(a => a.primary);
     const actionHtml = primary
       ? `<div class="demo-action">→ Azione primaria generata: <b>«${primary.recommended_action}»</b>` +
-        ` · canale: <b>${primary.recommended_channel}</b>` +
-        ` · categoria: <b>${nba.strategic_category}</b></div>`
+        ` · canale: <b>${CHANNEL_IT[primary.recommended_channel]||primary.recommended_channel}</b>` +
+        ` · categoria: <b>${STRAT_IT[nba.strategic_category]||nba.strategic_category}</b></div>`
       : "";
 
     box.innerHTML =
@@ -229,7 +233,7 @@
       `<tbody>${rows}${bonuses}${overrideRow}</tbody></table>` +
       `<div class="demo-total"><span>Punteggio finale:</span>` +
       `<span class="tier-score">${fmt1(bd.final_score)}</span>` +
-      `<span class="tier-chip" style="background:${meta.color}">${tier}</span></div>` +
+      `<span class="tier-chip" style="background:${meta.color}">${TIER_IT[tier]||tier}</span></div>` +
       actionHtml;
   }
 
