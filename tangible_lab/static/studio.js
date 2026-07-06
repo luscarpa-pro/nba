@@ -180,6 +180,8 @@
     HOME:"Casa", AUTO:"Auto", VITA:"Vita", PET:"Animali Domestici"
   };
 
+  // Pool di riserva per le esche dell'esercizio: usato solo se il dataset non
+  // offre abbastanza azioni reali di altri record (vedi buildRealisticDecoyPool).
   const DECOY_ACTIONS = [
     "Inviare la newsletter mensile",
     "Programmare una telefonata di cortesia",
@@ -1055,9 +1057,32 @@
     for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; }
     return r;
   }
-  function pickDecoys(n, exclude) {
-    const pool = DECOY_ACTIONS.filter(t => !exclude.includes(t));
-    return shuffleArr(pool).slice(0, Math.max(0, n));
+  function buildRealisticDecoyPool(it) {
+    // Esche realistiche: azioni davvero generate dal motore per ALTRI record,
+    // passate per reviseMessage come le card reali (stesso stile, zero manutenzione).
+    const texts = [];
+    const addFrom = (arr, type, idKey) => {
+      (arr || []).forEach(rec => {
+        if (it && it.kind === "predef" && it.type === type && it.id === rec[idKey]) return; // salta il record corrente
+        (rec.nba || []).forEach(a => {
+          const t = reviseMessage(a.action_category, a.recommended_action) || a.recommended_action;
+          if (t) texts.push(t);
+        });
+      });
+    };
+    addFrom(STATE.clients, "client", "client_id");
+    addFrom(STATE.leads, "lead", "lead_id");
+    return Array.from(new Set(texts));
+  }
+  function pickDecoys(n, exclude, it) {
+    const realistic = buildRealisticDecoyPool(it).filter(t => !exclude.includes(t));
+    let picked = shuffleArr(realistic).slice(0, Math.max(0, n));
+    if (picked.length < n) {
+      // Fallback sul pool fisso: dataset piccolo/vuoto o azioni tutte identiche.
+      const backup = DECOY_ACTIONS.filter(t => !exclude.includes(t) && !picked.includes(t));
+      picked = picked.concat(shuffleArr(backup).slice(0, n - picked.length));
+    }
+    return picked;
   }
   function saveExerciseState() {
     try {
@@ -1082,7 +1107,7 @@
       text: reviseMessage(a.action_category, a.recommended_action) || a.recommended_action || "—",
       isReal: true, rank: i
     }));
-    const decoys = pickDecoys(5 - reals.length, reals.map(r => r.text)).map(t => ({ text: t, isReal: false, rank: null }));
+    const decoys = pickDecoys(5 - reals.length, reals.map(r => r.text), it).map(t => ({ text: t, isReal: false, rank: null }));
     const cards = shuffleArr(reals.concat(decoys));
     STATE.exerciseActions[key] = cards;
     saveExerciseState();
