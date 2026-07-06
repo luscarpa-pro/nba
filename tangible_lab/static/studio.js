@@ -1107,7 +1107,8 @@
       text: reviseMessage(a.action_category, a.recommended_action) || a.recommended_action || "—",
       isReal: true, rank: i
     }));
-    const decoys = pickDecoys(5 - reals.length, reals.map(r => r.text), it).map(t => ({ text: t, isReal: false, rank: null }));
+    const excl = (it.nba || []).map(a => reviseMessage(a.action_category, a.recommended_action) || a.recommended_action || "—");
+    const decoys = pickDecoys(5 - reals.length, excl, it).map(t => ({ text: t, isReal: false, rank: null }));
     const cards = shuffleArr(reals.concat(decoys));
     STATE.exerciseActions[key] = cards;
     saveExerciseState();
