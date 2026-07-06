@@ -71,10 +71,36 @@
         if (onboarding) setTimeout(() => { location.href = "/lab/"; }, 1000);
       } catch (e) { toast(e.message, "err"); }
     }}, el("span", {class:"msi"}, "upload"), " Importa dataset");
+
+    // --- Svuota dati di lavoro (nuovo giro di test) ---
+    const resetBtn = el("button", {class:"btn danger", style:{display:"inline-flex",alignItems:"center",gap:"6px",padding:"10px 18px"}, onclick: async () => {
+      let s;
+      try { s = await fetchJSON("/lab/admin/stats"); }
+      catch (e) { toast(e.message, "err"); return; }
+      const n = {
+        cases: (s.cases && s.cases.total) || 0,
+        reviews: (s.reviews && s.reviews.total) || 0,
+        comments: (s.comments && s.comments.total) || 0,
+        checkup: (s.checkup && s.checkup.total) || 0,
+      };
+      const msg = `Verranno cancellati: ${n.cases} casi salvati, ${n.reviews} review, ${n.comments} commenti, ${n.checkup} casi check-up.\n\nUtenti e dataset NON vengono toccati.\nSe vuoi conservare i risultati, fai prima l'export Excel.\n\nContinuare?`;
+      if (!confirm(msg)) return;
+      resetBtn.disabled = true;
+      try {
+        const r = await fetchJSON("/lab/admin/reset", {method: "POST"});
+        const d = r.deleted || {};
+        toast(`Svuotati ${d.cases || 0} casi, ${d.reviews || 0} review, ${d.comments || 0} commenti, ${d.checkup_cases || 0} check-up. Ora puoi caricare un nuovo file con Importa dataset.`, "ok");
+      } catch (e) { toast(e.message, "err"); }
+      finally { resetBtn.disabled = false; }
+    }}, el("span", {class:"msi"}, "delete_sweep"), " Svuota dati di lavoro");
+
     dsCard.appendChild(el("div", {class:"section-body", style:{display:"flex", flexDirection:"column", gap:"12px"}},
       el("p", {class:"muted", style:{margin:"0",fontSize:"13px",lineHeight:"1.55"}},
         "Carica il file dataset.json reale (clienti e lead Vittoria). I dati restano solo su questo computer e non vengono mai caricati online. L'import sostituisce il dataset corrente."),
-      el("div", {style:{display:"flex", gap:"12px", alignItems:"center", flexWrap:"wrap"}}, dsFile, dsBtn)));
+      el("div", {style:{display:"flex", gap:"12px", alignItems:"center", flexWrap:"wrap"}}, dsFile, dsBtn),
+      el("p", {class:"muted", style:{margin:"8px 0 0",fontSize:"13px",lineHeight:"1.55"}},
+        "Per iniziare un nuovo giro di test puoi azzerare casi salvati, review, commenti e casi check-up. Utenti e dataset non vengono toccati."),
+      el("div", {}, resetBtn)));
     box.appendChild(dsCard);
 
     // --- Esporta stato dei test ---
