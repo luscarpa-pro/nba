@@ -337,3 +337,19 @@ def reset_lab_data() -> Dict[str, int]:
             conn.execute("ROLLBACK")
             raise
     return deleted
+
+
+def count_predef_feedback() -> Dict[str, int]:
+    """Conta review e commenti agganciati ad anagrafiche predefinite del dataset.
+
+    Usato come blocco di sicurezza prima di svuotare il dataset: se > 0,
+    svuotandolo resterebbero giudizi orfani.
+    """
+    with get_conn() as conn:
+        reviews = conn.execute(
+            "SELECT COUNT(*) c FROM reviews WHERE target_key LIKE 'predef:%'"
+        ).fetchone()["c"]
+        comments = conn.execute(
+            "SELECT COUNT(*) c FROM comments WHERE target_key LIKE 'predef:%'"
+        ).fetchone()["c"]
+    return {"reviews": reviews, "comments": comments}
