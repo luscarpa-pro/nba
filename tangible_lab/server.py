@@ -1012,6 +1012,23 @@ def admin_config_reset(request: Request):
     return {"status": "ok"}
 
 
+@app.post("/lab/admin/reset", include_in_schema=False)
+def admin_reset_lab_data(request: Request):
+    """Svuota i dati di lavoro del Lab (casi, review, commenti, check-up).
+
+    Utenti, sessioni, dataset e config restano intatti. I casi demo del
+    Check-up vengono ri-seedati subito (seed idempotente, tollerante:
+    se il file seed manca lo svuotamento resta valido).
+    """
+    require_admin(request)
+    deleted = models.reset_lab_data()
+    _seed_checkup_cases_if_empty()
+    from tangible_lab.db import get_conn as _gc
+    with _gc() as conn:
+        reseeded = conn.execute("SELECT COUNT(*) c FROM checkup_cases").fetchone()["c"] > 0
+    return {"deleted": deleted, "checkup_reseeded": reseeded}
+
+
 @app.get("/lab/api/messages-map", include_in_schema=False)
 def lab_messages_map():
     """Mappa dei messaggi rivisti per il frontend (toggle 'Messaggi rivisti')."""
