@@ -296,6 +296,7 @@ def admin_stats() -> Dict[str, Any]:
         cases_shared = conn.execute("SELECT COUNT(*) c FROM test_cases WHERE shared = 1").fetchone()["c"]
         reviews_total = conn.execute("SELECT COUNT(*) c FROM reviews").fetchone()["c"]
         comments_total = conn.execute("SELECT COUNT(*) c FROM comments").fetchone()["c"]
+        checkup_total = conn.execute("SELECT COUNT(*) c FROM checkup_cases").fetchone()["c"]
         by_judgement = {r["judgement"]: r["c"] for r in conn.execute("SELECT judgement, COUNT(*) c FROM reviews GROUP BY judgement")}
         per_user = [dict(r) for r in conn.execute(
             """SELECT u.id, u.username, u.role, u.active,
@@ -309,5 +310,30 @@ def admin_stats() -> Dict[str, Any]:
         "cases":  {"total": cases_total, "shared": cases_shared},
         "reviews": {"total": reviews_total, "by_judgement": by_judgement},
         "comments": {"total": comments_total},
+        "checkup": {"total": checkup_total},
         "per_user": per_user,
     }
+
+
+# ============================== reset dati di lavoro (admin) ==============================
+
+def reset_lab_data() -> Dict[str, int]:
+    """Svuota i dati di lavoro del Lab: casi salvati, review, commenti, casi check-up.
+
+    Non tocca utenti né sessioni. Unica transazione esplicita (le connessioni
+    sono in autocommit). Ritorna i conteggi delle righe cancellate.
+    """
+    with get_conn() as conn:
+        conn.execute("BEGIN")
+        try:
+            deleted = {
+                "cases": conn.execute("DELETE FROM test_cases").rowcount,
+                "reviews": conn.execute("DELETE FROM reviews").rowcount,
+                "comments": conn.execute("DELETE FROM comments").rowcount,
+                "checkup_cases": conn.execute("DELETE FROM checkup_cases").rowcount,
+            }
+            conn.execute("COMMIT")
+        except Exception:
+            conn.execute("ROLLBACK")
+            raise
+    return deleted
