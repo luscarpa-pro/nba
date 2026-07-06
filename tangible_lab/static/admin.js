@@ -94,13 +94,25 @@
       finally { resetBtn.disabled = false; }
     }}, el("span", {class:"msi"}, "delete_sweep"), " Svuota dati di lavoro");
 
+    // --- Svuota dataset (solo clienti/lead; bloccato se ci sono review su predef) ---
+    const clearDsBtn = el("button", {class:"btn danger", style:{display:"inline-flex",alignItems:"center",gap:"6px",padding:"10px 18px"}, onclick: async () => {
+      const msg = "Il dataset attivo verrà svuotato: 0 clienti e 0 lead.\n\nI dati di lavoro (casi, review, commenti) NON vengono toccati.\nPotrai caricare un nuovo file con Importa dataset.\n\nContinuare?";
+      if (!confirm(msg)) return;
+      clearDsBtn.disabled = true;
+      try {
+        await fetchJSON("/lab/admin/dataset/clear", {method: "POST"});
+        toast("Dataset svuotato. Ora puoi caricare un nuovo file con Importa dataset.", "ok");
+      } catch (e) { toast(e.message, "err"); }
+      finally { clearDsBtn.disabled = false; }
+    }}, el("span", {class:"msi"}, "scan_delete"), " Svuota dataset");
+
     dsCard.appendChild(el("div", {class:"section-body", style:{display:"flex", flexDirection:"column", gap:"12px"}},
       el("p", {class:"muted", style:{margin:"0",fontSize:"13px",lineHeight:"1.55"}},
         "Carica il file dataset.json reale (clienti e lead Vittoria). I dati restano solo su questo computer e non vengono mai caricati online. L'import sostituisce il dataset corrente."),
       el("div", {style:{display:"flex", gap:"12px", alignItems:"center", flexWrap:"wrap"}}, dsFile, dsBtn),
       el("p", {class:"muted", style:{margin:"8px 0 0",fontSize:"13px",lineHeight:"1.55"}},
-        "Per iniziare un nuovo giro di test puoi azzerare casi salvati, review, commenti e casi check-up. Utenti e dataset non vengono toccati."),
-      el("div", {}, resetBtn)));
+        "Per iniziare un nuovo giro di test puoi azzerare i dati di lavoro (casi salvati, review, commenti e casi check-up — utenti e dataset non vengono toccati) oppure svuotare il dataset attivo (clienti e lead — bloccato finché esistono review su anagrafiche predefinite)."),
+      el("div", {style:{display:"flex", gap:"12px", alignItems:"center", flexWrap:"wrap"}}, resetBtn, clearDsBtn)));
     box.appendChild(dsCard);
 
     // --- Esporta stato dei test ---
