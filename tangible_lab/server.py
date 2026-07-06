@@ -969,23 +969,9 @@ def lab_breakdown_lead(payload: dict = Body(...)):
         }
 
 
-@app.post("/lab/admin/dataset/import", include_in_schema=False)
-def admin_import_dataset(request: Request, payload: dict = Body(...)):
-    """Importa il dataset reale in locale (solo admin). Sostituisce quello corrente.
-
-    Il dato non sta mai nel repo/exe: viene scritto in DATASET_PATH
-    (%APPDATA%\\NBAStudio\\dataset.json) e la cache del backend viene azzerata.
-    """
-    require_admin(request)
+def _write_dataset(payload: dict) -> None:
+    """Scrive il dataset in DATASET_PATH (scrittura atomica) e azzera la cache."""
     import nba_api as _na
-
-    clients = payload.get("clients")
-    leads = payload.get("leads")
-    if not isinstance(clients, list) or not isinstance(leads, list):
-        raise HTTPException(
-            status_code=400,
-            detail="Formato non valido: il file deve contenere le liste 'clients' e 'leads'.",
-        )
 
     target = _na.DATASET_PATH
     os.makedirs(os.path.dirname(target) or ".", exist_ok=True)
@@ -996,7 +982,47 @@ def admin_import_dataset(request: Request, payload: dict = Body(...)):
 
     with _na._DATA_LOCK:       # reload a caldo lock-safe (come nba_api.dataset_reload)
         _na._DATA = None
+
+
+@app.post("/lab/admin/dataset/import", include_in_schema=False)
+def admin_import_dataset(request: Request, payload: dict = Body(...)):
+    """Importa il dataset reale in locale (solo admin). Sostituisce quello corrente.
+
+    Il dato non sta mai nel repo/exe: viene scritto in DATASET_PATH
+    (%APPDATA%\\NBAStudio\\dataset.json) e la cache del backend viene azzerata.
+    """
+    require_admin(request)
+    clients = payload.get("clients")
+    leads = payload.get("leads")
+    if not isinstance(clients, list) or not isinstance(leads, list):
+        raise HTTPException(
+            status_code=400,
+            detail="Formato non valido: il file deve contenere le liste 'clients' e 'leads'.",
+        )
+    _write_dataset(payload)
     return {"clients": len(clients), "leads": len(leads)}
+
+
+@app.post("/lab/admin/dataset/clear", include_in_schema=False)
+def admin_clear_dataset(request: Request):
+    """Svuota il dataset attivo (0 clienti, 0 lead). Solo admin.
+
+    Rifiuta con 409 se esistono review/commenti su anagrafiche predefinite:
+    svuotando il dataset resterebbero giudizi orfani - prima va usato
+    "Svuota dati di lavoro".
+    """
+    require_admin(request)
+    counts = models.count_predef_feedback()
+    if counts["reviews"] + counts["comments"] > 0:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"Ci sono {counts['reviews']} review e {counts['comments']} commenti "
+                "su anagrafiche predefinite: svuota prima i dati di lavoro."
+            ),
+        )
+    _write_dataset({"clients": [], "leads": []})
+    return {"clients": 0, "leads": 0}
 
 
 @app.post("/lab/admin/config/reset", include_in_schema=False)
